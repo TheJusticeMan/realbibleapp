@@ -1,8 +1,8 @@
- class BibleRef {   //Referance to a bible passage
+class BibleRef {   //Referance to a bible passage
 	constructor(Book, Chap, Verse) {
 		this.Book = Book;
-		this.Chap = Chap;
-		this.Verse = Verse;
+		this.Chap = Chap * 1;
+		this.Verse = Verse * 1;
 	}
 	WholeChapElement() {   //cast the whole Chapter as a HTML Element
 		var Cbible = document.createElement("div");
@@ -49,9 +49,46 @@
 		}
 		return Cbible;
 	}
-    fixItal(_string) {
-        return ((Bible[this.Book][this.Chap][this.Verse]).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
-    }
+	VerseSwipeLink() {   //cast as a HTML search Element
+		var Cbible = document.createElement("span");
+		Cbible.className = "SearchResult";
+		Cbible.dataset.Book = this.Book;  //store some values in the HTML DOM for recall by event handlers
+		Cbible.dataset.Chap = this.Chap;
+		Cbible.dataset.Verse = this.Verse;
+		Cbible.oncontextmenu = ShowThisVerseMenu;
+		Cbible.onclick = GoToThisVerse;
+		Cbible.innerHTML = "<SPAN class=VerseNum>" + this.Book + " : " + this.Chap + ":" + (this.Verse + 1) + "</SPAN>  " + this.fixItal();
+		return Cbible;
+	}
+	fixItal(_string) {
+		return ((Bible[this.Book][this.Chap][this.Verse]).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
+	}
 
 };
 
+function ShowThisVerseMenu(event) {  //****
+	var Book = event.currentTarget.dataset.Book;
+	var Chap = event.currentTarget.dataset.Chap * 1;
+	var Verse = event.currentTarget.dataset.Verse * 1;
+	loadVerseContextualInteractionScreen(Book, Chap, Verse);
+	event.returnValue = false;
+}
+
+function GoToThisVerse(event) {
+	var Book = event.currentTarget.dataset.Book;
+	var Chap = event.currentTarget.dataset.Chap * 1;
+	var Verse = event.currentTarget.dataset.Verse * 1;
+	GoToVerse(Book, Chap, Verse);
+}
+
+function AddThisVerse(event) {
+	var Book = event.currentTarget.dataset.Book;
+	var Chap = event.currentTarget.dataset.Chap * 1;
+	var Verse = event.currentTarget.dataset.Verse * 1;
+	VersesOpen.push(new BibleRef(Book, Chap, Verse));
+}
+
+function GoToVerse(Book, Chap, Verse) {
+	var Cbible = new BibleRef(Book, Chap, Verse);
+	loadDetailedVerseReadingScreen(Book + " " + Chap, Cbible.WholeChapElement());
+}

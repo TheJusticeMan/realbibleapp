@@ -1,25 +1,31 @@
 <!doctype html>
 
 <html>
-    <head>
-        <meta charset="utf-8">
 
-        <title>Blank template</title>
+<head>
+    <meta charset="utf-8">
 
-        <!-- Load external CSS styles -->
-        <link rel="stylesheet" href="styles.css">
+    <title>Blank template</title>
 
-    </head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Load external CSS styles -->
+    <link rel="stylesheet" href="StyleOld.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="./index_files/Bible.js"></script>
+    <script src="ShowFuncs.js"></script>
+            <script src="scripts.js"></script>
 
-    <body>
-    <div class="container">   
+</head>
+
+<body onload="Load()">
+    <div class="container">
         <div id="screen1" class="screen">
             <div class="toolbar top-toolbar">
                 <button id="searchBtn"><img src="search-icon.png" alt="Search"></button>
                 <button id="historyBtn"><img src="history-icon.png" alt="History"></button>
                 <button id="bookmarksBtn"><img src="bookmark-icon.png" alt="Bookmarks"></button>
             </div>
-            <ul id="verseList" class="verse-list">
+            <ul id="OPverseList" class="verse-list">
                 <!-- Verse snippets will be dynamically injected here -->
             </ul>
             <div class="toolbar bottom-toolbar">
@@ -110,7 +116,8 @@
         </div>
         <div id="screen7" class="screen">
             <div class="verse-display">
-                <p id="selectedVerseText">John 3:16 - For God so loved the world that he gave his one and only Son...</p>
+                <p id="selectedVerseText">John 3:16 - For God so loved the world that he gave his one and only Son...
+                </p>
             </div>
             <div class="interactive-sections">
                 <textarea id="noteEditor" class="note-editor" placeholder="Enter your notes here..."></textarea>
@@ -139,9 +146,8 @@
 
 
         <!-- Load external JavaScript -->
-        <script src="ShowFuncs.js"></script>
-        <script src="scripts.js"></script>
+
     </div>
-    </body>
+</body>
 
 </html>
