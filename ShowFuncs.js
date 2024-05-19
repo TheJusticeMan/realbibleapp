@@ -56,6 +56,23 @@ class BibleRef {   //Referance to a bible passage
 		Cbible.dataset.Chap = this.Chap;
 		Cbible.dataset.Verse = this.Verse;
 		Cbible.oncontextmenu = ShowThisVerseMenu;
+
+		var hammer = new Hammer(Cbible);
+
+		// Listen for swipe left
+		hammer.on('swipeleft', function () {
+			console.log('Swiped left on', Cbible.textContent);
+			// Perform action for swipe left
+			Cbible.style.backgroundColor = 'red'; // Example action
+		});
+
+		// Listen for swipe right
+		hammer.on('swiperight', function () {
+			console.log('Swiped right on', Cbible.textContent);
+			// Perform action for swipe right
+			Cbible.style.backgroundColor = 'green'; // Example action
+		});
+
 		Cbible.onclick = GoToThisVerse;
 		Cbible.innerHTML = "<SPAN class=VerseNum>" + this.Book + " : " + this.Chap + ":" + (this.Verse + 1) + "</SPAN>  " + this.fixItal();
 		return Cbible;

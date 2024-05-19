@@ -1,12 +1,41 @@
 var booksOfTheBible = ["GENESIS", "EXODUS", "LEVITICUS", "NUMBERS", "DEUTERONOMY", "JOSHUA", "JUDGES", "RUTH", "1 SAMUEL", "2 SAMUEL", "1 KINGS", "2 KINGS", "1 CHRONICLES", "2 CHRONICLES", "EZRA", "NEHEMIAH", "ESTHER", "JOB", "PSALMS", "PROVERBS", "ECCLESIASTES", "SONG SOLOMON", "ISAIAH", "JEREMIAH", "LAMENTATIONS", "EZEKIEL", "DANIEL", "HOSEA", "JOEL", "AMOS", "OBADIAH", "JONAH", "MICAH", "NAHUM", "HABAKKUK", "ZEPHANIAH", "HAGGAI", "ZECHARIAH", "MALACHI", "MATTHEW", "MARK", "LUKE", "JOHN", "ACTS", "ROMANS", "1 CORINTHIANS", "2 CORINTHIANS", "GALATIANS", "EPHESIANS", "PHILIPPIANS", "COLOSSIANS", "1 THESSALONIANS", "2 THESSALONIANS", "1 TIMOTHY", "2 TIMOTHY", "TITUS", "PHILEMON", "HEBREWS", "JAMES", "1 PETER", "2 PETER", "1 JOHN", "2 JOHN", "3 JOHN", "JUDE", "REVELATION"];
-
+var BibleSearch = Bible
 var VersesOpen = [];
+var VersesInview=[];
 VersesOpen.push(new BibleRef("GENESIS", 1, 0));
 function loadVerseListScreen() {
+    VersesInview=[];
     var verseList = document.getElementById('OPverseList');
     verseList.innerText = "";
+
     for (var i = 0; i < VersesOpen.length; i++) {
-        verseList.appendChild(VersesOpen[i].VerseSwipeLink());
+        var Cbible=VersesOpen[i].VerseSwipeLink();
+
+		var hammer = new Hammer(Cbible);
+
+		// Listen for swipe left
+		hammer.on('swipeleft', function () {
+			console.log('Swiped left on', Cbible.textContent);
+			// Perform action for swipe left
+
+			Cbible.style.backgroundColor = 'red'; // Example action
+		});
+
+		// Listen for swipe right
+		hammer.on('swiperight', function () {
+			console.log('Swiped right on', Cbible.textContent);
+			// Perform action for swipe right
+            //remove item
+            for(var a=i+1;a<VersesOpen.length;a++){
+                VersesOpen[a-1]=VersesOpen[a];
+            }
+            VersesOpen.pop();
+            loadVerseListScreen();
+			//Cbible.style.backgroundColor = 'green'; // Example action
+		});
+        verseList.appendChild(Cbible);
+
+
     }
     //alert(VersesOpen.length);
     navigateToScreen(1);
@@ -14,11 +43,11 @@ function loadVerseListScreen() {
 function loadVerseSelectionScreen() {
     navigateToScreen(2);
 };
-function loadDetailedVerseReadingScreen(TheTitle,TheContent) {
+function loadDetailedVerseReadingScreen(TheTitle, TheContent) {
     var textDisplayArea = document.getElementById('textDisplayArea')
     textDisplayArea.innerText = "";
     textDisplayArea.appendChild(TheContent);
-    document.getElementById("chapterTitle").innerText=TheTitle;
+    document.getElementById("chapterTitle").innerText = TheTitle;
     navigateToScreen(3);
 };
 function loadSearchScreen() {
@@ -92,13 +121,24 @@ function Load() {
     function loadBooks(testament) {
         const booksList = document.getElementById('booksList');
         booksList.innerHTML = ''; // Clear previous entries
-        for (var i = 0; i < 66; i++) {
-            const button = document.createElement('button');
-            button.textContent = booksOfTheBible[i];
-            button.className = 'list-item-button';
-            button.dataset.Book = booksOfTheBible[i];  //store some values in the HTML DOM for recall by event handlers
-            button.onclick = () => loadChapters();
-            booksList.appendChild(button);
+        if (testament == "Old Testament") {
+            for (var i = 0; i < 39; i++) {
+                const button = document.createElement('button');
+                button.textContent = booksOfTheBible[i];
+                button.className = 'list-item-button';
+                button.dataset.Book = booksOfTheBible[i];  //store some values in the HTML DOM for recall by event handlers
+                button.onclick = () => loadChapters();
+                booksList.appendChild(button);
+            }
+        } else {
+            for (var i = 39; i < 66; i++) {
+                const button = document.createElement('button');
+                button.textContent = booksOfTheBible[i];
+                button.className = 'list-item-button';
+                button.dataset.Book = booksOfTheBible[i];  //store some values in the HTML DOM for recall by event handlers
+                button.onclick = () => loadChapters();
+                booksList.appendChild(button);
+            }
         }
     }
 
@@ -231,9 +271,26 @@ function Load() {
 
     function simulateSearch(query) {
         // Placeholder for search logic
+        var results = [];
+        for (Book in BibleSearch) {     //Books
+            for (var C = 1; C < BibleSearch[Book].length; C++) {     //Chaps
+                for (var V = 0; V < BibleSearch[Book][C].length; V++) {     //Verse
+                    //if (this.SearchForCpt.test(BibleSearch[Book][C][V].toString()) > 0) {
+                    if (BibleSearch[Book][C][V].toLowerCase().includes(query.toLowerCase())) {
+                        results.push(BibleSearch[Book][C][V]);
+                        //this.FoundVerses.push(new BibleRef(Book, C, V));
+                        //this.FoundVerses[this.FoundVerses.length - 1].index = this.SearchForCpt.test(BibleSearch[Book][C][V].toString());
+                        //this.NoMatches++;
+                        if (results.length > 19) {
+                            return results;
+                        }
+                    }
+                }
+            }
+        }
+        return results;
         return ['Genesis 1:1 In the beginning...', 'John 3:16 For God so loved the world...'].filter(r => r.toLowerCase().includes(query.toLowerCase()));
     }
-
 
 
     // JavaScript interactions for Screen 5
@@ -370,4 +427,5 @@ function Load() {
             list.appendChild(li);
         });
     }
+    loadVerseListScreen();
 }
