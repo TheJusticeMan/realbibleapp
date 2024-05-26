@@ -1,93 +1,102 @@
+var VersesOpen = [];
 class BibleRef {   //Referance to a bible passage
 	constructor(Book, Chap, Verse) {
 		this.Book = Book;
 		this.Chap = Chap * 1;
 		this.Verse = Verse * 1;
 	}
-	WholeChapElement() {   //cast the whole Chapter as a HTML Element
-		var Cbible = document.createElement("div");
-		Cbible.dataset.Book = this.Book;
-		Cbible.dataset.Chap = this.Chap;
-		var Cverse;
+	get VerseContent() {
+		return Bible[this.Book][this.Chap][this.Verse];
+	}
+	RefElement(ElementType, ClassName, OnContextMenu, OnClick, Content) {
+		var element = document.createElement(ElementType);
+		element.className = ClassName;
+		element.dataset.Book = this.Book;
+		element.dataset.Chap = this.Chap;
+		element.dataset.Verse = this.Verse;
+		element.oncontextmenu = OnContextMenu;
+		element.onclick = OnClick;
+		element.innerHTML = Content;
+		return element;
+	}
+	WholeChapElement() {
+		var chapterElement = this.RefElement("div", "", null, null, "");
 		for (var i = 0; i < Bible[this.Book][this.Chap].length; i++) {
-			Cverse = new BibleRef(this.Book, this.Chap, i);
-			Cbible.appendChild(Cverse.Element());
+			let verseRef = new BibleRef(this.Book, this.Chap, i);
+			chapterElement.appendChild(verseRef.Element());
 		}
-		return Cbible;
+		return chapterElement;
 	}
-	Element() {   //cast as a HTML Element
-		var Cbible = document.createElement("p");
-		Cbible.className = "Contents";
-		Cbible.dataset.Book = this.Book;  //store some values in the HTML DOM for recall by event handlers
-		Cbible.dataset.Chap = this.Chap;
-		Cbible.dataset.Verse = this.Verse;
-		Cbible.oncontextmenu = ShowThisVerseMenu;
-		Cbible.innerHTML = "<SPAN class=VerseNum>" + (this.Verse + 1) + "</SPAN> " + this.fixItal();
-		return Cbible;
+	Element() {
+		return this.RefElement("p", "Contents", ShowThisVerseMenu, null,
+			`<span class="VerseNum">${this.Verse + 1}</span> ${this.fixItal()}`);
 	}
-	SearchElement() {   //cast as a HTML search Element
-		var Cbible = document.createElement("span");
-		Cbible.className = "SearchResult";
-		Cbible.dataset.Book = this.Book;  //store some values in the HTML DOM for recall by event handlers
-		Cbible.dataset.Chap = this.Chap;
-		Cbible.dataset.Verse = this.Verse;
-		Cbible.oncontextmenu = ShowThisVerseMenu;
-		Cbible.onclick = GoToThisVerse;
-		Cbible.innerHTML = "<SPAN class=VerseNum>" + this.Book + " : " + this.Chap + ":" + (this.Verse + 1) + "</SPAN>  " + this.fixItal();
-		return Cbible;
+	SearchElement() {
+		return this.RefElement("span", "SearchResult", ShowThisVerseMenu, GoToThisVerse,
+			`<span class="VerseNum">${this.RefText}</span> ${this.fixItal()}`);
 	}
-	SingleVerseText() {   //cast as Text
-		return (Bible[Book][Chap][Verse].replace(/[\]\[]/g, "") + " (" + Book + "  " + (Chap) + ":" + (Verse + 1) + ", KJV)");
+	SingleVerseText() {
+		return `${this.VerseContent.replace(/[\]\[]/g, "")} (${this.RefText()}, KJV)`;
 	}
-	VerseText() {   //cast as Text
-		return ((Verse + 1) + Bible[Book][Chap][Verse].replace(/[\]\[]/g, ""));
+	VerseText() {
+		return `${this.Verse + 1}${this.VerseContent.replace(/[\]\[]/g, "")}`;
 	}
-	WholeChapText() {   //cast whole Chapter as Text
-		var Cbible = "";
+	RefText() {
+		return `${this.Book}  ${this.Chap}:${this.Verse + 1}`;
+	}
+	WholeChapText() {
+		let chapterText = "";
 		for (var i = 0; i < Bible[this.Book][this.Chap].length; i++) {
-			Cbible += ((Verse + 1) + Bible[Book][Chap][Verse].replace(/[\]\[]/g, "")) + "";
+			chapterText += `${this.Verse + 1}${this.VerseContent.replace(/[\]\[]/g, "")}`;
 		}
-		return Cbible;
+		return chapterText;
 	}
-	VerseSwipeLink() {   //cast as a HTML search Element
-		var Cbible = document.createElement("span");
-		Cbible.className = "SearchResult";
-		Cbible.dataset.Book = this.Book;  //store some values in the HTML DOM for recall by event handlers
-		Cbible.dataset.Chap = this.Chap;
-		Cbible.dataset.Verse = this.Verse;
-		Cbible.oncontextmenu = ShowThisVerseMenu;
+	VerseSwipeLink() {
+		const content = `<SPAN class=VerseNum>${this.RefText()}</SPAN> ${this.fixItal()}`;
+		const onClick = (event) => {
+			const Book = event.currentTarget.dataset.Book;
+			const Chap = Number(event.currentTarget.dataset.Chap);
+			const Verse = Number(event.currentTarget.dataset.Verse);
+			if (VersesInview.length !== 0) {
+				VersesInview.push(new BibleRef(this.Book, this.Chap, this.Verse));
+				const textDisplayArea = document.getElementById('textDisplayArea');
+				textDisplayArea.innerText = "";
+				VersesInview.forEach(verse => {
+					textDisplayArea.appendChild(verse.WholeChapElement());
+				});
+				navigateToScreen(3);
+			} else {
+				GoToVerse(Book, Chap, Verse);
+			}
+		};
 
-		var hammer = new Hammer(Cbible);
+		const element = this.RefElement("span", "SearchResult", ShowThisVerseMenu, onClick, content);
 
-		// Listen for swipe left
-		hammer.on('swipeleft', function () {
-			console.log('Swiped left on', Cbible.textContent);
-			// Perform action for swipe left
-			Cbible.style.backgroundColor = 'red'; // Example action
+		const hammer = new Hammer(element);
+		hammer.on('swipeleft', () => {
+			console.log('Swiped left on', element.textContent);
+			VersesInview.push(new BibleRef(element.dataset.Book, element.dataset.Chap, element.dataset.Verse));
+			element.style.backgroundColor = 'darkblue';
+		});
+		hammer.on('swiperight', () => {
+			console.log('Swiped right on', element.textContent);
+			VersesOpen = VersesOpen.filter(verse => !(verse.Book === element.dataset.Book && verse.Chap === Number(element.dataset.Chap) && verse.Verse === Number(element.dataset.Verse)));
+			loadVerseListScreen();
 		});
 
-		// Listen for swipe right
-		hammer.on('swiperight', function () {
-			console.log('Swiped right on', Cbible.textContent);
-			// Perform action for swipe right
-			Cbible.style.backgroundColor = 'green'; // Example action
-		});
-
-		Cbible.onclick = GoToThisVerse;
-		Cbible.innerHTML = "<SPAN class=VerseNum>" + this.Book + " : " + this.Chap + ":" + (this.Verse + 1) + "</SPAN>  " + this.fixItal();
-		return Cbible;
+		return element;
 	}
-	fixItal(_string) {
+	fixItal() {
 		return ((Bible[this.Book][this.Chap][this.Verse]).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
 	}
-
 };
 
+function GetRefFromHTML(element) {
+	return new BibleRef(element.dataset.Book, element.dataset.Chap, element.dataset.Verse);
+}
+
 function ShowThisVerseMenu(event) {  //****
-	var Book = event.currentTarget.dataset.Book;
-	var Chap = event.currentTarget.dataset.Chap * 1;
-	var Verse = event.currentTarget.dataset.Verse * 1;
-	loadVerseContextualInteractionScreen(Book, Chap, Verse);
+	loadVerseContextualInteractionScreen(GetRefFromHTML(event.currentTarget));
 	event.returnValue = false;
 }
 

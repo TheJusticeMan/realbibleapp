@@ -1,41 +1,14 @@
 var booksOfTheBible = ["GENESIS", "EXODUS", "LEVITICUS", "NUMBERS", "DEUTERONOMY", "JOSHUA", "JUDGES", "RUTH", "1 SAMUEL", "2 SAMUEL", "1 KINGS", "2 KINGS", "1 CHRONICLES", "2 CHRONICLES", "EZRA", "NEHEMIAH", "ESTHER", "JOB", "PSALMS", "PROVERBS", "ECCLESIASTES", "SONG SOLOMON", "ISAIAH", "JEREMIAH", "LAMENTATIONS", "EZEKIEL", "DANIEL", "HOSEA", "JOEL", "AMOS", "OBADIAH", "JONAH", "MICAH", "NAHUM", "HABAKKUK", "ZEPHANIAH", "HAGGAI", "ZECHARIAH", "MALACHI", "MATTHEW", "MARK", "LUKE", "JOHN", "ACTS", "ROMANS", "1 CORINTHIANS", "2 CORINTHIANS", "GALATIANS", "EPHESIANS", "PHILIPPIANS", "COLOSSIANS", "1 THESSALONIANS", "2 THESSALONIANS", "1 TIMOTHY", "2 TIMOTHY", "TITUS", "PHILEMON", "HEBREWS", "JAMES", "1 PETER", "2 PETER", "1 JOHN", "2 JOHN", "3 JOHN", "JUDE", "REVELATION"];
-var BibleSearch = Bible
-var VersesOpen = [];
-var VersesInview=[];
+var BibleSearch = Bible;
+var VersesInview = [];
 VersesOpen.push(new BibleRef("GENESIS", 1, 0));
 function loadVerseListScreen() {
-    VersesInview=[];
+    VersesInview = [];
     var verseList = document.getElementById('OPverseList');
     verseList.innerText = "";
 
     for (var i = 0; i < VersesOpen.length; i++) {
-        var Cbible=VersesOpen[i].VerseSwipeLink();
-
-		var hammer = new Hammer(Cbible);
-
-		// Listen for swipe left
-		hammer.on('swipeleft', function () {
-			console.log('Swiped left on', Cbible.textContent);
-			// Perform action for swipe left
-
-			Cbible.style.backgroundColor = 'red'; // Example action
-		});
-
-		// Listen for swipe right
-		hammer.on('swiperight', function () {
-			console.log('Swiped right on', Cbible.textContent);
-			// Perform action for swipe right
-            //remove item
-            for(var a=i+1;a<VersesOpen.length;a++){
-                VersesOpen[a-1]=VersesOpen[a];
-            }
-            VersesOpen.pop();
-            loadVerseListScreen();
-			//Cbible.style.backgroundColor = 'green'; // Example action
-		});
-        verseList.appendChild(Cbible);
-
-
+        verseList.appendChild(VersesOpen[i].VerseSwipeLink());
     }
     //alert(VersesOpen.length);
     navigateToScreen(1);
@@ -59,8 +32,21 @@ function loadHistoryScreen() {
 function loadBookmarksScreen() {
     navigateToScreen(6);
 };
-function loadVerseContextualInteractionScreen() {
+function loadVerseContextualInteractionScreen(theVerse) {
+    //var theVerse = new BibleRef(Book, Chap, Verse);
+    var TheVerse = document.createElement("div");
+    TheVerse.className = "BibleContents";
+    TheVerse.appendChild(theVerse.Element());
 
+    // Create a new span element for the Bible reference
+    var referenceSpan = document.createElement("span");
+    referenceSpan.className = "BibleReference";
+    referenceSpan.textContent = theVerse.RefText();
+
+    // Append the reference span to the TheVerse div
+    TheVerse.appendChild(referenceSpan);
+    document.getElementById("selectedVerseText").innerText = "";
+    document.getElementById("selectedVerseText").appendChild(TheVerse);
 
     navigateToScreen(7);
 };
@@ -76,52 +62,27 @@ function Load() {
 
     // JavaScript interactions for Screen 1
 
-    document.getElementById('searchBtn').addEventListener('click', () => {
-        // Navigate to Screen 4
-        loadSearchScreen();
-    });
+    document.getElementById('searchBtn').onclick = loadSearchScreen;
 
-    document.getElementById('historyBtn').addEventListener('click', () => {
-        // Navigate to Screen 5
-        loadHistoryScreen();
-    });
+    document.getElementById('historyBtn').onclick = loadHistoryScreen;
 
-    document.getElementById('bookmarksBtn').addEventListener('click', () => {
-        // Navigate to Screen 6
-        loadBookmarksScreen();
-    });
+    document.getElementById('bookmarksBtn').onclick = loadBookmarksScreen;
 
-    document.getElementById('addVerseBtn').addEventListener('click', () => {
-        // Navigate to Screen 2
-        loadVerseSelectionScreen();
-    });
+    document.getElementById('addVerseBtn').onclick = loadVerseSelectionScreen;
 
     // JavaScript interactions for Screen 2
     // Event listeners for Testament buttons
-    document.getElementById('oldTestamentBtn').addEventListener('click', () => {
-        loadBooks('Old Testament');
-    });
-    document.getElementById('newTestamentBtn').addEventListener('click', () => {
-        loadBooks('New Testament');
-    });
 
-    document.getElementById('backButton1').addEventListener('click', () => {
-        // Return to Screen 1
-        loadVerseListScreen();
-    });
+    document.getElementById('backButton1').onclick = loadVerseListScreen;
 
-    // Function to initialize the data
-    function initialize() {
-        document.getElementById('oldTestamentBtn').addEventListener('click', () => loadBooks('Old'));
-        document.getElementById('newTestamentBtn').addEventListener('click', () => loadBooks('New'));
-        document.getElementById('confirmBtn').addEventListener('click', displayVerse);
-    }
+    document.getElementById('oldTestamentBtn').addEventListener('click', () => loadBooks('Old'));
+    document.getElementById('newTestamentBtn').addEventListener('click', () => loadBooks('New'));
 
     // Load books based on Testament selection
     function loadBooks(testament) {
         const booksList = document.getElementById('booksList');
         booksList.innerHTML = ''; // Clear previous entries
-        if (testament == "Old Testament") {
+        if (testament == "Old") {
             for (var i = 0; i < 39; i++) {
                 const button = document.createElement('button');
                 button.textContent = booksOfTheBible[i];
@@ -187,17 +148,10 @@ function Load() {
         alert(sessionStorage.getItem('selectedVerse'));
     }
 
-    // Initial setup
-    document.addEventListener('DOMContentLoaded', initialize);
-
-    // Additional logic for managing chapter and verse selection
 
 
     // JavaScript interactions for Screen 3
-    document.getElementById('backButton2').addEventListener('click', () => {
-        // Return to Screen 1
-        loadVerseListScreen();
-    });
+    document.getElementById('backButton2').onclick = loadVerseListScreen;
 
     // Implement pinch to zoom functionality
     const textDisplayArea = document.getElementById('textDisplayArea');
@@ -294,10 +248,7 @@ function Load() {
 
 
     // JavaScript interactions for Screen 5
-    document.getElementById('backButton3').addEventListener('click', () => {
-        // Return to the main menu or previous screen
-        loadVerseListScreen();
-    });
+    document.getElementById('backButton3').onclick = loadVerseListScreen;
 
     // Function to load history from local storage or a database
     function loadHistory() {
@@ -339,10 +290,7 @@ function Load() {
 
 
     // JavaScript interactions for Screen 6
-    document.getElementById('backButton4').addEventListener('click', () => {
-        // Return to the main menu or previous screen
-        loadVerseListScreen();
-    });
+    document.getElementById('backButton4').onclick = loadVerseListScreen;
 
     document.getElementById('categoryFilter').addEventListener('change', (event) => {
         filterBookmarksByCategory(event.target.value);
@@ -374,11 +322,7 @@ function Load() {
         ];
     }
 
-    document.getElementById('findVerseButton').addEventListener('click', () => {
-        // Navigate to the search screen or a suggested verse
-        loadDetailedVerseReadingScreen();
-    });
-
+    document.getElementById('findVerseButton').onclick = loadDetailedVerseReadingScreen;
     // Function to filter bookmarks based on selected category
     function filterBookmarksByCategory(category) {
         // Placeholder function to demonstrate filtering logic
