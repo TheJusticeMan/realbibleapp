@@ -1,41 +1,59 @@
-# 👋 Hello developer!
-This project contains a basic HTML structure to get you started. Check our [tutorials for frontend development](https://www.w3schools.com/where_to_start.asp) to learn the basics of [HTML](https://www.w3schools.com/html/default.asp) and [CSS](https://www.w3schools.com/css/default.asp). 🦄
+Welcome to your comprehensive guide to navigating the Bible App. Below, you'll find detailed instructions on how to use each screen effectively, enhancing your reading and study experience.
 
+#### **Screen 1: Main Verse List**
 
-## 🏗 What's next?
+- **Top Toolbar Actions**
+    - **Search Icon**: Tap to open Screen 4 and search for verses or phrases.
+    - **History Icon**: Opens Screen 5, showing your past verse readings.
+    - **Bookmarks Icon**: Leads to Screen 6, where your bookmarked verses are listed.
+- **Verse List Interactions**
+    - **Tap on a Verse**: Opens the full text in Screen 3.
+    - **Long Press on a Verse**: Shows options to bookmark the verse.
+    - **Swipe Actions**: Swipe right to remove a verse from the list, or left to add it to a parallel reading view in Screen 3.
+- **Adding a Verse**
+    - Tap the **Plus Icon** in the bottom corner to go to Screen 2 and choose a new verse.
 
-Build your project however you like using HTML, CSS and JavaScript. 
+#### **Screen 2: Verse Selection**
 
-Use these four files as your starting point:
+- **Navigation and Book Selection**
+    - Use the **Back Button** to return to the previous screen.
+    - Tap on either **Old Testament** or **New Testament** to select a section.
+- **Choosing a Verse**
+    - After selecting a book and chapter, tap on a verse to add it to your list.
 
-- **README.md:** This is the file that you are reading now. You can change the text in this file to leave information to others about your website - or delete it.
-- **index.html:** This is the default page for your space, where you write HTML, the standard markup language for creating web pages.
-- **styles.css:** Use the CSS file to style your content and change the look of your space with beautiful colors, fonts and much more. 
-- **scripts.js:** Use this file to make your website dynamic and interactive with JavaScript. 
+#### **Screen 3: Verse Reading**
 
-> **Note:** The **styles.css** and **scripts.js** files link into the **index.html** file so that they are all connected.
+- **Reading and Navigation**
+    - Use the navigation bar to return to Screen 1 or adjust the text settings.
+    - **Split View**: If multiple passages are selected, use the draggable divider to adjust viewing panels.
+- **Accessibility Features**
+    - **Pinch to Zoom**: Adjust the text size for comfort.
+    - Optional controls for text size and night mode are available in the toolbar.
 
+#### **Screen 4: Verse Search**
 
-## 🎨 Where to find everything
+- **Performing a Search**
+    - Type your query in the search bar to see suggestions and results.
+    - Tap on a result to view it in full on Screen 3.
+- **Managing Results**
+    - If many results are found, use pagination or scroll to navigate through them.
 
-- **Fonts:** Add your favorite from **Google fonts**.  
-	[Go to tutorial about fonts](https://www.w3schools.com/w3css/w3css_fonts_google.asp)
+#### **Screen 5: Reading History**
 
-- **Icons:** Add icons with **Fontawesome** and their free library.  
-	[Go to tutorial about Fontawesome](https://www.w3schools.com/icons/fontawesome5_intro.asp)
+- **Navigating History**
+    - Tap markers on the timeline to view past readings.
+    - Use sorting and filtering to find specific entries.
 
-- **Images:** Upload images and add their URLs to your code.  
-	[Go to article about how to upload files](https://support.w3schools.com/hc/en-gb/articles/4410414928017)
+#### **Screen 6: Bookmarks**
 
-> ⚡️ **Tip:** [Set up Google Analytics](https://www.w3schools.com/howto/howto_google_analytics.asp) to get valuable insights about your space and visitors. 
-	
+- **Managing Bookmarks**
+    - The miniaturized Bible graphic helps you navigate through bookmarked verses.
+    - Use the category filter to sort your bookmarks for quicker access.
 
-### ⛑ Need support?
-[Join our Discord community](https://discord.gg/6Z7UaRbUQM) and ask questions in the **#spaces-general** channel.
+#### **Screen 7: Verse Interaction**
 
-
-### 🚀 Upgrade to Pro
-[Upgrade your account](https://billing.w3schools.com/products/spaces) to boost your space and take your projects to the next level; more requests, more storage and more power for up to 10 spaces.
-
-
-Happy learning!
+- **Editing and Linking**
+    - Add notes or labels to your verses in the note editor.
+    - Link related verses using the cross-reference functionality.
+- **Saving Changes**
+    - Use the **Save** button to keep any changes, or tap **Close** to exit without saving.

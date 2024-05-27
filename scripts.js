@@ -1,7 +1,14 @@
 var booksOfTheBible = ["GENESIS", "EXODUS", "LEVITICUS", "NUMBERS", "DEUTERONOMY", "JOSHUA", "JUDGES", "RUTH", "1 SAMUEL", "2 SAMUEL", "1 KINGS", "2 KINGS", "1 CHRONICLES", "2 CHRONICLES", "EZRA", "NEHEMIAH", "ESTHER", "JOB", "PSALMS", "PROVERBS", "ECCLESIASTES", "SONG SOLOMON", "ISAIAH", "JEREMIAH", "LAMENTATIONS", "EZEKIEL", "DANIEL", "HOSEA", "JOEL", "AMOS", "OBADIAH", "JONAH", "MICAH", "NAHUM", "HABAKKUK", "ZEPHANIAH", "HAGGAI", "ZECHARIAH", "MALACHI", "MATTHEW", "MARK", "LUKE", "JOHN", "ACTS", "ROMANS", "1 CORINTHIANS", "2 CORINTHIANS", "GALATIANS", "EPHESIANS", "PHILIPPIANS", "COLOSSIANS", "1 THESSALONIANS", "2 THESSALONIANS", "1 TIMOTHY", "2 TIMOTHY", "TITUS", "PHILEMON", "HEBREWS", "JAMES", "1 PETER", "2 PETER", "1 JOHN", "2 JOHN", "3 JOHN", "JUDE", "REVELATION"];
 var BibleSearch = Bible;
 var VersesInview = [];
+var currentverseviewing;
 VersesOpen.push(new BibleRef("GENESIS", 1, 0));
+VersesOpen.push(new BibleRef("JOHN", 3, 15));
+VersesOpen.push(new BibleRef("PSALMS", 23, 1));
+VersesOpen.push(new BibleRef("1 CORINTHIANS", 13, 3));
+VersesOpen.push(new BibleRef("PHILIPPIANS", 4, 12));
+VersesOpen.push(new BibleRef("ROMANS", 8, 27));
+var notes = [];
 function loadVerseListScreen() {
     VersesInview = [];
     var verseList = document.getElementById('OPverseList');
@@ -14,6 +21,11 @@ function loadVerseListScreen() {
     navigateToScreen(1);
 };
 function loadVerseSelectionScreen() {
+    document.getElementById("oldTestamentBtn").style.display = "";
+    document.getElementById("newTestamentBtn").style.display = "";
+    document.getElementById("booksList").style.display = "none";
+    document.getElementById("chapterList").style.display = "none";
+    document.getElementById("verseList").style.display = "none";
     navigateToScreen(2);
 };
 function loadDetailedVerseReadingScreen(TheTitle, TheContent) {
@@ -34,6 +46,7 @@ function loadBookmarksScreen() {
 };
 function loadVerseContextualInteractionScreen(theVerse) {
     //var theVerse = new BibleRef(Book, Chap, Verse);
+    currentverseviewing = theVerse;
     var TheVerse = document.createElement("div");
     TheVerse.className = "BibleContents";
     TheVerse.appendChild(theVerse.Element());
@@ -42,6 +55,11 @@ function loadVerseContextualInteractionScreen(theVerse) {
     var referenceSpan = document.createElement("span");
     referenceSpan.className = "BibleReference";
     referenceSpan.textContent = theVerse.RefText();
+    let notetoload = notes.filter(verse => (verse.BibleVerse.Book === theVerse.Book && verse.BibleVerse.Chap === theVerse.Chap && verse.BibleVerse.Verse === theVerse.Verse));
+    document.getElementById('noteEditor').value = "";
+    if (notetoload.length > 0) {
+        document.getElementById('noteEditor').value = notetoload[0].Note;
+    }
 
     // Append the reference span to the TheVerse div
     TheVerse.appendChild(referenceSpan);
@@ -88,7 +106,7 @@ function Load() {
                 button.textContent = booksOfTheBible[i];
                 button.className = 'list-item-button';
                 button.dataset.Book = booksOfTheBible[i];  //store some values in the HTML DOM for recall by event handlers
-                button.onclick = () => loadChapters();
+                button.onclick = loadChapters;
                 booksList.appendChild(button);
             }
         } else {
@@ -97,14 +115,19 @@ function Load() {
                 button.textContent = booksOfTheBible[i];
                 button.className = 'list-item-button';
                 button.dataset.Book = booksOfTheBible[i];  //store some values in the HTML DOM for recall by event handlers
-                button.onclick = () => loadChapters();
+                button.onclick = loadChapters;
                 booksList.appendChild(button);
             }
         }
+        document.getElementById("oldTestamentBtn").style.display = "none";
+        document.getElementById("newTestamentBtn").style.display = "none";
+        document.getElementById("booksList").style.display = "";
+        document.getElementById("chapterList").style.display = "none";
+        document.getElementById("verseList").style.display = "none";
     }
 
     // Load chapters of a selected book
-    function loadChapters() {
+    function loadChapters(event) {
         const chapterList = document.getElementById('chapterList');
         chapterList.innerHTML = '';
         var Book = event.currentTarget.dataset.Book;
@@ -115,14 +138,19 @@ function Load() {
                 button.className = 'list-item-button';
                 button.dataset.Book = Book;  //store some values in the HTML DOM for recall by event handlers
                 button.dataset.Chap = index;
-                button.onclick = () => loadVerses();
+                button.onclick = loadVerses;
                 chapterList.appendChild(button);
             }
         });
+        document.getElementById("oldTestamentBtn").style.display = "none";
+        document.getElementById("newTestamentBtn").style.display = "none";
+        document.getElementById("booksList").style.display = "none";
+        document.getElementById("chapterList").style.display = "";
+        document.getElementById("verseList").style.display = "none";
     }
 
     // Load verses of a selected chapter
-    function loadVerses() {
+    function loadVerses(event) {
         const verseList = document.getElementById('verseList');
         verseList.innerHTML = '';
         var Book = event.currentTarget.dataset.Book;
@@ -141,6 +169,11 @@ function Load() {
             verseList.appendChild(button);
         });
         //alert([Book,Chap]);
+        document.getElementById("oldTestamentBtn").style.display = "none";
+        document.getElementById("newTestamentBtn").style.display = "none";
+        document.getElementById("booksList").style.display = "none";
+        document.getElementById("chapterList").style.display = "none";
+        document.getElementById("verseList").style.display = "";
     }
 
     // Display the selected verse
@@ -170,9 +203,9 @@ function Load() {
     // Night mode toggle
     document.getElementById('nightModeToggle').addEventListener('click', () => {
         const body = document.body;
-        body.classList.toggle('night-mode');
-        body.style.backgroundColor = body.classList.contains('night-mode') ? '#333' : '#fff';
-        textDisplayArea.style.color = body.classList.contains('night-mode') ? '#fff' : '#333';
+        body.classList.toggle('light-theme');
+        //body.style.backgroundColor = body.classList.contains('night-mode') ? '#333' : '#fff';
+        //textDisplayArea.style.color = body.classList.contains('night-mode') ? '#fff' : '#333';
     });
 
     // Font size adjustments
@@ -184,13 +217,6 @@ function Load() {
         fontSize = Math.max(12, fontSize - 1);
         textDisplayArea.style.fontSize = `${fontSize}px`;
     });
-
-    // Bookmarking functionality
-    document.getElementById('bookmarkButton').addEventListener('click', () => {
-        // Add bookmark logic here
-    });
-
-
 
     // JavaScript interactions for Screen 4
     document.getElementById('searchInput').addEventListener('input', (event) => {
@@ -219,7 +245,7 @@ function Load() {
             resultDiv.addEventListener('click', () => {
                 // Open result in Screen 3
             });
-            resultsContainer.appendChild(resultDiv);
+            resultsContainer.appendChild(result.SearchElement());
         });
     }
 
@@ -231,7 +257,7 @@ function Load() {
                 for (var V = 0; V < BibleSearch[Book][C].length; V++) {     //Verse
                     //if (this.SearchForCpt.test(BibleSearch[Book][C][V].toString()) > 0) {
                     if (BibleSearch[Book][C][V].toLowerCase().includes(query.toLowerCase())) {
-                        results.push(BibleSearch[Book][C][V]);
+                        results.push(new BibleRef(Book, C, V));
                         //this.FoundVerses.push(new BibleRef(Book, C, V));
                         //this.FoundVerses[this.FoundVerses.length - 1].index = this.SearchForCpt.test(BibleSearch[Book][C][V].toString());
                         //this.NoMatches++;
@@ -347,8 +373,17 @@ function Load() {
     });
 
     document.getElementById('saveChanges').addEventListener('click', () => {
+        theVerse=currentverseviewing;
+        for (let a = 0; a < notes.length; a++) {
+            if (notes[a].BibleVerse.Book === theVerse.Book && notes[a].BibleVerse.Chap === theVerse.Chap && notes[a].BibleVerse.Verse === theVerse.Verse) {
+                notes[a] = new BibleNote(currentverseviewing, document.getElementById('noteEditor').value);
+                return;
+            }
+        }
+        notes.push(new BibleNote(currentverseviewing, document.getElementById('noteEditor').value));
         // Save changes logic
-        alert('Changes saved!');
+        //alert('Changes saved!');
+        loadVerseListScreen();
     });
 
     document.getElementById('closeMenu').addEventListener('click', () => {

@@ -32,8 +32,8 @@ class BibleRef {   //Referance to a bible passage
 			`<span class="VerseNum">${this.Verse + 1}</span> ${this.fixItal()}`);
 	}
 	SearchElement() {
-		return this.RefElement("span", "SearchResult", ShowThisVerseMenu, GoToThisVerse,
-			`<span class="VerseNum">${this.RefText}</span> ${this.fixItal()}`);
+		return this.RefElement("span", "SearchResult", ShowThisVerseMenu, GoToAddThisVerse,
+			`<span class="VerseNum">${this.RefText()}</span> ${this.fixItal()}`);
 	}
 	SingleVerseText() {
 		return `${this.VerseContent.replace(/[\]\[]/g, "")} (${this.RefText()}, KJV)`;
@@ -53,30 +53,21 @@ class BibleRef {   //Referance to a bible passage
 	}
 	VerseSwipeLink() {
 		const content = `<SPAN class=VerseNum>${this.RefText()}</SPAN> ${this.fixItal()}`;
-		const onClick = (event) => {
-			const Book = event.currentTarget.dataset.Book;
-			const Chap = Number(event.currentTarget.dataset.Chap);
-			const Verse = Number(event.currentTarget.dataset.Verse);
-			if (VersesInview.length !== 0) {
-				VersesInview.push(new BibleRef(this.Book, this.Chap, this.Verse));
-				const textDisplayArea = document.getElementById('textDisplayArea');
-				textDisplayArea.innerText = "";
-				VersesInview.forEach(verse => {
-					textDisplayArea.appendChild(verse.WholeChapElement());
-				});
-				navigateToScreen(3);
-			} else {
-				GoToVerse(Book, Chap, Verse);
-			}
-		};
-
-		const element = this.RefElement("span", "SearchResult", ShowThisVerseMenu, onClick, content);
+		const element = this.RefElement("span", "SearchResult", ShowThisVerseMenu, GoToThisVerse, content);
 
 		const hammer = new Hammer(element);
 		hammer.on('swipeleft', () => {
 			console.log('Swiped left on', element.textContent);
 			VersesInview.push(new BibleRef(element.dataset.Book, element.dataset.Chap, element.dataset.Verse));
 			element.style.backgroundColor = 'darkblue';
+			element.onclick = (event) => {
+				const textDisplayArea = document.getElementById('textDisplayArea');
+				textDisplayArea.innerText = "";
+				VersesInview.forEach(verse => {
+					textDisplayArea.appendChild(verse.WholeChapElement());
+				});
+				navigateToScreen(3);
+			};
 		});
 		hammer.on('swiperight', () => {
 			console.log('Swiped right on', element.textContent);
@@ -100,21 +91,27 @@ function ShowThisVerseMenu(event) {  //****
 	event.returnValue = false;
 }
 
+function GoToAddThisVerse(event) {
+	VersesOpen.push(GetRefFromHTML(event.currentTarget));
+	GoToRef(GetRefFromHTML(event.currentTarget));
+}
+
 function GoToThisVerse(event) {
-	var Book = event.currentTarget.dataset.Book;
-	var Chap = event.currentTarget.dataset.Chap * 1;
-	var Verse = event.currentTarget.dataset.Verse * 1;
-	GoToVerse(Book, Chap, Verse);
+	GoToRef(GetRefFromHTML(event.currentTarget));
 }
 
 function AddThisVerse(event) {
-	var Book = event.currentTarget.dataset.Book;
-	var Chap = event.currentTarget.dataset.Chap * 1;
-	var Verse = event.currentTarget.dataset.Verse * 1;
-	VersesOpen.push(new BibleRef(Book, Chap, Verse));
+	VersesOpen.push(GetRefFromHTML(event.currentTarget));
 }
 
-function GoToVerse(Book, Chap, Verse) {
-	var Cbible = new BibleRef(Book, Chap, Verse);
-	loadDetailedVerseReadingScreen(Book + " " + Chap, Cbible.WholeChapElement());
+function GoToRef(c) {
+	loadDetailedVerseReadingScreen(c.Book + " " + c.Chap, c.WholeChapElement());
+}
+
+class BibleNote{
+	constructor(BibleVerse,thenote,BookmarkLBL=""){
+		this.BibleVerse=BibleVerse;
+		this.Note=thenote;
+		this.BookmarkLBL=BookmarkLBL
+	}
 }

@@ -1,3 +1,102 @@
+:root {
+    /* Sets the primary background color of the app to black */
+    --MainBGcolor: #000;  
+
+    /* Sets the primary color used for text to white */
+    --Maincolor: #fff;
+
+    /* Background color for input fields, set to a light blue */
+    --InputBGcolor: #ccf;
+
+    /* Color of text inside input fields, set to black */
+    --Inputcolor: #000;
+
+    /* Color for input fields when hovered, set to a darker shade of light blue */
+    --InputHVRcolor: #aaf;
+
+    /* Background color for lists of links, set to a dark grey */
+    --linklistBGcolor: #444;
+
+    /* Color used for references in the text, set to bright green for visibility */
+    --Refcolor: #0f0;
+
+    /* Background color for header and footer, set to a semi-transparent dark grey */
+    --headerBGcolor: rgba(34, 34, 34, 0.8);
+}
+
+.light-theme {
+    --MainBGcolor: #f0f0f0; /* Light grey for a soft background that's easy on the eyes */
+    --Maincolor: #333; /* Dark grey for text, providing good contrast without being too harsh */
+
+    --InputBGcolor: #ffffff; /* Pure white for input fields, offering a clean and crisp look */
+    --Inputcolor: #5c5c5c; /* Medium grey for input text, ensuring readability */
+
+    --InputHVRcolor: #e0e0e0; /* Lighter grey for input hover, subtly highlighting the input area */
+    
+    --linklistBGcolor: #eaeaea; /* Very light grey for lists of links, differentiating it slightly from the main background */
+    
+    --Refcolor: #2a9d8f; /* Soft teal for references, providing a pop of color that's not too overwhelming */
+    
+    --headerBGcolor: rgba(255, 255, 255, 0.95); /* Almost white with a touch of transparency for the header and footer, maintaining an airy feel while staying functional */
+}
+
+
+.Ocean-Breeze {
+    --MainBGcolor: #2b2f77; /* Dark blue like the deep ocean */
+    --Maincolor: #e1ffff; /* Soft, light cyan for text */
+    --InputBGcolor: #58a4b0; /* Medium teal for input fields */
+    --Inputcolor: #f6f1d1; /* Pale yellow for input text */
+    --InputHVRcolor: #5dbcd2; /* Lighter teal for hover states */
+    --linklistBGcolor: #33658a; /* Desaturated dark blue for link lists */
+    --Refcolor: #ade25d; /* Soft lime green for references */
+    --headerBGcolor: rgba(43, 47, 119, 0.8); /* Semi-transparent dark blue for headers and footers */
+}
+
+.Autumn-Warmth {
+    --MainBGcolor: #3b1f2b; /* Dark maroon for a warm background */
+    --Maincolor: #f4d35e; /* Vibrant yellow for clear text */
+    --InputBGcolor: #ee964b; /* Pumpkin orange for input fields */
+    --Inputcolor: #f95738; /* Reddish orange for input text */
+    --InputHVRcolor: #facf5a; /* Brighter yellow for hover states */
+    --linklistBGcolor: #552f44; /* Deep purple for link backgrounds */
+    --Refcolor: #cdd422; /* Mustard yellow for references */
+    --headerBGcolor: rgba(59, 31, 43, 0.8); /* Semi-transparent maroon for headers and footers */
+}
+
+.Forest-Retreat {
+    --MainBGcolor: #004d3a; /* Deep forest green background */
+    --Maincolor: #cce3de; /* Pale teal for text */
+    --InputBGcolor: #588c7e; /* Earthy green for input fields */
+    --Inputcolor: #f0f3bd; /* Very light green for input text */
+    --InputHVRcolor: #8fc1a9; /* Softer green for hover states */
+    --linklistBGcolor: #35524a; /* Mossy green for link lists */
+    --Refcolor: #f5dd90; /* Soft gold for references */
+    --headerBGcolor: rgba(0, 77, 58, 0.8); /* Semi-transparent deep green for headers and footers */
+}
+
+.Urban-Chic {
+    --MainBGcolor: #333741; /* Very dark grey almost black */
+    --Maincolor: #fff; /* Pure white for text */
+    --InputBGcolor: #484848; /* Dark grey for input fields */
+    --Inputcolor: #cfdac8; /* Light gray for input text */
+    --InputHVRcolor: #606c88; /* Dark slate blue for hover states */
+    --linklistBGcolor: #3e4c59; /* Dark blue-grey for link lists */
+    --Refcolor: #b8d8d8; /* Light turquoise for references */
+    --headerBGcolor: rgba(51, 55, 65, 0.8); /* Semi-transparent dark grey for headers and footers */
+}
+
+.Pastel-Dreams {
+    --MainBGcolor: #f7ebec; /* Soft pink background */
+    --Maincolor: #505050; /* Dark gray for text contrast */
+    --InputBGcolor: #d6d2f1; /* Lavender for input fields */
+    --Inputcolor: #555; /* Dark grey for input text */
+    --InputHVRcolor: #f1d4e0; /* Lighter pink for hover states */
+    --linklistBGcolor: #f3d1f4; /* Soft purple for link lists */
+    --Refcolor: #f0c808; /* Soft yellow for references */
+    --headerBGcolor: rgba(247, 235, 236, 0.8); /* Semi-transparent soft pink for headers and footers */
+}
+
+
 /* Parent container holding all screens */
 .container {
     position: relative;
@@ -6,8 +105,9 @@
 /* General Screen Style */
 .screen {
     flex-direction: column;
-    background-color: #000;
-    color: #fff;
+    background-color: var(--MainBGcolor);
+    color: var(--Maincolor);
+    //height: 100%;
 }
 
 /* Verse List Style */
@@ -17,16 +117,8 @@
     overflow-y: auto;
     height: 300px;
     flex-grow: 1;
-    background-color: #000;
-    color: #fff;
-}
-
-/* Individual verse list item */
-.verse-list li {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-    background-color: #f0f0f0;
-    margin-bottom: 5px;
+    background-color: var(--MainBGcolor);
+    color: var(--Maincolor);
 }
 
 /* Floating Button Style */
@@ -35,7 +127,7 @@
     bottom: 20px;
     right: 20px;
     border: none;
-    color: #000;
+    color: var(--Inputcolor);
     padding: 10px 20px;
     border-radius: 50%;
     font-size: 24px;
@@ -50,8 +142,8 @@
     align-items: center;
     padding: 10px;
     justify-content: space-between;
-    background-color: rgba(34, 34, 34, 0.8);
-    color: #fff;
+    background-color: var(--headerBGcolor);
+    color: var(--Maincolor);
 }
 
 /* Common Footer Style */
@@ -59,46 +151,47 @@
     position: fixed;
     bottom: 0;
     padding: 10px;
-    background-color: rgba(34, 34, 34, 0.8);
-    color: #fff;
+    background-color: var(--headerBGcolor);
+    color: var(--Maincolor);
 }
 
+.interactive-sections {
+    width: 100%; /* Ensures the container takes full width */
+    height: 100%; /* Example height, adjust based on your layout needs */
+    display: flex;
+    flex-direction: column;
+}
+.note-editor {
+    width: 100%; /* Makes the textarea full width */
+    height: 5em; /* Makes the textarea full width */
+    font-size: 18px; /* Sets a larger font size for the textarea */
+    padding: 0.5em; /* Adds some padding inside the textarea */
+    box-sizing: border-box; /* Includes padding and border in the width */
+    resize: none; /* Optional: Disables resizing the textarea */
+    transition: 0.3s;
+}
+.note-editor:focus {
+    height: 20em;
+}
 /* Back Button Style */
 .back-button {
     margin-right: 10px;
-    color: #000;
+    color: var(--Inputcolor);
 }
 
 /* Dynamic List Style */
 .dynamic-list {
     margin: 10px 0;
     overflow-y: auto;
-    border: 1px solid #ccc;
     padding: 5px;
-    background-color: #444;
-    color: #fff;
+    color: var(--Maincolor);
 }
 
 /* Dynamic List Div Item */
 .dynamic-list div {
     padding: 10px;
-    border-bottom: 1px solid #eee;
-    background-color: #000;
-    color: #fff;
-}
-
-/* Confirm Button Style */
-.confirm-button {
-    padding: 10px;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    cursor: pointer;
-}
-
-/* Disabled Confirm Button Style */
-.confirm-button[disabled] {
-    background-color: #ccc;
+    background-color: var(--MainBGcolor);
+    color: var(--Maincolor);
 }
 
 /* Text Display for Screen 3 */
@@ -107,7 +200,7 @@
     overflow-y: auto;
     padding: 15px;
     font-size: 18px;
-    color: #fff;
+    color: var(--Maincolor);
     word-spacing: 0.5em;
     letter-spacing: 0.1em;
     line-height: 1.5;
@@ -121,7 +214,7 @@
     padding: 10px;
     border: none;
     background: none;
-    color: #fff;
+    color: var(--Maincolor);
 }
 
 /* Search Results for Screen 4 */
@@ -129,23 +222,21 @@
     overflow-y: auto;
     margin: 10px;
     padding: 5px;
-    border: 1px solid #eee;
-    background-color: #444;
-    color: #fff;
+    background-color: var(--MainBGcolor);
+    color: var(--Maincolor);
 }
 
 /* Search Results Div for Screen 4 */
 .search-results div {
     padding: 10px;
-    border-bottom: 1px solid #eee;
-    background-color: #000;
-    color: #fff;
+    background-color: var(--linklistBGcolor);
+    color: var(--Maincolor);
 }
 
 /* Content */
 body {
-    color: #fff;
-    background: #000;
+    color: var(--Maincolor);
+    background: var(--MainBGcolor);
     font-size: 1em;
     -ms-content-zooming: none;
 }
@@ -156,10 +247,11 @@ p.Contents {
 }
 
 /* Verse Number */
-SPAN.VerseNum, .BibleReference {
+SPAN.VerseNum,
+.BibleReference {
     text-indent: 1em;
     margin-left: 1em;
-    color: #0f0;
+    color: var(--Refcolor);
     font-style: italic;
 }
 
@@ -171,29 +263,31 @@ strong.LORDCAPS {
 /* Navigation */
 input,
 select,
-button {
+button,
+textarea {
     font-size: 1em;
-    background-color: #ccf;
+    background-color: var(--InputBGcolor);
     border-radius: 0.6em 0.3em;
     border-width: 0;
     margin: 0.2em;
     padding: 0.3em;
     transition: 0.3s;
+    color: var(--Inputcolor);
 }
 
 /* Navigation Hover Effects */
 input:hover,
 button:hover,
 select:hover {
-    background-color: #aaf;
+    background-color: var(--InputHVRcolor);
     text-shadow: -1em -2em 0.25em white, 1em 2em 0.25em white, -0.5em -1em 0.125em white, 0.5em 1em 0.125em white;
 }
 
 span.SearchResult {
-    background: #444;
+    background: var(--linklistBGcolor);
     border-radius: 10px;
     margin: 2px;
-    color: #fff;
+    color: var(--Maincolor);
     cursor: pointer;
     display: block;
     padding: 10px;
@@ -203,6 +297,7 @@ span.SearchResult {
 span.SearchResult:hover,
 span.SearchResult:active {
     text-decoration: none;
-    color: #eef;
+    /*color: #00f;*/
     text-shadow: 0px 0px 1em white;
 }
+
