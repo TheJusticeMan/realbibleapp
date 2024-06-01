@@ -10,6 +10,7 @@ VersesOpen.push(new BibleRef("PHILIPPIANS", 4, 12));
 VersesOpen.push(new BibleRef("ROMANS", 8, 27));
 var notes = [];
 function loadVerseListScreen() {
+    VersesInviewindex = 0;
     VersesInview = [];
     var verseList = document.getElementById('OPverseList');
     verseList.innerText = "";
@@ -28,12 +29,13 @@ function loadVerseSelectionScreen() {
     document.getElementById("verseList").style.display = "none";
     navigateToScreen(2);
 };
-function loadDetailedVerseReadingScreen(TheTitle, TheContent) {
+function loadDetailedVerseReadingScreen(TheTitle, TheContent, Verse) {
     var textDisplayArea = document.getElementById('textDisplayArea')
     textDisplayArea.innerText = "";
     textDisplayArea.appendChild(TheContent);
     document.getElementById("chapterTitle").innerText = TheTitle;
     navigateToScreen(3);
+    ScrollToVerse(Verse);
 };
 function loadSearchScreen() {
     navigateToScreen(4);
@@ -72,7 +74,7 @@ function loadVerseContextualInteractionScreen(theVerse) {
 function navigateToScreen(screenId) {
     // Logic to hide all screens and show the selected one
     document.querySelectorAll('.screen').forEach(screen => screen.style.display = 'none');
-    document.getElementById(`screen${screenId}`).style.display = 'block';
+    document.getElementById(`screen${screenId}`).style.display = 'flex';
     //loadScreen
 }
 
@@ -188,17 +190,8 @@ function Load() {
 
     // Implement pinch to zoom functionality
     const textDisplayArea = document.getElementById('textDisplayArea');
-    let fontSize = 18;
-    textDisplayArea.addEventListener('gestureend', (event) => {
-        if (event.scale < 1.0) {
-            // User pinched together
-            fontSize = Math.max(12, fontSize - 1);
-        } else if (event.scale > 1.0) {
-            // User pinched apart
-            fontSize = Math.min(24, fontSize + 1);
-        }
-        textDisplayArea.style.fontSize = `${fontSize}px`;
-    });
+    var fontSize = 18;
+    var oldfontsize=0;
 
     // Night mode toggle
     document.getElementById('nightModeToggle').addEventListener('click', () => {
@@ -206,6 +199,48 @@ function Load() {
         body.classList.toggle('light-theme');
         //body.style.backgroundColor = body.classList.contains('night-mode') ? '#333' : '#fff';
         //textDisplayArea.style.color = body.classList.contains('night-mode') ? '#fff' : '#333';
+    });
+
+    const zoomArea = document.getElementById('textDisplayArea');
+    let initialDistance = null;
+    let versescrolledto=0;
+    function getDistance(touches) {
+        const touch1 = touches[0];
+        const touch2 = touches[1];
+        const dx = touch1.pageX - touch2.pageX;
+        const dy = touch1.pageY - touch2.pageY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    zoomArea.addEventListener('touchstart', function (e) {
+        if (e.touches.length === 2) { // Check if two fingers are used for touch
+            initialDistance = getDistance(e.touches);
+            oldfontsize=fontSize;
+            versescrolledto=getVerseScroll();
+        }
+    });
+
+    zoomArea.addEventListener('touchmove', function (e) {
+        if (e.touches.length === 2 && initialDistance !== null) {
+            e.preventDefault(); // Prevent the default action (scroll / zoom)
+            const currentDistance = getDistance(e.touches);
+            if (currentDistance !== initialDistance) {
+                const zoomFactor = currentDistance / initialDistance;
+                console.log(`Zoom factor: ${zoomFactor}`);
+                fontSize=oldfontsize*zoomFactor;
+                fontSize= Math.min(24, fontSize);
+                fontSize= Math.max(12, fontSize);
+                textDisplayArea.style.fontSize = `${fontSize}px`;
+                //zoomArea.textContent = `Zoom factor: ${zoomFactor.toFixed(2)}`;
+                ScrollToVerse(versescrolledto);
+            }
+        }
+    });
+
+    zoomArea.addEventListener('touchend', function (e) {
+        if (e.touches.length < 2) {
+            initialDistance = null; // Reset initial distance on finger release
+        }
     });
 
     // Font size adjustments
@@ -240,11 +275,6 @@ function Load() {
         const resultsContainer = document.getElementById('searchResults');
         resultsContainer.innerHTML = ''; // Clear previous results
         results.forEach(result => {
-            const resultDiv = document.createElement('div');
-            resultDiv.textContent = result;
-            resultDiv.addEventListener('click', () => {
-                // Open result in Screen 3
-            });
             resultsContainer.appendChild(result.SearchElement());
         });
     }
@@ -373,7 +403,7 @@ function Load() {
     });
 
     document.getElementById('saveChanges').addEventListener('click', () => {
-        theVerse=currentverseviewing;
+        theVerse = currentverseviewing;
         for (let a = 0; a < notes.length; a++) {
             if (notes[a].BibleVerse.Book === theVerse.Book && notes[a].BibleVerse.Chap === theVerse.Chap && notes[a].BibleVerse.Verse === theVerse.Verse) {
                 notes[a] = new BibleNote(currentverseviewing, document.getElementById('noteEditor').value);

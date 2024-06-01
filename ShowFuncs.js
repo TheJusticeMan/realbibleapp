@@ -60,14 +60,7 @@ class BibleRef {   //Referance to a bible passage
 			console.log('Swiped left on', element.textContent);
 			VersesInview.push(new BibleRef(element.dataset.Book, element.dataset.Chap, element.dataset.Verse));
 			element.style.backgroundColor = 'darkblue';
-			element.onclick = (event) => {
-				const textDisplayArea = document.getElementById('textDisplayArea');
-				textDisplayArea.innerText = "";
-				VersesInview.forEach(verse => {
-					textDisplayArea.appendChild(verse.WholeChapElement());
-				});
-				navigateToScreen(3);
-			};
+			element.onclick = LoadVersesInview;
 		});
 		hammer.on('swiperight', () => {
 			console.log('Swiped right on', element.textContent);
@@ -92,12 +85,53 @@ function ShowThisVerseMenu(event) {  //****
 }
 
 function GoToAddThisVerse(event) {
-	VersesOpen.push(GetRefFromHTML(event.currentTarget));
+	var h = GetRefFromHTML(event.currentTarget);
+	VersesOpen.push(h);
+	GoToRef(h);
+}
+var VersesInviewindex = 0;
+function GoToThisVerse(event) {
 	GoToRef(GetRefFromHTML(event.currentTarget));
 }
 
-function GoToThisVerse(event) {
-	GoToRef(GetRefFromHTML(event.currentTarget));
+function GoLeft() {
+	VersesInview[VersesInviewindex].Verse = getVerseScroll();
+	VersesInviewindex = Math.min(VersesInviewindex + 1, VersesInview.length - 1);
+	LoadVersesInview();
+}
+function GoRight() {
+	VersesInview[VersesInviewindex].Verse = getVerseScroll();
+	VersesInviewindex = Math.max(VersesInviewindex - 1, 0);
+	LoadVersesInview();
+}
+
+function getVerseScroll() {
+	var Scroolpoz = window.scrollY + document.getElementById("ReadingHeader").scrollHeight;
+	function checkelement(verseel) {
+		return verseel.offsetTop >= Scroolpoz;
+	}
+	var Varses = Array.from(document.querySelectorAll('.Contents'));
+	return Number((Varses.find(checkelement)).dataset.Verse);
+}
+
+function ScrollToVerse(Verse) {
+	if (Verse != 0) {
+		var scrooltooffset = document.querySelectorAll('.Contents')[Verse].offsetTop;
+		scrooltooffset -= document.getElementById("ReadingHeader").scrollHeight;
+		window.scrollTo(0, scrooltooffset);
+	} else {
+		window.scrollTo(0, 0);
+	}
+}
+
+function LoadVersesInview() {
+	let c = VersesInview[VersesInviewindex];
+	let el = c.WholeChapElement();
+	const hammer = new Hammer(el);
+	hammer.on('swipeleft', GoLeft);
+	hammer.on('swiperight', GoRight);
+	let booktitle = ((VersesInviewindex > 0) ? "<  " : "") + c.Book + " " + c.Chap + ((VersesInviewindex < (VersesInview.length - 1)) ? "  >" : "");
+	loadDetailedVerseReadingScreen(booktitle, el, c.Verse);
 }
 
 function AddThisVerse(event) {
@@ -105,13 +139,13 @@ function AddThisVerse(event) {
 }
 
 function GoToRef(c) {
-	loadDetailedVerseReadingScreen(c.Book + " " + c.Chap, c.WholeChapElement());
+	loadDetailedVerseReadingScreen(c.Book + " " + c.Chap, c.WholeChapElement(), c.Verse);
 }
 
-class BibleNote{
-	constructor(BibleVerse,thenote,BookmarkLBL=""){
-		this.BibleVerse=BibleVerse;
-		this.Note=thenote;
-		this.BookmarkLBL=BookmarkLBL
+class BibleNote {
+	constructor(BibleVerse, thenote, BookmarkLBL = "") {
+		this.BibleVerse = BibleVerse;
+		this.Note = thenote;
+		this.BookmarkLBL = BookmarkLBL;
 	}
 }
