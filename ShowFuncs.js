@@ -33,7 +33,19 @@ class BibleRef {   //Referance to a bible passage
 	}
 	SearchElement() {
 		return this.RefElement("span", "SearchResult", ShowThisVerseMenu, GoToAddThisVerse,
-			`<span class="VerseNum">${this.RefText()}</span> ${this.fixItal()}`);
+			`<span class="VerseNum">${this.RefText()}</span> ${this.fixItalSearch()}`);
+	}
+	BookName() {
+		return this.RefElement("span", "verse-nav-button", null, GoToAddThisVerse,
+			`${this.Book}`);
+	}
+	ChapterNumber() {
+		return this.RefElement("span", "verse-nav-button", null, GoToAddThisVerse,
+			`${this.Chap+1}`);
+	}
+	VerseNumber() {
+		return this.RefElement("span", "verse-nav-button", ShowThisVerseMenu, GoToAddThisVerse,
+			`${this.Verse+1}`);
 	}
 	SingleVerseText() {
 		return `${this.VerseContent.replace(/[\]\[]/g, "")} (${this.RefText()}, KJV)`;
@@ -69,6 +81,14 @@ class BibleRef {   //Referance to a bible passage
 		});
 
 		return element;
+	}
+	fixItalSearch() {
+		if (this.SearchQ) {
+			return ((Bible[this.Book][this.Chap][this.Verse]).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
+				.replace(new RegExp(`(${this.SearchQ})`, "gi"), "<span class=resultmark>$1</span>")
+		} else {
+			return ((Bible[this.Book][this.Chap][this.Verse]).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
+		}
 	}
 	fixItal() {
 		return ((Bible[this.Book][this.Chap][this.Verse]).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))

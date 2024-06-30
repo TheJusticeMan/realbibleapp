@@ -7,21 +7,45 @@
 
     <title>Blank template</title>
 
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Load external CSS styles -->
     <!--<link rel="stylesheet" href="StyleOld.css">
     <link rel="stylesheet" href="styles.css">-->
     <link rel="stylesheet" href="./cleanstyle.css">
     <!--<link rel="stylesheet" href="./styles.css">-->
-    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="./hammer.min.js"></script>
     <script src="./index_files/Bible.js"></script>
-    <script src="ShowFuncs.js"></script>
-    <script src="scripts.js"></script>
+    <script src="./ShowFuncs.js"></script>
+    <script src="./scripts.js"></script>
 
 
 </head>
 
 <body onload="Load()">
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p id="loading-text">Loading... 0%</p>
+    </div>
+    <script>
+        let percent = 0;
+        const loadingText = document.getElementById("loading-text");
+
+        function updateLoadingText() {
+        percent++;
+        if (percent > 100) percent = 999;
+        loadingText.textContent = `Loading... ${percent}%`;
+
+        setTimeout(() => {
+            if (Math.random() < 0.1) {
+            // 10% chance to jump to a random percent
+            percent = Math.floor(Math.random() * 50 + 25);
+            }
+            updateLoadingText();
+        }, 100);
+        }
+
+        updateLoadingText();
+    </script>
     <div class="container">
         <div id="screen1" class="screen">
             <div class="common-header">
@@ -33,7 +57,7 @@
                 <!-- Verse snippets will be dynamically injected here -->
             </ul>
             <div class="common-footer">
-                <button id="addVerseBtn" class="floating-btn">+</button>
+                <span id="addVerseBtn" class="floating-btn verse-nav-button">+</span>
             </div>
         </div>
         <div id="screen2" class="screen">
@@ -42,8 +66,8 @@
                 <h1>Select a Verse</h1>
             </div>
             <div class="selection-area">
-                <button id="oldTestamentBtn" class="section-button">Old Testament</button>
-                <button id="newTestamentBtn" class="section-button">New Testament</button>
+                <span id="oldTestamentBtn" class="verse-nav-button">Old Testament</span>
+                <span id="newTestamentBtn" class="verse-nav-button">New Testament</span>
             </div>
             <div id="booksList" class="dynamic-list"></div>
             <div id="chapterList" class="dynamic-list"></div>
@@ -58,8 +82,6 @@
                 <!-- Bible chapter text will be dynamically loaded here -->
             </div>
             <div class="common-footer">
-                <button id="zoomInButton">A+</button>
-                <button id="zoomOutButton">A-</button>
                 <button id="nightModeToggle">Night Mode</button>
             </div>
         </div>

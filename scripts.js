@@ -1,7 +1,9 @@
 var booksOfTheBible = ["GENESIS", "EXODUS", "LEVITICUS", "NUMBERS", "DEUTERONOMY", "JOSHUA", "JUDGES", "RUTH", "1 SAMUEL", "2 SAMUEL", "1 KINGS", "2 KINGS", "1 CHRONICLES", "2 CHRONICLES", "EZRA", "NEHEMIAH", "ESTHER", "JOB", "PSALMS", "PROVERBS", "ECCLESIASTES", "SONG SOLOMON", "ISAIAH", "JEREMIAH", "LAMENTATIONS", "EZEKIEL", "DANIEL", "HOSEA", "JOEL", "AMOS", "OBADIAH", "JONAH", "MICAH", "NAHUM", "HABAKKUK", "ZEPHANIAH", "HAGGAI", "ZECHARIAH", "MALACHI", "MATTHEW", "MARK", "LUKE", "JOHN", "ACTS", "ROMANS", "1 CORINTHIANS", "2 CORINTHIANS", "GALATIANS", "EPHESIANS", "PHILIPPIANS", "COLOSSIANS", "1 THESSALONIANS", "2 THESSALONIANS", "1 TIMOTHY", "2 TIMOTHY", "TITUS", "PHILEMON", "HEBREWS", "JAMES", "1 PETER", "2 PETER", "1 JOHN", "2 JOHN", "3 JOHN", "JUDE", "REVELATION"];
-var BibleSearch = Bible;
+const BookShortNames = ["Gen", "Exod", "Lev", "Num", "Deut", "Josh", "Judg", "Ruth", "1Sam", "2Sam", "1Kgs", "2Kgs", "1Chr", "2Chr", "Ezra", "Neh", "Esth", "Job", "Ps", "Prov", "Eccl", "Song", "Isa", "Jer", "Lam", "Ezek", "Dan", "Hos", "Joel", "Amos", "Obad", "Jonah", "Mic", "Nah", "Hab", "Zeph", "Hag", "Zech", "Mal", "Matt", "Mark", "Luke", "John", "Acts", "Rom", "1Cor", "2Cor", "Gal", "Eph", "Phil", "Col", "1Thess", "2Thess", "1Tim", "2Tim", "Titus", "Phlm", "Heb", "Jas", "1Pet", "2Pet", "1John", "2John", "3John", "Jude", "Rev"];
+const BibleSearch = {};
 var VersesInview = [];
 var currentverseviewing;
+var BibleCrossReferences = {};
 VersesOpen.push(new BibleRef("GENESIS", 1, 0));
 VersesOpen.push(new BibleRef("JOHN", 3, 15));
 VersesOpen.push(new BibleRef("PSALMS", 23, 1));
@@ -14,7 +16,6 @@ function loadVerseListScreen() {
     VersesInview = [];
     var verseList = document.getElementById('OPverseList');
     verseList.innerText = "";
-
     for (var i = 0; i < VersesOpen.length; i++) {
         verseList.appendChild(VersesOpen[i].VerseSwipeLink());
     }
@@ -27,6 +28,7 @@ function loadVerseSelectionScreen() {
     document.getElementById("booksList").style.display = "none";
     document.getElementById("chapterList").style.display = "none";
     document.getElementById("verseList").style.display = "none";
+    GetRelevantVerses();
     navigateToScreen(2);
 };
 function loadDetailedVerseReadingScreen(TheTitle, TheContent, Verse) {
@@ -67,9 +69,20 @@ function loadVerseContextualInteractionScreen(theVerse) {
     TheVerse.appendChild(referenceSpan);
     document.getElementById("selectedVerseText").innerText = "";
     document.getElementById("selectedVerseText").appendChild(TheVerse);
-
+    try {
+        const refBookShortForm = BookShortNames[booksOfTheBible.indexOf(currentverseviewing.Book)];
+        versesRefs = BibleCrossReferences[refBookShortForm][currentverseviewing.Chap + 1][currentverseviewing.Verse + 1];
+        versesRefs.forEach((ref, index) => {
+            const refBookLongForm = booksOfTheBible[ref[0]];
+            const RefVerse = new BibleRef(refBookLongForm, ref[1], ref[2] - 1);
+            document.getElementById("crossReferencesList").appendChild(RefVerse.SearchElement());
+        });
+    } catch (e) { }
+	window.scrollTo(0, 0);
     navigateToScreen(7);
 };
+
+
 //var loadScreen=
 function navigateToScreen(screenId) {
     // Logic to hide all screens and show the selected one
@@ -78,7 +91,83 @@ function navigateToScreen(screenId) {
     //loadScreen
 }
 
+function GetRelevantVerses() {
+    const versesRefs = [];
+
+    // Collect relevant verse references
+    VersesOpen.forEach(verse => {
+        const refBookShortForm = BookShortNames[booksOfTheBible.indexOf(verse.Book)];
+        const chapterRefs = BibleCrossReferences[refBookShortForm]?.[verse.Chap + 1];
+        const verseRefs = chapterRefs?.[verse.Verse + 1];
+
+        if (verseRefs) {
+            versesRefs.push(...verseRefs);
+        }
+    });
+
+    // Merge duplicate references
+    for (let i = 0; i < versesRefs.length - 1; i++) {
+        for (let j = i + 1; j < versesRefs.length; j++) {
+            if (
+                versesRefs[i][0] === versesRefs[j][0] &&
+                versesRefs[i][1] === versesRefs[j][1] &&
+                versesRefs[i][2] === versesRefs[j][2]
+            ) {
+                versesRefs[i][3] += versesRefs[j][3];
+                versesRefs.splice(j, 1);
+                j--;
+            }
+        }
+    }
+
+    // Sort references by relevance
+    versesRefs.sort((a, b) => a[3] - b[3]);
+
+    const isVerseInVersesOpen = (R) => {
+        return VersesOpen.some(openVerse =>
+            openVerse.Book === R.Book && openVerse.Chap === R.Chap && openVerse.Verse === R.Verse
+        );
+    };
+
+
+    // Convert short book names to long form
+    versesRefs.forEach((ref, index) => {
+        const refBookLongForm = booksOfTheBible[ref[0]];
+        versesRefs[index] = new BibleRef(refBookLongForm, ref[1], ref[2] - 1);
+    });
+
+    // Display the verses
+    const verseList = document.getElementById('booksList');
+    verseList.innerText = "";
+    versesRefs.forEach(ref => {
+        if (!isVerseInVersesOpen(ref))
+            verseList.appendChild(ref.SearchElement());
+    });
+
+    document.getElementById("booksList").style.display = "";
+}
+
 function Load() {
+
+    // Initialize the variable to store the cross-references
+
+    // Function to load the JSON file
+    async function loadBibleCrossReferences() {
+        try {
+            const response = await fetch('./index_files/BibleCRef.json'); // Replace with the correct path to your JSON file
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            BibleCrossReferences = await response.json();
+            console.log('BibleCrossReferences loaded:', BibleCrossReferences);
+            //alert(BibleCrossReferences["Gen"][1][1]);
+        } catch (error) {
+            console.error('Failed to load BibleCRef.json:', error);
+        }
+    }
+
+    // Call the function to load the JSON file
+    loadBibleCrossReferences();
 
     // JavaScript interactions for Screen 1
 
@@ -104,18 +193,18 @@ function Load() {
         booksList.innerHTML = ''; // Clear previous entries
         if (testament == "Old") {
             for (var i = 0; i < 39; i++) {
-                const button = document.createElement('button');
+                const button = document.createElement('span');
                 button.textContent = booksOfTheBible[i];
-                button.className = 'list-item-button';
+                button.className = 'verse-nav-button';
                 button.dataset.Book = booksOfTheBible[i];  //store some values in the HTML DOM for recall by event handlers
                 button.onclick = loadChapters;
                 booksList.appendChild(button);
             }
         } else {
             for (var i = 39; i < 66; i++) {
-                const button = document.createElement('button');
+                const button = document.createElement('span');
                 button.textContent = booksOfTheBible[i];
-                button.className = 'list-item-button';
+                button.className = 'verse-nav-button';
                 button.dataset.Book = booksOfTheBible[i];  //store some values in the HTML DOM for recall by event handlers
                 button.onclick = loadChapters;
                 booksList.appendChild(button);
@@ -135,9 +224,9 @@ function Load() {
         var Book = event.currentTarget.dataset.Book;
         Bible[Book].forEach((_, index) => {
             if (index > 0) {  // Skip the book description
-                const button = document.createElement('button');
-                button.textContent = `Chapter ${index}`;
-                button.className = 'list-item-button';
+                const button = document.createElement('span');
+                button.textContent = `${index}`;
+                button.className = 'verse-nav-button';
                 button.dataset.Book = Book;  //store some values in the HTML DOM for recall by event handlers
                 button.dataset.Chap = index;
                 button.onclick = loadVerses;
@@ -158,17 +247,19 @@ function Load() {
         var Book = event.currentTarget.dataset.Book;
         var Chap = event.currentTarget.dataset.Chap * 1;
         Bible[Book][Chap].forEach((Verse, index) => {
-            const button = document.createElement('button');
-            button.textContent = `Verse ${index + 1}`;
-            button.className = 'list-item-button';
-            button.dataset.Book = Book;  //store some values in the HTML DOM for recall by event handlers
-            button.dataset.Chap = Chap;
-            button.dataset.Verse = index;
-            button.onclick = (e) => {
-                AddThisVerse(e);
-                loadVerseListScreen();
-            };
-            verseList.appendChild(button);
+            const verselink = new BibleRef(Book, Chap, index);
+            verseList.appendChild(verselink.VerseNumber());
+            // const button = document.createElement('button');
+            // button.textContent = `Verse ${index + 1}`;
+            // button.className = 'list-item-button';
+            // button.dataset.Book = Book;  //store some values in the HTML DOM for recall by event handlers
+            // button.dataset.Chap = Chap;
+            // button.dataset.Verse = index;
+            // button.onclick = (e) => {
+            //     AddThisVerse(e);
+            //     loadVerseListScreen();
+            // };
+            // verseList.appendChild(button);
         });
         //alert([Book,Chap]);
         document.getElementById("oldTestamentBtn").style.display = "none";
@@ -188,52 +279,54 @@ function Load() {
     // JavaScript interactions for Screen 3
     document.getElementById('backButton2').onclick = loadVerseListScreen;
 
-    // Implement pinch to zoom functionality
-    const textDisplayArea = document.getElementById('textDisplayArea');
-    var fontSize = 18;
-    var oldfontsize=0;
 
     // Night mode toggle
     document.getElementById('nightModeToggle').addEventListener('click', () => {
         const body = document.body;
         body.classList.toggle('light-theme');
-        //body.style.backgroundColor = body.classList.contains('night-mode') ? '#333' : '#fff';
-        //textDisplayArea.style.color = body.classList.contains('night-mode') ? '#fff' : '#333';
     });
 
-    const zoomArea = document.getElementById('textDisplayArea');
+    // Implement pinch to zoom functionality
+    let fontSize = 18;
+    let oldFontSize = 0;
     let initialDistance = null;
-    let versescrolledto=0;
+    let verseScrolledTo = 0;
+
+    const zoomArea = document.getElementById('textDisplayArea');
+
     function getDistance(touches) {
-        const touch1 = touches[0];
-        const touch2 = touches[1];
+        const [touch1, touch2] = touches;
         const dx = touch1.pageX - touch2.pageX;
         const dy = touch1.pageY - touch2.pageY;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    zoomArea.addEventListener('touchstart', function (e) {
+    zoomArea.addEventListener('touchstart', (e) => {
         if (e.touches.length === 2) { // Check if two fingers are used for touch
             initialDistance = getDistance(e.touches);
-            oldfontsize=fontSize;
-            versescrolledto=getVerseScroll();
+            oldFontSize = fontSize;
+            verseScrolledTo = getVerseScroll();
         }
     });
 
-    zoomArea.addEventListener('touchmove', function (e) {
+    zoomArea.addEventListener('touchmove', (e) => {
         if (e.touches.length === 2 && initialDistance !== null) {
             e.preventDefault(); // Prevent the default action (scroll / zoom)
             const currentDistance = getDistance(e.touches);
             if (currentDistance !== initialDistance) {
                 const zoomFactor = currentDistance / initialDistance;
                 console.log(`Zoom factor: ${zoomFactor}`);
-                fontSize=oldfontsize*zoomFactor;
-                fontSize= Math.min(24, fontSize);
-                fontSize= Math.max(12, fontSize);
-                textDisplayArea.style.fontSize = `${fontSize}px`;
-                //zoomArea.textContent = `Zoom factor: ${zoomFactor.toFixed(2)}`;
-                ScrollToVerse(versescrolledto);
+                fontSize = oldFontSize * zoomFactor;
+                fontSize = Math.min(24, Math.max(12, fontSize)); // Clamp font size between 12 and 24
+                zoomArea.style.fontSize = `${fontSize}px`;
+                ScrollToVerse(verseScrolledTo);
             }
+        }
+    });
+
+    zoomArea.addEventListener('touchend', () => {
+        if (e.touches.length < 2) {
+            initialDistance = null; // Reset initial distance on finger release
         }
     });
 
@@ -241,16 +334,6 @@ function Load() {
         if (e.touches.length < 2) {
             initialDistance = null; // Reset initial distance on finger release
         }
-    });
-
-    // Font size adjustments
-    document.getElementById('zoomInButton').addEventListener('click', () => {
-        fontSize = Math.min(24, fontSize + 1);
-        textDisplayArea.style.fontSize = `${fontSize}px`;
-    });
-    document.getElementById('zoomOutButton').addEventListener('click', () => {
-        fontSize = Math.max(12, fontSize - 1);
-        textDisplayArea.style.fontSize = `${fontSize}px`;
     });
 
     // JavaScript interactions for Screen 4
@@ -279,25 +362,46 @@ function Load() {
         });
     }
 
+
+    function preprocessBible() {
+        for (const book in Bible) {
+            BibleSearch[book] = [];
+            const chapters = Bible[book];
+            for (let C = 1; C < chapters.length; C++) {
+                BibleSearch[book][C] = [];
+                const verses = chapters[C];
+                for (let V = 0; V < verses.length; V++) {
+                    BibleSearch[book][C][V] = verses[V].toLowerCase();
+                }
+            }
+        }
+        return BibleSearch;
+    }
+    preprocessBible();
+
+
+
     function simulateSearch(query) {
-        // Placeholder for search logic
-        var results = [];
-        for (Book in BibleSearch) {     //Books
-            for (var C = 1; C < BibleSearch[Book].length; C++) {     //Chaps
-                for (var V = 0; V < BibleSearch[Book][C].length; V++) {     //Verse
-                    //if (this.SearchForCpt.test(BibleSearch[Book][C][V].toString()) > 0) {
-                    if (BibleSearch[Book][C][V].toLowerCase().includes(query.toLowerCase())) {
-                        results.push(new BibleRef(Book, C, V));
-                        //this.FoundVerses.push(new BibleRef(Book, C, V));
-                        //this.FoundVerses[this.FoundVerses.length - 1].index = this.SearchForCpt.test(BibleSearch[Book][C][V].toString());
-                        //this.NoMatches++;
-                        if (results.length > 19) {
-                            return results;
+        const MAX_RESULTS = 20; // Define the maximum number of results
+        const results = [];
+        const lowerCaseQuery = query.toLowerCase(); // Convert query to lowercase once
+
+        outerLoop: for (const B in BibleSearch) { // Iterate through each book
+            const chapters = BibleSearch[B];
+            for (let C = 1; C < chapters.length; C++) { // Iterate through each chapter
+                const verses = chapters[C];
+                for (let V = 0; V < verses.length; V++) { // Iterate through each verse
+                    if (verses[V].includes(lowerCaseQuery)) { // Check if the verse includes the query
+                        results.push(new BibleRef(B, C, V)); // Add the result
+                        results[results.length - 1].SearchQ = lowerCaseQuery;
+                        if (results.length >= MAX_RESULTS) { // Check if max results are reached
+                            break outerLoop; // Break out of all loops
                         }
                     }
                 }
             }
         }
+
         return results;
         return ['Genesis 1:1 In the beginning...', 'John 3:16 For God so loved the world...'].filter(r => r.toLowerCase().includes(query.toLowerCase()));
     }
@@ -437,4 +541,5 @@ function Load() {
         });
     }
     loadVerseListScreen();
+    document.getElementById("loadingScreen").style.display="none";
 }
