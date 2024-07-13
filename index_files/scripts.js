@@ -337,30 +337,73 @@ function Load() {
     });
 
     // JavaScript interactions for Screen 4
+    let bibleSearchInstance = new BibleSearchClass("", "Phrase", false, false, "i");
+    var query = "";
+    let insearchstart=false;
+
+    // JavaScript interactions for Screen 4
     document.getElementById('searchInput').addEventListener('input', (event) => {
-        const query = event.target.value;
+        query = event.target.value;
         updateSearchResults(query);
     });
 
     document.getElementById('clearSearchButton').addEventListener('click', () => {
         document.getElementById('searchInput').value = '';
         document.getElementById('searchResults').innerHTML = '';
+        bibleSearchInstance.reset(); // Reset the search instance
+        query = "";
     });
 
     // Implement voice search functionality (if applicable)
     document.getElementById('voiceSearchButton').addEventListener('click', () => {
         // Trigger speech to text
+        // After getting the voice input, call updateSearchResults with the input text
+        const voiceInput = "voice detected text"; // Replace with actual voice input
+        document.getElementById('searchInput').value = voiceInput;
+        updateSearchResults(voiceInput);
     });
 
     function updateSearchResults(query) {
-        // Simulate fetching search results based on the query
-        const results = simulateSearch(query); // This function should return search results
+        insearchstart=true;
+        // Update the search instance with the new query
+        bibleSearchInstance = new BibleSearchClass(query, "Phrase", false, false, "i");
+        //bibleSearchInstance.reset(); // Ensure a fresh search each time
+        //bibleSearchInstance.searchFor = query;
+        //bibleSearchInstance.setupSearch();
+
+        // Perform the search
+        const results = bibleSearchInstance.search(query);
+
         const resultsContainer = document.getElementById('searchResults');
         resultsContainer.innerHTML = ''; // Clear previous results
         results.forEach(result => {
             resultsContainer.appendChild(result.SearchElement());
         });
     }
+
+    function loadMoreResults() {
+        if (query) {
+            if (bibleSearchInstance.MAX_RESULTS == 20) {
+                bibleSearchInstance.MAX_RESULTS = 10000;
+                // Fetch the next set of results
+                const results = bibleSearchInstance.search(query);
+
+                const resultsContainer = document.getElementById('searchResults');
+                resultsContainer.innerHTML = ''; // Clear previous results
+                results.forEach(result => {
+                    resultsContainer.appendChild(result.SearchElement());
+                });
+            }
+        }
+    }
+
+    window.addEventListener('scroll', () => {
+        //if (insearchstart) {
+            // User has scrolled to the bottom
+            loadMoreResults();
+            insearchstart=false;
+        //}
+    });
 
 
     function preprocessBible() {
@@ -403,7 +446,6 @@ function Load() {
         }
 
         return results;
-        return ['Genesis 1:1 In the beginning...', 'John 3:16 For God so loved the world...'].filter(r => r.toLowerCase().includes(query.toLowerCase()));
     }
 
 

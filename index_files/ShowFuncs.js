@@ -84,14 +84,16 @@ class BibleRef {   //Referance to a bible passage
 	}
 	fixItalSearch() {
 		if (this.SearchQ) {
-			return ((Bible[this.Book][this.Chap][this.Verse]).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
-				.replace(new RegExp(`(${this.SearchQ})`, "gi"), "<span class=resultmark>$1</span>")
+			//return ((this.VerseContent).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
+			//	.replace(new RegExp(`(${this.SearchQ})`, "gi"), "<span class=resultmark>$1</span>")
+			return ((highlightMatches(this.VerseContent,this.SearchQ)).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
+				
 		} else {
-			return ((Bible[this.Book][this.Chap][this.Verse]).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
+			return ((this.VerseContent).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
 		}
 	}
 	fixItal() {
-		return ((Bible[this.Book][this.Chap][this.Verse]).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
+		return ((this.VerseContent).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
 	}
 };
 
