@@ -36,11 +36,11 @@ class BibleRef {   //Referance to a bible passage
 			`<span class="VerseNum">${this.RefText()}</span> ${this.fixItalSearch()}`);
 	}
 	BookName() {
-		return this.RefElement("span", "verse-nav-button", null, GoToAddThisVerse,
+		return this.RefElement("span", "verse-nav-button", null, loadChapters,
 			`${this.Book}`);
 	}
 	ChapterNumber() {
-		return this.RefElement("span", "verse-nav-button", null, GoToAddThisVerse,
+		return this.RefElement("span", "verse-nav-button", null, loadVerses,
 			`${this.Chap+1}`);
 	}
 	VerseNumber() {

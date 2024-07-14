@@ -1,16 +1,16 @@
-var booksOfTheBible = ["GENESIS", "EXODUS", "LEVITICUS", "NUMBERS", "DEUTERONOMY", "JOSHUA", "JUDGES", "RUTH", "1 SAMUEL", "2 SAMUEL", "1 KINGS", "2 KINGS", "1 CHRONICLES", "2 CHRONICLES", "EZRA", "NEHEMIAH", "ESTHER", "JOB", "PSALMS", "PROVERBS", "ECCLESIASTES", "SONG SOLOMON", "ISAIAH", "JEREMIAH", "LAMENTATIONS", "EZEKIEL", "DANIEL", "HOSEA", "JOEL", "AMOS", "OBADIAH", "JONAH", "MICAH", "NAHUM", "HABAKKUK", "ZEPHANIAH", "HAGGAI", "ZECHARIAH", "MALACHI", "MATTHEW", "MARK", "LUKE", "JOHN", "ACTS", "ROMANS", "1 CORINTHIANS", "2 CORINTHIANS", "GALATIANS", "EPHESIANS", "PHILIPPIANS", "COLOSSIANS", "1 THESSALONIANS", "2 THESSALONIANS", "1 TIMOTHY", "2 TIMOTHY", "TITUS", "PHILEMON", "HEBREWS", "JAMES", "1 PETER", "2 PETER", "1 JOHN", "2 JOHN", "3 JOHN", "JUDE", "REVELATION"];
+const booksOfTheBible = ["GENESIS", "EXODUS", "LEVITICUS", "NUMBERS", "DEUTERONOMY", "JOSHUA", "JUDGES", "RUTH", "1 SAMUEL", "2 SAMUEL", "1 KINGS", "2 KINGS", "1 CHRONICLES", "2 CHRONICLES", "EZRA", "NEHEMIAH", "ESTHER", "JOB", "PSALMS", "PROVERBS", "ECCLESIASTES", "SONG SOLOMON", "ISAIAH", "JEREMIAH", "LAMENTATIONS", "EZEKIEL", "DANIEL", "HOSEA", "JOEL", "AMOS", "OBADIAH", "JONAH", "MICAH", "NAHUM", "HABAKKUK", "ZEPHANIAH", "HAGGAI", "ZECHARIAH", "MALACHI", "MATTHEW", "MARK", "LUKE", "JOHN", "ACTS", "ROMANS", "1 CORINTHIANS", "2 CORINTHIANS", "GALATIANS", "EPHESIANS", "PHILIPPIANS", "COLOSSIANS", "1 THESSALONIANS", "2 THESSALONIANS", "1 TIMOTHY", "2 TIMOTHY", "TITUS", "PHILEMON", "HEBREWS", "JAMES", "1 PETER", "2 PETER", "1 JOHN", "2 JOHN", "3 JOHN", "JUDE", "REVELATION"];
 const BookShortNames = ["Gen", "Exod", "Lev", "Num", "Deut", "Josh", "Judg", "Ruth", "1Sam", "2Sam", "1Kgs", "2Kgs", "1Chr", "2Chr", "Ezra", "Neh", "Esth", "Job", "Ps", "Prov", "Eccl", "Song", "Isa", "Jer", "Lam", "Ezek", "Dan", "Hos", "Joel", "Amos", "Obad", "Jonah", "Mic", "Nah", "Hab", "Zeph", "Hag", "Zech", "Mal", "Matt", "Mark", "Luke", "John", "Acts", "Rom", "1Cor", "2Cor", "Gal", "Eph", "Phil", "Col", "1Thess", "2Thess", "1Tim", "2Tim", "Titus", "Phlm", "Heb", "Jas", "1Pet", "2Pet", "1John", "2John", "3John", "Jude", "Rev"];
-const BibleSearch = {};
 var VersesInview = [];
 var currentverseviewing;
-var BibleCrossReferences = {};
+const BibleSearch = {};
+let BibleCrossReferences = {};
+var notes = [];
 VersesOpen.push(new BibleRef("GENESIS", 1, 0));
 VersesOpen.push(new BibleRef("JOHN", 3, 15));
 VersesOpen.push(new BibleRef("PSALMS", 23, 1));
 VersesOpen.push(new BibleRef("1 CORINTHIANS", 13, 3));
 VersesOpen.push(new BibleRef("PHILIPPIANS", 4, 12));
 VersesOpen.push(new BibleRef("ROMANS", 8, 27));
-var notes = [];
 function loadVerseListScreen() {
     VersesInviewindex = 0;
     VersesInview = [];
@@ -149,24 +149,8 @@ function GetRelevantVerses() {
 
 function Load() {
 
-    // Initialize the variable to store the cross-references
-
-    // Function to load the JSON file
-    async function loadBibleCrossReferences() {
-        try {
-            const response = await fetch('./index_files/BibleCRef.json'); // Replace with the correct path to your JSON file
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            BibleCrossReferences = await response.json();
-            console.log('BibleCrossReferences loaded:', BibleCrossReferences);
-            //alert(BibleCrossReferences["Gen"][1][1]);
-        } catch (error) {
-            console.error('Failed to load BibleCRef.json:', error);
-        }
-    }
-
     // Call the function to load the JSON file
+    
     loadBibleCrossReferences();
 
     // JavaScript interactions for Screen 1
@@ -249,17 +233,6 @@ function Load() {
         Bible[Book][Chap].forEach((Verse, index) => {
             const verselink = new BibleRef(Book, Chap, index);
             verseList.appendChild(verselink.VerseNumber());
-            // const button = document.createElement('button');
-            // button.textContent = `Verse ${index + 1}`;
-            // button.className = 'list-item-button';
-            // button.dataset.Book = Book;  //store some values in the HTML DOM for recall by event handlers
-            // button.dataset.Chap = Chap;
-            // button.dataset.Verse = index;
-            // button.onclick = (e) => {
-            //     AddThisVerse(e);
-            //     loadVerseListScreen();
-            // };
-            // verseList.appendChild(button);
         });
         //alert([Book,Chap]);
         document.getElementById("oldTestamentBtn").style.display = "none";

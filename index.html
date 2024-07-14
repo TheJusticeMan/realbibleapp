@@ -11,10 +11,14 @@
     <!-- Load external CSS styles -->
     <link rel="stylesheet" href="./index_files/cleanstyle.css">
     <script src="./index_files/hammer.min.js"></script>
+    <script src="./index_files/WebSetup.js"></script>
     <script src="./index_files/Bible.js"></script>
     <script src="./index_files/Search.js"></script>
     <script src="./index_files/ShowFuncs.js"></script>
-    <script src="./index_files/scripts.js"></script>
+    <script src="./index_files/functions.js"></script>
+    <script src="./index_files/domHandlers.js"></script>
+    <script src="./index_files/main.js"></script>
+
 
 
 </head>
@@ -47,9 +51,9 @@
     <div class="container">
         <div id="screen1" class="screen">
             <div class="common-header">
-                <button id="searchBtn"><img src="search-icon.png" width="64" alt="Search"></button>
-                <button id="historyBtn"><img src="history-icon.png" width="64" alt="History"></button>
-                <button id="bookmarksBtn"><img src="bookmark-icon.png" width="64" alt="Bookmarks"></button>
+                <button id="searchBtn">Search</button>
+                <button id="historyBtn">History</button>
+                <button id="bookmarksBtn">Bookmarks</button>
             </div>
             <ul id="OPverseList" class="verse-list">
                 <!-- Verse snippets will be dynamically injected here -->
@@ -86,8 +90,8 @@
         <div id="screen4" class="screen">
             <div class="common-header">
                 <input type="text" id="searchInput" placeholder="Search verses..." aria-label="Search verses">
-                <button id="voiceSearchButton" class="icon-button"><img src="mic-icon.png" width="64" alt="Voice Search"></button>
-                <button id="clearSearchButton" class="icon-button"><img src="clear-icon.png" width="64" alt="Clear Search"></button>
+                <button id="voiceSearchButton" class="icon-button">Voice Search</button>
+                <button id="clearSearchButton" class="icon-button">Clear Search</button>
             </div>
             <div id="searchResults" class="search-results">
                 <!-- Search results will be dynamically loaded here -->
