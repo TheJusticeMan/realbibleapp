@@ -1,5 +1,3 @@
-var BibleCrossReferences = {};
-var Bible = {};
 async function loadBibleCrossReferences() {
     try {
         const jsonString = await new Promise((resolve, reject) => {
@@ -20,7 +18,7 @@ async function loadBibleCrossReferences() {
 
 
 
-async function loadBibleCrossReferences() {
+async function loadBible() {
     try {
         const jsonString = await new Promise((resolve, reject) => {
             if (typeof Android !== 'undefined' && Android.loadJSONFromAsset) {

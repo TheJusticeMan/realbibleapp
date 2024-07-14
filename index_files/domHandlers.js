@@ -13,10 +13,12 @@ function setupEventListeners() {
 
     // Screen 3
     document.getElementById('backButton2').onclick = loadVerseListScreen;
-    document.getElementById('nightModeToggle').addEventListener('click', toggleNightMode);
     document.getElementById('textDisplayArea').addEventListener('touchstart', handleTouchStart);
     document.getElementById('textDisplayArea').addEventListener('touchmove', handleTouchMove);
     document.getElementById('textDisplayArea').addEventListener('touchend', handleTouchEnd);
+    document.getElementById('theme-selector').addEventListener('change', function () {
+        document.body.className = this.value;
+    });
 
     // Screen 4
     document.getElementById('searchInput').addEventListener('input', (event) => updateSearchResults(event.target.value));
