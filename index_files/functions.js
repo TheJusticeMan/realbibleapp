@@ -41,6 +41,8 @@ function loadSearchScreen() {
 };
 
 function loadHistoryScreen() {
+    showHistory();
+    
     navigateToScreen(5);
 };
 
@@ -287,34 +289,6 @@ function preprocessBible() {
         }
     }
     return BibleSearch;
-}
-
-function loadHistory() {
-    const history = getHistory();
-    const timeline = document.getElementById('timeline');
-    const list = document.getElementById('history-list');
-    if (history.length === 0) {
-        document.querySelector('.no-history-message').style.display = 'block';
-    } else {
-        history.forEach(entry => {
-            const marker = document.createElement('div');
-            marker.textContent = entry.date;
-            timeline.appendChild(marker);
-            const listItem = document.createElement('div');
-            listItem.textContent = `${entry.date} - ${entry.verse}`;
-            listItem.addEventListener('click', () => {
-                // Open full passage in Screen 3
-            });
-            list.appendChild(listItem);
-        });
-    }
-}
-
-function getHistory() {
-    return [
-        { date: '2023-05-01', verse: 'John 3:16', snippet: 'For God so loved the world...' },
-        { date: '2023-05-02', verse: 'Genesis 1:1', snippet: 'In the beginning God created the heaven and the earth...' }
-    ];
 }
 
 function loadBookmarks() {

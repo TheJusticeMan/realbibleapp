@@ -19,6 +19,14 @@ class BibleRef {   //Referance to a bible passage
 		element.innerHTML = Content;
 		return element;
 	}
+
+	HistoryElement(lastSeen) {
+		const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+		const formattedTime = lastSeen.toLocaleDateString('en-US', options);
+		return this.RefElement("span", "SearchResult", ShowThisVerseMenu, GoToAddThisVerse,
+			`<span class="VerseNum">${this.RefText()}</span> ${this.fixItal()} <span class="last-seen">(${formattedTime})</span>`);
+	}
+
 	WholeChapElement() {
 		var chapterElement = this.RefElement("div", "", null, null, "");
 		for (var i = 0; i < Bible[this.Book][this.Chap].length; i++) {
@@ -41,11 +49,11 @@ class BibleRef {   //Referance to a bible passage
 	}
 	ChapterNumber() {
 		return this.RefElement("span", "verse-nav-button", null, loadVerses,
-			`${this.Chap+1}`);
+			`${this.Chap + 1}`);
 	}
 	VerseNumber() {
 		return this.RefElement("span", "verse-nav-button", ShowThisVerseMenu, GoToAddThisVerse,
-			`${this.Verse+1}`);
+			`${this.Verse + 1}`);
 	}
 	SingleVerseText() {
 		return `${this.VerseContent.replace(/[\]\[]/g, "")} (${this.RefText()}, KJV)`;
@@ -86,8 +94,8 @@ class BibleRef {   //Referance to a bible passage
 		if (this.SearchQ) {
 			//return ((this.VerseContent).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
 			//	.replace(new RegExp(`(${this.SearchQ})`, "gi"), "<span class=resultmark>$1</span>")
-			return ((highlightMatches(this.VerseContent,this.SearchQ)).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
-				
+			return ((highlightMatches(this.VerseContent, this.SearchQ)).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
+
 		} else {
 			return ((this.VerseContent).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
 		}
@@ -108,9 +116,11 @@ function ShowThisVerseMenu(event) {  //****
 
 function GoToAddThisVerse(event) {
 	var h = GetRefFromHTML(event.currentTarget);
+	NewHistory(h);
 	VersesOpen.push(h);
 	GoToRef(h);
 }
+
 var VersesInviewindex = 0;
 function GoToThisVerse(event) {
 	GoToRef(GetRefFromHTML(event.currentTarget));
@@ -156,11 +166,8 @@ function LoadVersesInview() {
 	loadDetailedVerseReadingScreen(booktitle, el, c.Verse);
 }
 
-function AddThisVerse(event) {
-	VersesOpen.push(GetRefFromHTML(event.currentTarget));
-}
-
 function GoToRef(c) {
+	UpdateHistoryTime(c);
 	loadDetailedVerseReadingScreen(c.Book + " " + c.Chap, c.WholeChapElement(), c.Verse);
 }
 

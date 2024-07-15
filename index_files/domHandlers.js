@@ -23,11 +23,6 @@ function setupEventListeners() {
     // Screen 4
     document.getElementById('searchInput').addEventListener('input', (event) => updateSearchResults(event.target.value));
     document.getElementById('clearSearchButton').addEventListener('click', () => updateSearchResults(''));
-    document.getElementById('voiceSearchButton').addEventListener('click', () => {
-        const voiceInput = "voice detected text"; // Replace with actual voice input
-        document.getElementById('searchInput').value = voiceInput;
-        updateSearchResults(voiceInput);
-    });
 
     window.addEventListener('scroll', loadMoreResults);
 

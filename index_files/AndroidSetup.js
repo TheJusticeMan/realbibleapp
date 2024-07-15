@@ -35,3 +35,23 @@ async function loadBible() {
         alert('Failed to load BibleCRef.json:' + error);
     }
 }
+
+function saveHistoryAndBookmarksToAndroid() {
+    var historyAndBookmarks = {
+        history: getHistoryData(),  // Function to get history data
+        bookmarks: getBookmarksData()  // Function to get bookmarks data
+    };
+    Android.saveData(JSON.stringify(historyAndBookmarks));
+}
+
+// Example functions to get history and bookmarks data
+function getHistoryData() {
+    // Your logic to get history data
+    return History;
+}
+
+function getBookmarksData() {
+    // Your logic to get bookmarks data
+    return [];
+}
+

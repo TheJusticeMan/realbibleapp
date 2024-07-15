@@ -17,6 +17,7 @@
     <script src="./index_files/ShowFuncs.js"></script>
     <script src="./index_files/functions.js"></script>
     <script src="./index_files/domHandlers.js"></script>
+    <script src="./index_files/History.js"></script>
     <script src="./index_files/main.js"></script>
 
 
@@ -100,7 +101,6 @@
         <div id="screen4" class="screen">
             <div class="common-header">
                 <input type="text" id="searchInput" placeholder="Search verses..." aria-label="Search verses">
-                <button id="voiceSearchButton" class="icon-button">Voice Search</button>
                 <button id="clearSearchButton" class="icon-button">Clear Search</button>
             </div>
             <div id="searchResults" class="search-results">
@@ -118,7 +118,7 @@
             <div class="timeline">
                 <!-- Markers will be dynamically generated based on history data -->
             </div>
-            <div class="history-list">
+            <div id="history-list" class="history-list">
                 <!-- History entries will be dynamically loaded here -->
             </div>
             <div class="no-history-message" style="display:none;">
