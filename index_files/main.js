@@ -3,8 +3,12 @@ let BibleCrossReferences = {};
 var notes = [];
 
 function Load() {
+    loadHistoryAndBookmarks();
     loadBibleCrossReferences();
     setupEventListeners();
+    populateTagFilter();
+    loadBookmarks();
+
     VersesOpen.push(new BibleRef("GENESIS", 1, 0));
     VersesOpen.push(new BibleRef("JOHN", 3, 15));
     VersesOpen.push(new BibleRef("PSALMS", 23, 1));

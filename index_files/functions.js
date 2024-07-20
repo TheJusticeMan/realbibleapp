@@ -42,11 +42,13 @@ function loadSearchScreen() {
 
 function loadHistoryScreen() {
     showHistory();
-    
+
     navigateToScreen(5);
 };
 
 function loadBookmarksScreen() {
+    populateTagFilter();
+    loadBookmarks();
     navigateToScreen(6);
 };
 
@@ -69,6 +71,7 @@ function loadVerseContextualInteractionScreen(theVerse) {
 
     // Append the reference span to the TheVerse div
     TheVerse.appendChild(referenceSpan);
+    document.getElementById("crossReferencesList").innerHTML = "";
     document.getElementById("selectedVerseText").innerText = "";
     document.getElementById("selectedVerseText").appendChild(TheVerse);
     try {
@@ -81,6 +84,7 @@ function loadVerseContextualInteractionScreen(theVerse) {
         });
     } catch (e) { }
     window.scrollTo(0, 0);
+    populateTagList();
     navigateToScreen(7);
 };
 
@@ -246,7 +250,7 @@ let insearchstart = false;
 
 function updateSearchResults(query2) {
     insearchstart = false;
-	window.scrollTo(0, 0);
+    window.scrollTo(0, 0);
     const resultsContainer = document.getElementById('searchResults');
     if (query2 == "") {
         document.getElementById('searchInput').value = '';
@@ -291,30 +295,89 @@ function preprocessBible() {
     return BibleSearch;
 }
 
-function loadBookmarks() {
-    const bookmarks = getBookmarks();
-    const list = document.getElementById('bookmarksList');
-    if (bookmarks.length === 0) {
-        document.querySelector('.empty-state').style.display = 'block';
-    } else {
-        bookmarks.forEach(bookmark => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${bookmark.verse} - ${bookmark.snippet}`;
-            listItem.style.borderColor = bookmark.color;
-            listItem.addEventListener('click', () => {
-                // Open full passage in Screen 3
-                loadDetailedVerseReadingScreen();
-            });
-            list.appendChild(listItem);
-        });
-    }
+//const tagManager = new TagManager();
+
+function populateTagFilter() {
+    const tagFilter = document.getElementById('tagFilter');
+    tagFilter.innerHTML = '<option value="all">All Tags</option>';
+    tagManager.listAllTags().forEach(tag => {
+        const option = document.createElement('option');
+        option.value = tag;
+        option.textContent = tag;
+        tagFilter.appendChild(option);
+    });
 }
 
-function getBookmarks() {
-    return [
-        { verse: 'Psalm 23:1', snippet: 'The Lord is my shepherd...', color: 'green' },
-        { verse: 'John 3:16', snippet: 'For God so loved the world...', color: 'blue' }
-    ];
+function loadBookmarks(tag = 'all') {
+    const bookmarksList = document.getElementById('bookmarksList');
+    bookmarksList.innerHTML = '';
+    let verses = tag === 'all' ? tagManager.getAllVerses() : tagManager.getVersesByTag(tag);
+
+    if (verses.length === 0) {
+        document.querySelector('.empty-state').style.display = 'block';
+        return;
+    }
+
+    document.querySelector('.empty-state').style.display = 'none';
+    verses.forEach(verse => {
+        //const listItem = document.createElement('li');
+        //listItem.className = 'bookmark-item';
+        //listItem.textContent = `${verse.Book} ${verse.Chap}:${verse.Verse}`;
+        bookmarksList.appendChild(verse.SearchElement());
+    });
+}
+
+var existingTags = [];
+
+function populateTagList() {
+    const tagList = document.getElementById('tagList');
+    tagList.innerHTML = ''; // Clear existing tags
+
+    // Filter existing tags for the current verse
+    existingTags = tagManager.listAllTags().filter(tag =>
+        tagManager.getVersesByTag(tag).some(ref =>
+            ref.Book === currentverseviewing.Book && ref.Chap === currentverseviewing.Chap && ref.Verse === currentverseviewing.Verse
+        )
+    );
+
+    tagManager.listAllTags().forEach(tag => {
+        const tagItem = document.createElement('div');
+        tagItem.className = 'tag-item';
+        tagItem.textContent = tag;
+        if (existingTags.includes(tag)) {
+            tagItem.classList.add('selected'); // Highlight already selected tags
+        }
+        tagItem.dataset.tag = tag;
+        tagItem.addEventListener('click', function (event) {
+            const tag = event.currentTarget.dataset.tag;
+            const tagItem = event.currentTarget;
+            if (existingTags.includes(tag)) {
+                tagManager.removeTag(currentverseviewing, tag);
+                tagItem.classList.remove('selected');
+                existingTags = existingTags.filter(t => t !== tag); // Update existingTags
+                console.log(`Tag removed: ${tag}`);
+            } else {
+                tagManager.addTag(currentverseviewing, tag);
+                tagItem.classList.add('selected');
+                existingTags.push(tag); // Update existingTags
+                console.log(`Verse bookmarked with tag: ${tag}`);
+            }
+        });
+        tagList.appendChild(tagItem);
+    });
+
+    // Add the + item for adding new tags
+    const addTagItem = document.createElement('div');
+    addTagItem.className = 'tag-item add-tag';
+    addTagItem.textContent = '+';
+    addTagItem.addEventListener('click', function () {
+        const newTag = prompt("Enter new tag:");
+        if (newTag) {
+            tagManager.addTag(currentverseviewing, newTag);
+            populateTagList(); // Refresh the tag list
+        }
+    });
+    tagList.appendChild(addTagItem);
 }
 
 function addNewLabel() {

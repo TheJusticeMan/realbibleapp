@@ -1,4 +1,4 @@
-const History = [];
+let History = [];
 
 function NewHistory(h) {
     const now = new Date();

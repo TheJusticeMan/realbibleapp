@@ -31,11 +31,22 @@ function setupEventListeners() {
 
     // Screen 6
     document.getElementById('backButton4').onclick = loadVerseListScreen;
-    document.getElementById('categoryFilter').addEventListener('change', (event) => filterBookmarksByCategory(event.target.value));
-    document.getElementById('findVerseButton').onclick = loadDetailedVerseReadingScreen;
+    document.getElementById('tagFilter').addEventListener('change', function () {
+        loadBookmarks(this.value);
+    });
+    //document.getElementById('categoryFilter').addEventListener('change', (event) => filterBookmarksByCategory(event.target.value));
+    //document.getElementById('findVerseButton').onclick = loadDetailedVerseReadingScreen;
 
     // Screen 7
-    document.getElementById('addNewLabel').addEventListener('click', addNewLabel);
+    //document.getElementById('addNewLabel').addEventListener('click', addNewLabel);
+    document.getElementById('addBookmarkButton').addEventListener('click', function() {
+        const tagList = document.getElementById('tagList');
+        tagList.style.display = tagList.style.display === 'none' ? 'block' : 'none';
+        if (tagList.style.display === 'block') {
+            populateTagList();
+        }
+    });
+
     document.getElementById('crossReferenceSearch').addEventListener('input', (event) => updateCrossReferences(event.target.value));
     document.getElementById('saveChanges').addEventListener('click', saveChanges);
     document.getElementById('closeMenu').addEventListener('click', loadVerseListScreen);

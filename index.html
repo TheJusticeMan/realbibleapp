@@ -9,6 +9,8 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Load external CSS styles -->
+    <link rel="icon" type="image/jpg" href="./index_files/fromthepages_64x64.jpg">
+
     <link rel="stylesheet" href="./index_files/cleanstyle.css">
     <script src="./index_files/hammer.min.js"></script>
     <script src="./index_files/WebSetup.js"></script>
@@ -18,6 +20,7 @@
     <script src="./index_files/functions.js"></script>
     <script src="./index_files/domHandlers.js"></script>
     <script src="./index_files/History.js"></script>
+    <script src="./index_files/bookmarks.js"></script>
     <script src="./index_files/main.js"></script>
 
 
@@ -130,19 +133,17 @@
             <div class="common-header">
                 <button id="backButton4" class="back-button">Back</button>
                 <h1>Bookmarked Verses</h1>
-                <select id="categoryFilter" class="category-filter">
-                    <option value="all">All Categories</option>
-                    <option value="study">Study</option>
-                    <option value="inspiration">Inspiration</option>
-                    <option value="favorite">Favorite</option>
+                <select id="tagFilter" class="tag-filter">
+                    <option value="all">All Tags</option>
+                    <!-- Dynamically populated with available tags -->
                 </select>
             </div>
             <div class="bible-graphic">
                 <!-- Miniaturized Bible graphic with interactive markers -->
             </div>
-            <ul id="bookmarksList" class="bookmarks-list">
+            <div id="bookmarksList" class="bookmarks-list">
                 <!-- Bookmarked verses will be dynamically loaded here -->
-            </ul>
+            </div>
             <div class="empty-state" style="display:none;">
                 <p>Bookmark your favorite verses to keep them close!</p>
                 <button id="findVerseButton">Find Verses</button>
@@ -155,19 +156,17 @@
             </div>
             <div class="interactive-sections">
                 <textarea id="noteEditor" class="note-editor" placeholder="Enter your notes here..."></textarea>
-                <div class="bookmark-labels">
-                    <select id="bookmarkDropdown">
-                        <option value="">Select a label...</option>
-                        <option value="study">Study</option>
-                        <option value="inspiration">Inspiration</option>
-                    </select>
-                    <button id="addNewLabel">Add New Label</button>
+                <div class="bookmark-tags">
+                    <button id="addBookmarkButton" class="bookmark-button">Add Bookmark</button>
+                    <div id="tagList" class="tag-list" style="display:none;">
+                        <!-- Dynamically filled with available tags -->
+                    </div>
                 </div>
                 <div class="cross-references">
                     <input type="text" id="crossReferenceSearch" placeholder="Search for verses...">
-                    <ul id="crossReferencesList">
+                    <div id="crossReferencesList">
                         <!-- Dynamically filled with search results -->
-                    </ul>
+                    </div>
                 </div>
             </div>
             <div class="action-buttons common-footer">
@@ -176,7 +175,6 @@
                 <button id="moreOptions">More Options</button>
             </div>
         </div>
-
 
 
         <!-- Load external JavaScript -->
