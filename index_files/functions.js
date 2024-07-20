@@ -1,109 +1,99 @@
 const booksOfTheBible = ["GENESIS", "EXODUS", "LEVITICUS", "NUMBERS", "DEUTERONOMY", "JOSHUA", "JUDGES", "RUTH", "1 SAMUEL", "2 SAMUEL", "1 KINGS", "2 KINGS", "1 CHRONICLES", "2 CHRONICLES", "EZRA", "NEHEMIAH", "ESTHER", "JOB", "PSALMS", "PROVERBS", "ECCLESIASTES", "SONG SOLOMON", "ISAIAH", "JEREMIAH", "LAMENTATIONS", "EZEKIEL", "DANIEL", "HOSEA", "JOEL", "AMOS", "OBADIAH", "JONAH", "MICAH", "NAHUM", "HABAKKUK", "ZEPHANIAH", "HAGGAI", "ZECHARIAH", "MALACHI", "MATTHEW", "MARK", "LUKE", "JOHN", "ACTS", "ROMANS", "1 CORINTHIANS", "2 CORINTHIANS", "GALATIANS", "EPHESIANS", "PHILIPPIANS", "COLOSSIANS", "1 THESSALONIANS", "2 THESSALONIANS", "1 TIMOTHY", "2 TIMOTHY", "TITUS", "PHILEMON", "HEBREWS", "JAMES", "1 PETER", "2 PETER", "1 JOHN", "2 JOHN", "3 JOHN", "JUDE", "REVELATION"];
 const BookShortNames = ["Gen", "Exod", "Lev", "Num", "Deut", "Josh", "Judg", "Ruth", "1Sam", "2Sam", "1Kgs", "2Kgs", "1Chr", "2Chr", "Ezra", "Neh", "Esth", "Job", "Ps", "Prov", "Eccl", "Song", "Isa", "Jer", "Lam", "Ezek", "Dan", "Hos", "Joel", "Amos", "Obad", "Jonah", "Mic", "Nah", "Hab", "Zeph", "Hag", "Zech", "Mal", "Matt", "Mark", "Luke", "John", "Acts", "Rom", "1Cor", "2Cor", "Gal", "Eph", "Phil", "Col", "1Thess", "2Thess", "1Tim", "2Tim", "Titus", "Phlm", "Heb", "Jas", "1Pet", "2Pet", "1John", "2John", "3John", "Jude", "Rev"];
-var VersesInview = [];
-var currentverseviewing;
+let VersesInview = [];
+let currentverseviewing;
 
 function handleBackButton() {
     loadVerseListScreen();
 }
 
 function loadVerseListScreen() {
-    VersesInviewindex = 0;
+    VersesInviewIndex = 0;
     VersesInview = [];
-    var verseList = document.getElementById('OPverseList');
+    const verseList = document.getElementById('OPverseList');
     verseList.innerText = "";
-    for (var i = 0; i < VersesOpen.length; i++) {
-        verseList.appendChild(VersesOpen[i].VerseSwipeLink());
+    for (let i = 0; i < VersesOpen.length; i++) {
+        verseList.appendChild(VersesOpen[i].SwipeLink);
     }
-    //alert(VersesOpen.length);
     navigateToScreen(1);
-};
+}
 
 function loadVerseSelectionScreen() {
-    //toggleDisplay(["oldTestamentBtn", "newTestamentBtn", "booksList", "chapterList", "verseList"], "none");
     toggleDisplay(["booksList", "chapterList", "verseList"], "none");
     toggleDisplay(["oldTestamentBtn", "newTestamentBtn"], "");
     GetRelevantVerses();
     navigateToScreen(2);
-};
+}
 
 function loadDetailedVerseReadingScreen(TheTitle, TheContent, Verse) {
-    var textDisplayArea = document.getElementById('textDisplayArea')
+    const textDisplayArea = document.getElementById('textDisplayArea');
     textDisplayArea.innerText = "";
     textDisplayArea.appendChild(TheContent);
     document.getElementById("chapterTitle").innerText = TheTitle;
     navigateToScreen(3);
-    ScrollToVerse(Verse);
-};
+    BibleRef.scrollToVerse(Verse);
+}
 
 function loadSearchScreen() {
     navigateToScreen(4);
-};
+}
 
 function loadHistoryScreen() {
     showHistory();
-
     navigateToScreen(5);
-};
+}
 
 function loadBookmarksScreen() {
     populateTagFilter();
     loadBookmarks();
     navigateToScreen(6);
-};
+}
 
 function loadVerseContextualInteractionScreen(theVerse) {
-    //var theVerse = new BibleRef(Book, Chap, Verse);
     currentverseviewing = theVerse;
-    var TheVerse = document.createElement("div");
+    const TheVerse = document.createElement("div");
     TheVerse.className = "BibleContents";
-    TheVerse.appendChild(theVerse.Element());
+    TheVerse.appendChild(theVerse.VerseElement);
 
-    // Create a new span element for the Bible reference
-    var referenceSpan = document.createElement("span");
+    const referenceSpan = document.createElement("span");
     referenceSpan.className = "BibleReference";
-    referenceSpan.textContent = theVerse.RefText();
-    let notetoload = notes.filter(verse => (verse.BibleVerse.Book === theVerse.Book && verse.BibleVerse.Chap === theVerse.Chap && verse.BibleVerse.Verse === theVerse.Verse));
+    referenceSpan.textContent = theVerse.refText;
+    const notetoload = notes.filter(verse => (verse.BibleVerse.Book === theVerse.Book && verse.BibleVerse.Chap === theVerse.Chap && verse.BibleVerse.Verse === theVerse.Verse));
     document.getElementById('noteEditor').value = "";
     if (notetoload.length > 0) {
         document.getElementById('noteEditor').value = notetoload[0].Note;
     }
 
-    // Append the reference span to the TheVerse div
     TheVerse.appendChild(referenceSpan);
     document.getElementById("crossReferencesList").innerHTML = "";
     document.getElementById("selectedVerseText").innerText = "";
     document.getElementById("selectedVerseText").appendChild(TheVerse);
     try {
         const refBookShortForm = BookShortNames[booksOfTheBible.indexOf(currentverseviewing.Book)];
-        versesRefs = BibleCrossReferences[refBookShortForm][currentverseviewing.Chap + 1][currentverseviewing.Verse + 1];
+        const versesRefs = BibleCrossReferences[refBookShortForm][currentverseviewing.Chap][currentverseviewing.Verse + 1];
         versesRefs.forEach((ref, index) => {
             const refBookLongForm = booksOfTheBible[ref[0]];
             const RefVerse = new BibleRef(refBookLongForm, ref[1], ref[2] - 1);
-            document.getElementById("crossReferencesList").appendChild(RefVerse.SearchElement());
+            document.getElementById("crossReferencesList").appendChild(RefVerse.SearchElement);
         });
     } catch (e) { }
     window.scrollTo(0, 0);
     populateTagList();
     navigateToScreen(7);
-};
+}
 
-
-//var loadScreen=
 function navigateToScreen(screenId) {
-    // Logic to hide all screens and show the selected one
+    saveHistoryAndBookmarks();
     document.querySelectorAll('.screen').forEach(screen => screen.style.display = 'none');
     document.getElementById(`screen${screenId}`).style.display = 'flex';
-    //loadScreen
 }
 
 function GetRelevantVerses() {
     const versesRefs = [];
 
-    // Collect relevant verse references
     VersesOpen.forEach(verse => {
         const refBookShortForm = BookShortNames[booksOfTheBible.indexOf(verse.Book)];
-        const chapterRefs = BibleCrossReferences[refBookShortForm]?.[verse.Chap + 1];
+        const chapterRefs = BibleCrossReferences[refBookShortForm]?.[verse.Chap];
         const verseRefs = chapterRefs?.[verse.Verse + 1];
 
         if (verseRefs) {
@@ -111,7 +101,6 @@ function GetRelevantVerses() {
         }
     });
 
-    // Merge duplicate references
     for (let i = 0; i < versesRefs.length - 1; i++) {
         for (let j = i + 1; j < versesRefs.length; j++) {
             if (
@@ -126,7 +115,6 @@ function GetRelevantVerses() {
         }
     }
 
-    // Sort references by relevance
     versesRefs.sort((a, b) => a[3] - b[3]);
 
     const isVerseInVersesOpen = (R) => {
@@ -135,24 +123,20 @@ function GetRelevantVerses() {
         );
     };
 
-
-    // Convert short book names to long form
     versesRefs.forEach((ref, index) => {
         const refBookLongForm = booksOfTheBible[ref[0]];
         versesRefs[index] = new BibleRef(refBookLongForm, ref[1], ref[2] - 1);
     });
 
-    // Display the verses
     const verseList = document.getElementById('booksList');
     verseList.innerText = "";
     versesRefs.forEach(ref => {
         if (!isVerseInVersesOpen(ref))
-            verseList.appendChild(ref.SearchElement());
+            verseList.appendChild(ref.SearchElement);
     });
 
     document.getElementById("booksList").style.display = "";
 }
-
 
 function loadBooks(testament) {
     const booksList = document.getElementById('booksList');
@@ -162,7 +146,7 @@ function loadBooks(testament) {
 
     for (let i = start; i < end; i++) {
         const Booklink = new BibleRef(booksOfTheBible[i], 0, 0);
-        booksList.appendChild(Booklink.BookName());
+        booksList.appendChild(Booklink.BookNameElement);
     }
 
     toggleDisplay(["oldTestamentBtn", "newTestamentBtn", "chapterList", "verseList"], "none");
@@ -176,7 +160,7 @@ function loadChapters(event) {
 
     Bible[Book].slice(1).forEach((_, index) => {
         const Chaplink = new BibleRef(Book, index + 1, 0);
-        chapterList.appendChild(Chaplink.ChapterNumber());
+        chapterList.appendChild(Chaplink.ChapterNumberElement);
     });
 
     toggleDisplay(["oldTestamentBtn", "newTestamentBtn", "booksList", "verseList"], "none");
@@ -190,7 +174,7 @@ function loadVerses(event) {
 
     Bible[Book][Chap].forEach((_, index) => {
         const verselink = new BibleRef(Book, Chap, index);
-        verseList.appendChild(verselink.VerseNumber());
+        verseList.appendChild(verselink.VerseNumberElement);
     });
 
     toggleDisplay(["oldTestamentBtn", "newTestamentBtn", "booksList", "chapterList"], "none");
@@ -222,7 +206,7 @@ function handleTouchStart(e) {
     if (e.touches.length === 2) {
         initialDistance = getDistance(e.touches);
         oldFontSize = fontSize;
-        verseScrolledTo = getVerseScroll();
+        verseScrolledTo = BibleRef.getVerseScroll();
     }
 }
 
@@ -235,7 +219,7 @@ function handleTouchMove(e) {
             fontSize = oldFontSize * zoomFactor;
             fontSize = Math.min(24, Math.max(12, fontSize));
             document.getElementById('textDisplayArea').style.fontSize = `${fontSize}px`;
-            ScrollToVerse(verseScrolledTo);
+            BibleRef.scrollToVerse(verseScrolledTo);
         }
     }
 }
@@ -245,7 +229,7 @@ function handleTouchEnd() {
 }
 
 let bibleSearchInstance = new BibleSearchClass("", "Phrase", false, false, "i");
-var query = "";
+let query = "";
 let insearchstart = false;
 
 function updateSearchResults(query2) {
@@ -262,7 +246,7 @@ function updateSearchResults(query2) {
         const results = bibleSearchInstance.search(query2);
         resultsContainer.innerHTML = '';
         results.forEach(result => {
-            resultsContainer.appendChild(result.SearchElement());
+            resultsContainer.appendChild(result.SearchElement);
         });
     }
 }
@@ -274,7 +258,7 @@ function loadMoreResults() {
         const resultsContainer = document.getElementById('searchResults');
         resultsContainer.innerHTML = '';
         results.forEach(result => {
-            resultsContainer.appendChild(result.SearchElement());
+            resultsContainer.appendChild(result.SearchElement);
         });
     }
     insearchstart = false;
@@ -295,8 +279,6 @@ function preprocessBible() {
     return BibleSearch;
 }
 
-//const tagManager = new TagManager();
-
 function populateTagFilter() {
     const tagFilter = document.getElementById('tagFilter');
     tagFilter.innerHTML = '<option value="all">All Tags</option>';
@@ -311,7 +293,7 @@ function populateTagFilter() {
 function loadBookmarks(tag = 'all') {
     const bookmarksList = document.getElementById('bookmarksList');
     bookmarksList.innerHTML = '';
-    let verses = tag === 'all' ? tagManager.getAllVerses() : tagManager.getVersesByTag(tag);
+    const verses = tag === 'all' ? tagManager.getAllVerses() : tagManager.getVersesByTag(tag);
 
     if (verses.length === 0) {
         document.querySelector('.empty-state').style.display = 'block';
@@ -320,20 +302,16 @@ function loadBookmarks(tag = 'all') {
 
     document.querySelector('.empty-state').style.display = 'none';
     verses.forEach(verse => {
-        //const listItem = document.createElement('li');
-        //listItem.className = 'bookmark-item';
-        //listItem.textContent = `${verse.Book} ${verse.Chap}:${verse.Verse}`;
-        bookmarksList.appendChild(verse.SearchElement());
+        bookmarksList.appendChild(verse.SearchElement);
     });
 }
 
-var existingTags = [];
+let existingTags = [];
 
 function populateTagList() {
     const tagList = document.getElementById('tagList');
-    tagList.innerHTML = ''; // Clear existing tags
+    tagList.innerHTML = ''; 
 
-    // Filter existing tags for the current verse
     existingTags = tagManager.listAllTags().filter(tag =>
         tagManager.getVersesByTag(tag).some(ref =>
             ref.Book === currentverseviewing.Book && ref.Chap === currentverseviewing.Chap && ref.Verse === currentverseviewing.Verse
@@ -345,7 +323,7 @@ function populateTagList() {
         tagItem.className = 'tag-item';
         tagItem.textContent = tag;
         if (existingTags.includes(tag)) {
-            tagItem.classList.add('selected'); // Highlight already selected tags
+            tagItem.classList.add('selected');
         }
         tagItem.dataset.tag = tag;
         tagItem.addEventListener('click', function (event) {
@@ -354,19 +332,18 @@ function populateTagList() {
             if (existingTags.includes(tag)) {
                 tagManager.removeTag(currentverseviewing, tag);
                 tagItem.classList.remove('selected');
-                existingTags = existingTags.filter(t => t !== tag); // Update existingTags
+                existingTags = existingTags.filter(t => t !== tag);
                 console.log(`Tag removed: ${tag}`);
             } else {
                 tagManager.addTag(currentverseviewing, tag);
                 tagItem.classList.add('selected');
-                existingTags.push(tag); // Update existingTags
+                existingTags.push(tag);
                 console.log(`Verse bookmarked with tag: ${tag}`);
             }
         });
         tagList.appendChild(tagItem);
     });
 
-    // Add the + item for adding new tags
     const addTagItem = document.createElement('div');
     addTagItem.className = 'tag-item add-tag';
     addTagItem.textContent = '+';
@@ -374,7 +351,7 @@ function populateTagList() {
         const newTag = prompt("Enter new tag:");
         if (newTag) {
             tagManager.addTag(currentverseviewing, newTag);
-            populateTagList(); // Refresh the tag list
+            populateTagList();
         }
     });
     tagList.appendChild(addTagItem);
@@ -401,7 +378,7 @@ function updateCrossReferences(query) {
 }
 
 function saveChanges() {
-    theVerse = currentverseviewing;
+    const theVerse = currentverseviewing;
     for (let a = 0; a < notes.length; a++) {
         if (notes[a].BibleVerse.Book === theVerse.Book && notes[a].BibleVerse.Chap === theVerse.Chap && notes[a].BibleVerse.Verse === theVerse.Verse) {
             notes[a] = new BibleNote(currentverseviewing, document.getElementById('noteEditor').value);

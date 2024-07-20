@@ -132,7 +132,7 @@ function showHistory() {
         // Add entries for the day
         dayEntries.forEach(entry => {
             const bibleRef = new BibleRef(entry.Book, entry.Chap, entry.Verse);
-            const entryElement = bibleRef.HistoryElement(new Date(entry.lastSeen));
+            const entryElement = bibleRef.createHistoryElement(new Date(entry.lastSeen));
             dayContainer.appendChild(entryElement);
         });
 

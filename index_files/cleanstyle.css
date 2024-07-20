@@ -1,156 +1,84 @@
 :root {
-    /* Sets the primary background color of the app to black */
     --MainBGcolor: #000;
-
-    /* Sets the primary color used for text to white */
     --Maincolor: #fff;
-
-    /* Background color for input fields, set to a light blue */
     --InputBGcolor: #ccf;
-
-    /* Color of text inside input fields, set to black */
     --Inputcolor: #000;
-
-    /* Color for input fields when hovered, set to a darker shade of light blue */
     --InputHVRcolor: #aaf;
-
-    /* Background color for lists of links, set to a dark grey */
     --linklistBGcolor: #444;
-
-    /* Color used for references in the text, set to bright green for visibility */
     --Refcolor: #0f0;
-
-    /* Background color for header and footer, set to a semi-transparent dark grey */
     --headerBGcolor: rgba(34, 34, 34, 0.8);
 }
 
 .light-theme {
     --MainBGcolor: #f0f0f0;
-    /* Light grey for a soft background that's easy on the eyes */
     --Maincolor: #333;
-    /* Dark grey for text, providing good contrast without being too harsh */
-
     --InputBGcolor: #ffffff;
-    /* Pure white for input fields, offering a clean and crisp look */
     --Inputcolor: #5c5c5c;
-    /* Medium grey for input text, ensuring readability */
-
     --InputHVRcolor: #e0e0e0;
-    /* Lighter grey for input hover, subtly highlighting the input area */
-
     --linklistBGcolor: #eaeaea;
-    /* Very light grey for lists of links, differentiating it slightly from the main background */
-
     --Refcolor: #2a9d8f;
-    /* Soft teal for references, providing a pop of color that's not too overwhelming */
-
     --headerBGcolor: rgba(255, 255, 255, 0.95);
-    /* Almost white with a touch of transparency for the header and footer, maintaining an airy feel while staying functional */
 }
-
 
 .Ocean-Breeze {
     --MainBGcolor: #2b2f77;
-    /* Dark blue like the deep ocean */
     --Maincolor: #e1ffff;
-    /* Soft, light cyan for text */
     --InputBGcolor: #58a4b0;
-    /* Medium teal for input fields */
     --Inputcolor: #f6f1d1;
-    /* Pale yellow for input text */
     --InputHVRcolor: #5dbcd2;
-    /* Lighter teal for hover states */
     --linklistBGcolor: #33658a;
-    /* Desaturated dark blue for link lists */
     --Refcolor: #ade25d;
-    /* Soft lime green for references */
     --headerBGcolor: rgba(43, 47, 119, 0.8);
-    /* Semi-transparent dark blue for headers and footers */
 }
 
 .Autumn-Warmth {
     --MainBGcolor: #3b1f2b;
-    /* Dark maroon for a warm background */
     --Maincolor: #f4d35e;
-    /* Vibrant yellow for clear text */
     --InputBGcolor: #ee964b;
-    /* Pumpkin orange for input fields */
     --Inputcolor: #f95738;
-    /* Reddish orange for input text */
     --InputHVRcolor: #facf5a;
-    /* Brighter yellow for hover states */
     --linklistBGcolor: #552f44;
-    /* Deep purple for link backgrounds */
     --Refcolor: #cdd422;
-    /* Mustard yellow for references */
     --headerBGcolor: rgba(59, 31, 43, 0.8);
-    /* Semi-transparent maroon for headers and footers */
 }
 
 .Forest-Retreat {
     --MainBGcolor: #004d3a;
-    /* Deep forest green background */
     --Maincolor: #cce3de;
-    /* Pale teal for text */
     --InputBGcolor: #588c7e;
-    /* Earthy green for input fields */
     --Inputcolor: #f0f3bd;
-    /* Very light green for input text */
     --InputHVRcolor: #8fc1a9;
-    /* Softer green for hover states */
     --linklistBGcolor: #35524a;
-    /* Mossy green for link lists */
     --Refcolor: #f5dd90;
-    /* Soft gold for references */
     --headerBGcolor: rgba(0, 77, 58, 0.8);
-    /* Semi-transparent deep green for headers and footers */
 }
 
 .Urban-Chic {
     --MainBGcolor: #333741;
-    /* Very dark grey almost black */
     --Maincolor: #fff;
-    /* Pure white for text */
     --InputBGcolor: #484848;
-    /* Dark grey for input fields */
     --Inputcolor: #cfdac8;
-    /* Light gray for input text */
     --InputHVRcolor: #606c88;
-    /* Dark slate blue for hover states */
     --linklistBGcolor: #3e4c59;
-    /* Dark blue-grey for link lists */
     --Refcolor: #b8d8d8;
-    /* Light turquoise for references */
     --headerBGcolor: rgba(51, 55, 65, 0.8);
-    /* Semi-transparent dark grey for headers and footers */
 }
 
 .Pastel-Dreams {
     --MainBGcolor: #f7ebec;
-    /* Soft pink background */
     --Maincolor: #505050;
-    /* Dark gray for text contrast */
     --InputBGcolor: #d6d2f1;
-    /* Lavender for input fields */
     --Inputcolor: #555;
-    /* Dark grey for input text */
     --InputHVRcolor: #f1d4e0;
-    /* Lighter pink for hover states */
     --linklistBGcolor: #f3d1f4;
-    /* Soft purple for link lists */
     --Refcolor: #f0c808;
-    /* Soft yellow for references */
     --headerBGcolor: rgba(247, 235, 236, 0.8);
-    /* Semi-transparent soft pink for headers and footers */
 }
 
-
-/* Parent container holding all screens */
 .container {
     position: relative;
 }
 
-/* General Screen Style */
 .screen {
     flex-direction: column;
     display: none;
@@ -158,7 +86,6 @@
     color: var(--Maincolor);
 }
 
-/* Verse List Style */
 .verse-list {
     margin: 10px;
     padding: 10px;
@@ -168,7 +95,6 @@
     color: var(--Maincolor);
 }
 
-/* Floating Button Style */
 .floating-btn {
     position: fixed;
     bottom: 20px;
@@ -181,7 +107,6 @@
     transition: 0.3s;
 }
 
-/* Common Header Style */
 .common-header {
     position: sticky;
     top: 0;
@@ -193,7 +118,6 @@
     color: var(--Maincolor);
 }
 
-/* Common Footer Style */
 .common-footer {
     position: fixed;
     bottom: 0;
@@ -204,26 +128,18 @@
 
 .interactive-sections {
     width: 100%;
-    /* Ensures the container takes full width */
     height: 100%;
-    /* Example height, adjust based on your layout needs */
     display: flex;
     flex-direction: column;
 }
 
 .note-editor {
     width: 100%;
-    /* Makes the textarea full width */
     height: 5em;
-    /* Makes the textarea full width */
     font-size: 18px;
-    /* Sets a larger font size for the textarea */
     padding: 0.5em;
-    /* Adds some padding inside the textarea */
     box-sizing: border-box;
-    /* Includes padding and border in the width */
     resize: none;
-    /* Optional: Disables resizing the textarea */
     transition: 0.3s;
 }
 
@@ -231,13 +147,11 @@
     height: 20em;
 }
 
-/* Back Button Style */
 .back-button {
     margin-right: 10px;
     color: var(--Inputcolor);
 }
 
-/* Dynamic List Style */
 .dynamic-list {
     margin: 10px 0;
     overflow-y: auto;
@@ -245,14 +159,12 @@
     color: var(--Maincolor);
 }
 
-/* Dynamic List Div Item */
 .dynamic-list div {
     padding: 10px;
     background-color: var(--MainBGcolor);
     color: var(--Maincolor);
 }
 
-/* Text Display for Screen 3 */
 .text-display {
     flex-grow: 1;
     overflow-y: auto;
@@ -268,38 +180,6 @@
     transition: font-size 0.2s ease;
 }
 
-.resultmark {
-    text-shadow: 0px 0px 0.5em #88f;
-    font-weight: bold;
-}
-
-
-
-/* Icon Button for Screen 4 */
-.icon-button {
-    padding: 10px;
-    border: none;
-    background: none;
-    color: var(--Maincolor);
-}
-
-/* Search Results for Screen 4 */
-.search-results {
-    overflow-y: auto;
-    margin: 10px;
-    padding: 5px;
-    background-color: var(--MainBGcolor);
-    color: var(--Maincolor);
-}
-
-/* Search Results Div for Screen 4 */
-.search-results div {
-    padding: 10px;
-    background-color: var(--linklistBGcolor);
-    color: var(--Maincolor);
-}
-
-/* Content */
 body {
     color: var(--Maincolor);
     background: var(--MainBGcolor);
@@ -307,12 +187,10 @@ body {
     -ms-content-zooming: none;
 }
 
-/* Paragraph Contents */
 p.Contents {
     text-indent: 1em;
 }
 
-/* Verse Number */
 SPAN.VerseNum,
 .BibleReference {
     text-indent: 1em;
@@ -321,12 +199,10 @@ SPAN.VerseNum,
     font-style: italic;
 }
 
-/* Lord Caps */
 strong.LORDCAPS {
     font-variant: small-caps;
 }
 
-/* Navigation */
 input,
 select,
 button,
@@ -341,12 +217,11 @@ textarea {
     color: var(--Inputcolor);
 }
 
-/* Navigation Hover Effects */
 input:hover,
 button:hover,
 select:hover {
     background-color: var(--InputHVRcolor);
-    text-shadow: -1em -2em 0.25em white, 1em 2em 0.25em white, -0.5em -1em 0.125em white, 0.5em 1em 0.125em white;
+    text-shadow: 0 0 0.25em white;
 }
 
 span.SearchResult {
@@ -363,11 +238,9 @@ span.SearchResult {
 span.SearchResult:hover,
 span.SearchResult:active {
     text-decoration: none;
-    /*color: #00f;*/
     text-shadow: 0px 0px 1em white;
 }
 
-/* Verse Navigation Button Style */
 .verse-nav-button {
     display: inline-block;
     padding: 10px 15px;
@@ -380,13 +253,11 @@ span.SearchResult:active {
     text-align: center;
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
-    //border: 0.01px solid white;
-    //box-shadow: 0 0 8px rgba(255, 255, 255);
 }
 
 .verse-nav-button:hover {
     background-color: var(--InputHVRcolor);
-    color: var(--Maincolor);
+    color: var (--Maincolor);
     transform: scale(1.05);
 }
 
@@ -397,55 +268,58 @@ span.SearchResult:active {
 }
 
 .loading-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #444;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000; /* Make sure it's on top of all other elements */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #444;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .loading-spinner {
-  border: 8px solid #aaa;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  animation: spin 2s linear infinite;
+    border: 8px solid #aaa;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
 }
 
 @keyframes spin {
-  0% {
-    border-radius: 100% 0%;
-    border-color: #fff #000;
-  }
-  25% {
-    border-radius: 0% 100%;
-  }
-  50% {
-    border-radius: 100% 0%;
-    border-color: #000 #fff;
-  }
-  75% {
-    border-radius: 0% 100%;
-  }
-  100% {
-    border-radius: 100% 0%;
-    border-color: #fff #000;
-  }
+    0% {
+        border-radius: 100% 0%;
+        border-color: #fff #000;
+    }
+
+    25% {
+        border-radius: 0% 100%;
+    }
+
+    50% {
+        border-radius: 100% 0%;
+        border-color: #000 #fff;
+    }
+
+    75% {
+        border-radius: 0% 100%;
+    }
+
+    100% {
+        border-radius: 100% 0%;
+        border-color: #fff #000;
+    }
 }
 
 .loading-screen p {
-  margin-top: 20px;
-  font-size: 18px;
-  color: #ccc;
+    margin-top: 20px;
+    font-size: 18px;
+    color: #ccc;
 }
-
-/* Style for tag-item */
+/* Tag Item */
 .tag-item {
     display: inline-block;
     padding: 0.5em 1em;
@@ -457,13 +331,7 @@ span.SearchResult:active {
     transition: background-color 0.3s, color 0.3s;
 }
 
-/*.tag-item:hover {
-    background-color: var(--InputHVRcolor);
-}*/
-
-/* Style for selected tag-item */
 .tag-item.selected {
     background-color: var(--MainBGcolor);
     color: var(--Refcolor);
 }
-

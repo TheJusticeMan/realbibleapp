@@ -12,11 +12,9 @@ async function loadBibleCrossReferences() {
         console.log('BibleCrossReferences loaded:', BibleCrossReferences);
     } catch (error) {
         console.error('Failed to load BibleCRef.json:', error);
-        alert('Failed to load BibleCRef.json:' + error);
+        alert('Failed to load BibleCRef.json: ' + error);
     }
 }
-
-
 
 async function loadBible() {
     try {
@@ -28,30 +26,44 @@ async function loadBible() {
             }
         });
 
-        //var Bible = JSON.parse(jsonString);
-        console.log('BibleCrossReferences loaded:', BibleCrossReferences);
+        const Bible = JSON.parse(jsonString);
+        console.log('Bible loaded:', Bible);
     } catch (error) {
-        console.error('Failed to load BibleCRef.json:', error);
-        alert('Failed to load BibleCRef.json:' + error);
+        console.error('Failed to load Bible.json:', error);
+        alert('Failed to load Bible.json: ' + error);
     }
 }
 
 function saveHistoryAndBookmarksToAndroid() {
-    var historyAndBookmarks = {
-        history: getHistoryData(),  // Function to get history data
-        bookmarks: getBookmarksData(),  // Function to get bookmarks data
-        notes: notes
-    };
-    Android.saveData(JSON.stringify(historyAndBookmarks));
+    try {
+        const historyAndBookmarks = {
+            history: getHistoryData(),
+            bookmarks: getBookmarksData(),
+            notes: notes
+        };
+        Android.saveData(JSON.stringify(historyAndBookmarks));
+        console.log('History and bookmarks saved successfully.');
+    } catch (error) {
+        console.error('Failed to save history and bookmarks:', error);
+        alert('Failed to save history and bookmarks: ' + error);
+    }
 }
 
 function loadHistoryAndBookmarks() {
-    var data = Android.loadData();
-    if (data) {
-        var historyAndBookmarks = JSON.parse(data);
-        History=historyAndBookmarks.history;  // Replace with your logic to set history data
-        tagManager.deserialize(historyAndBookmarks.bookmarks);  // Replace with your logic to set bookmarks data
-        notes=historyAndBookmarks.notes;
+    try {
+        const data = Android.loadData();
+        if (data) {
+            const historyAndBookmarks = JSON.parse(data);
+            History = historyAndBookmarks.history;
+            tagManager.deserialize(historyAndBookmarks.bookmarks);
+            notes = historyAndBookmarks.notes;
+            console.log('History and bookmarks loaded successfully.');
+        } else {
+            throw new Error('No data found');
+        }
+    } catch (error) {
+        console.error('Failed to load history and bookmarks:', error);
+        alert('Failed to load history and bookmarks: ' + error);
     }
 }
 
@@ -65,4 +77,4 @@ function getBookmarksData() {
     // Your logic to get bookmarks data
     return tagManager.serialize();
 }
-
+var saveHistoryAndBookmarks=saveHistoryAndBookmarksToAndroid;

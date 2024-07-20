@@ -1,180 +1,210 @@
-var VersesOpen = [];
-class BibleRef {   //Referance to a bible passage
+let VersesOpen = [];
+//let VersesInview = [];
+//let VersesInviewIndex = 0;
+
+class BibleRef {
 	constructor(Book, Chap, Verse) {
 		this.Book = Book;
-		this.Chap = Chap * 1;
-		this.Verse = Verse * 1;
+		this.Chap = Number(Chap);
+		this.Verse = Number(Verse);
 	}
+
+	static getRefFromHTML(element) {
+		return new BibleRef(element.dataset.Book, element.dataset.Chap, element.dataset.Verse);
+	}
+
 	get VerseContent() {
 		return Bible[this.Book][this.Chap][this.Verse];
 	}
-	RefElement(ElementType, ClassName, OnContextMenu, OnClick, Content) {
-		var element = document.createElement(ElementType);
-		element.className = ClassName;
+
+	createElement(tag, className, contextMenuHandler, clickHandler, content) {
+		const element = document.createElement(tag);
+		element.className = className;
 		element.dataset.Book = this.Book;
 		element.dataset.Chap = this.Chap;
 		element.dataset.Verse = this.Verse;
-		element.oncontextmenu = OnContextMenu;
-		element.onclick = OnClick;
-		element.innerHTML = Content;
+		if (contextMenuHandler) element.oncontextmenu = contextMenuHandler;
+		if (clickHandler) element.onclick = clickHandler;
+		element.innerHTML = content;
 		return element;
 	}
 
-	HistoryElement(lastSeen) {
+	createHistoryElement(lastSeen) {
 		const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
 		const formattedTime = lastSeen.toLocaleDateString('en-US', options);
-		return this.RefElement("span", "SearchResult", ShowThisVerseMenu, GoToAddThisVerse,
-			`<span class="VerseNum">${this.RefText()}</span> ${this.fixItal()} <span class="last-seen">(${formattedTime})</span>`);
+		return this.createElement(
+			"span",
+			"SearchResult",
+			BibleRef.showVerseMenu,
+			BibleRef.goToVerse,
+			`<span class="VerseNum">${this.refText}</span> ${this.italicsFormatted} <span class="last-seen">(${formattedTime})</span>`
+		);
 	}
 
-	WholeChapElement() {
-		var chapterElement = this.RefElement("div", "", null, null, "");
-		for (var i = 0; i < Bible[this.Book][this.Chap].length; i++) {
+	get ChapterElement() {
+		const chapterElement = this.createElement("div", "", null, null, "");
+		Bible[this.Book][this.Chap].forEach((_, i) => {
 			let verseRef = new BibleRef(this.Book, this.Chap, i);
-			chapterElement.appendChild(verseRef.Element());
-		}
+			chapterElement.appendChild(verseRef.VerseElement);
+		});
 		return chapterElement;
 	}
-	Element() {
-		return this.RefElement("p", "Contents", ShowThisVerseMenu, null,
-			`<span class="VerseNum">${this.Verse + 1}</span> ${this.fixItal()}`);
+
+	get VerseElement() {
+		return this.createElement(
+			"p",
+			"Contents",
+			BibleRef.showVerseMenu,
+			null,
+			`<span class="VerseNum">${this.Verse + 1}</span> ${this.italicsFormatted}`
+		);
 	}
-	SearchElement() {
-		return this.RefElement("span", "SearchResult", ShowThisVerseMenu, GoToAddThisVerse,
-			`<span class="VerseNum">${this.RefText()}</span> ${this.fixItalSearch()}`);
+
+	get SearchElement() {
+		return this.createElement(
+			"span",
+			"SearchResult",
+			BibleRef.showVerseMenu,
+			BibleRef.goToVerse,
+			`<span class="VerseNum">${this.refText}</span> ${this.searchItalicsFormatted}`
+		);
 	}
-	BookName() {
-		return this.RefElement("span", "verse-nav-button", null, loadChapters,
+
+	get BookNameElement() {
+		return this.createElement(
+			"span",
+			"verse-nav-button",
+			null,
+			loadChapters,
 			`${this.Book}`);
 	}
-	ChapterNumber() {
-		return this.RefElement("span", "verse-nav-button", null, loadVerses,
-			`${this.Chap + 1}`);
+
+	get ChapterNumberElement() {
+		return this.createElement(
+			"span",
+			"verse-nav-button",
+			null,
+			loadVerses,
+			`${this.Chap}`);
 	}
-	VerseNumber() {
-		return this.RefElement("span", "verse-nav-button", ShowThisVerseMenu, GoToAddThisVerse,
-			`${this.Verse + 1}`);
+
+	get VerseNumberElement() {
+		return this.createElement(
+			"span",
+			"verse-nav-button",
+			BibleRef.showVerseMenu,
+			BibleRef.goToVerse,
+			`${this.Verse + 1}`
+		);
 	}
-	SingleVerseText() {
-		return `${this.VerseContent.replace(/[\]\[]/g, "")} (${this.RefText()}, KJV)`;
+
+	get singleVerseText() {
+		return `${this.VerseContent.replace(/[\]\[]/g, "")} (${this.refText}, KJV)`;
 	}
-	VerseText() {
+
+	get verseText() {
 		return `${this.Verse + 1}${this.VerseContent.replace(/[\]\[]/g, "")}`;
 	}
-	RefText() {
-		return `${this.Book}  ${this.Chap}:${this.Verse + 1}`;
+
+	get refText() {
+		return `${this.Book} ${this.Chap}:${this.Verse + 1}`;
 	}
-	WholeChapText() {
-		let chapterText = "";
-		for (var i = 0; i < Bible[this.Book][this.Chap].length; i++) {
-			chapterText += `${this.Verse + 1}${this.VerseContent.replace(/[\]\[]/g, "")}`;
-		}
-		return chapterText;
+
+	get wholeChapterText() {
+		return Bible[this.Book][this.Chap].map((verse, i) => `${i + 1}${verse.replace(/[\]\[]/g, "")}`).join("");
 	}
-	VerseSwipeLink() {
-		const content = `<SPAN class=VerseNum>${this.RefText()}</SPAN> ${this.fixItal()}`;
-		const element = this.RefElement("span", "SearchResult", ShowThisVerseMenu, GoToThisVerse, content);
+
+	get SwipeLink() {
+		const content = `<span class="VerseNum">${this.refText}</span> ${this.italicsFormatted}`;
+		const element = this.createElement("span", "SearchResult", BibleRef.showVerseMenu, BibleRef.goToVerse, content);
 
 		const hammer = new Hammer(element);
-		hammer.on('swipeleft', () => {
-			console.log('Swiped left on', element.textContent);
-			VersesInview.push(new BibleRef(element.dataset.Book, element.dataset.Chap, element.dataset.Verse));
-			element.style.backgroundColor = 'darkblue';
-			element.onclick = LoadVersesInview;
-		});
-		hammer.on('swiperight', () => {
-			console.log('Swiped right on', element.textContent);
-			VersesOpen = VersesOpen.filter(verse => !(verse.Book === element.dataset.Book && verse.Chap === Number(element.dataset.Chap) && verse.Verse === Number(element.dataset.Verse)));
-			loadVerseListScreen();
-		});
+		hammer.on('swipeleft', () => this.handleSwipeLeft(element));
+		hammer.on('swiperight', () => this.handleSwipeRight(element));
 
 		return element;
 	}
-	fixItalSearch() {
-		if (this.SearchQ) {
-			//return ((this.VerseContent).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
-			//	.replace(new RegExp(`(${this.SearchQ})`, "gi"), "<span class=resultmark>$1</span>")
-			return ((highlightMatches(this.VerseContent, this.SearchQ)).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
 
-		} else {
-			return ((this.VerseContent).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
-		}
+	handleSwipeLeft(element) {
+		console.log('Swiped left on', element.textContent);
+		VersesInview.push(new BibleRef(element.dataset.Book, element.dataset.Chap, element.dataset.Verse));
+		element.style.backgroundColor = 'darkblue';
+		element.onclick = BibleRef.loadVersesInview;
 	}
-	fixItal() {
-		return ((this.VerseContent).replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>"))
+
+	handleSwipeRight(element) {
+		console.log('Swiped right on', element.textContent);
+		VersesOpen = VersesOpen.filter(verse =>
+			!(verse.Book === element.dataset.Book && verse.Chap === Number(element.dataset.Chap) && verse.Verse === Number(element.dataset.Verse))
+		);
+		BibleRef.loadVerseListScreen();
 	}
-};
 
-function GetRefFromHTML(element) {
-	return new BibleRef(element.dataset.Book, element.dataset.Chap, element.dataset.Verse);
-}
-
-function ShowThisVerseMenu(event) {  //****
-	loadVerseContextualInteractionScreen(GetRefFromHTML(event.currentTarget));
-	event.returnValue = false;
-}
-
-function GoToAddThisVerse(event) {
-	var h = GetRefFromHTML(event.currentTarget);
-	NewHistory(h);
-	VersesOpen.push(h);
-	GoToRef(h);
-}
-
-var VersesInviewindex = 0;
-function GoToThisVerse(event) {
-	GoToRef(GetRefFromHTML(event.currentTarget));
-}
-
-function GoLeft() {
-	VersesInview[VersesInviewindex].Verse = getVerseScroll();
-	VersesInviewindex = Math.min(VersesInviewindex + 1, VersesInview.length - 1);
-	LoadVersesInview();
-}
-function GoRight() {
-	VersesInview[VersesInviewindex].Verse = getVerseScroll();
-	VersesInviewindex = Math.max(VersesInviewindex - 1, 0);
-	LoadVersesInview();
-}
-
-function getVerseScroll() {
-	var Scroolpoz = window.scrollY + document.getElementById("ReadingHeader").scrollHeight;
-	function checkelement(verseel) {
-		return verseel.offsetTop >= Scroolpoz;
+	get searchItalicsFormatted() {
+		const content = this.SearchQ ? highlightMatches(this.VerseContent, this.SearchQ) : this.VerseContent;
+		return content.replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>");
 	}
-	var Varses = Array.from(document.querySelectorAll('.Contents'));
-	return Number((Varses.find(checkelement)).dataset.Verse);
-}
 
-function ScrollToVerse(Verse) {
-	if (Verse != 0) {
-		var scrooltooffset = document.querySelectorAll('.Contents')[Verse].offsetTop;
-		scrooltooffset -= document.getElementById("ReadingHeader").scrollHeight;
-		window.scrollTo(0, scrooltooffset);
-	} else {
-		window.scrollTo(0, 0);
+	get italicsFormatted() {
+		return this.VerseContent.replace(/\[/g, "<em>").replace(/\]/g, "</em>").replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>");
 	}
-}
 
-function LoadVersesInview() {
-	let c = VersesInview[VersesInviewindex];
-	let el = c.WholeChapElement();
-	const hammer = new Hammer(el);
-	hammer.on('swipeleft', GoLeft);
-	hammer.on('swiperight', GoRight);
-	let booktitle = ((VersesInviewindex > 0) ? "<  " : "") + c.Book + " " + c.Chap + ((VersesInviewindex < (VersesInview.length - 1)) ? "  >" : "");
-	loadDetailedVerseReadingScreen(booktitle, el, c.Verse);
-}
+	static showVerseMenu(event) {
+		loadVerseContextualInteractionScreen(BibleRef.getRefFromHTML(event.currentTarget));
+		event.returnValue = false;
+	}
 
-function GoToRef(c) {
-	UpdateHistoryTime(c);
-	loadDetailedVerseReadingScreen(c.Book + " " + c.Chap, c.WholeChapElement(), c.Verse);
+	static goToVerse(event) {
+		const ref = BibleRef.getRefFromHTML(event.currentTarget);
+		NewHistory(ref);
+		VersesOpen.push(ref);
+		BibleRef.goToRef(ref);
+	}
+
+	static goLeft() {
+		VersesInview[VersesInviewIndex].Verse = BibleRef.getVerseScroll();
+		VersesInviewIndex = Math.min(VersesInviewIndex + 1, VersesInview.length - 1);
+		BibleRef.loadVersesInview();
+	}
+
+	static goRight() {
+		VersesInview[VersesInviewIndex].Verse = BibleRef.getVerseScroll();
+		VersesInviewIndex = Math.max(VersesInviewIndex - 1, 0);
+		BibleRef.loadVersesInview();
+	}
+
+	static getVerseScroll() {
+		const scrollPosition = window.scrollY + document.getElementById("ReadingHeader").scrollHeight;
+		const verses = Array.from(document.querySelectorAll('.Contents'));
+		return Number(verses.find(verseEl => verseEl.offsetTop >= scrollPosition).dataset.Verse);
+	}
+
+	static scrollToVerse(Verse) {
+		const verses = document.querySelectorAll('.Contents');
+		const scrollToOffset = verses[Verse].offsetTop;
+		window.scrollTo(0, scrollToOffset - document.getElementById("ReadingHeader").scrollHeight);
+	}
+
+	static loadVersesInview() {
+		const currentVerse = VersesInview[VersesInviewIndex];
+		const element = currentVerse.ChapterElement;
+		const hammer = new Hammer(element);
+		hammer.on('swipeleft', BibleRef.goLeft);
+		hammer.on('swiperight', BibleRef.goRight);
+		const bookTitle = `${VersesInviewIndex > 0 ? "<  " : ""}${currentVerse.Book} ${currentVerse.Chap}${VersesInviewIndex < VersesInview.length - 1 ? "  >" : ""}`;
+		BibleRef.loadDetailedVerseReadingScreen(bookTitle, element, currentVerse.Verse);
+	}
+
+	static goToRef(ref) {
+		UpdateHistoryTime(ref);
+		loadDetailedVerseReadingScreen(`${ref.Book} ${ref.Chap}`, ref.ChapterElement, ref.Verse);
+	}
 }
 
 class BibleNote {
-	constructor(BibleVerse, thenote, BookmarkLBL = "") {
+	constructor(BibleVerse, note, BookmarkLBL = "") {
 		this.BibleVerse = BibleVerse;
-		this.Note = thenote;
+		this.Note = note;
 		this.BookmarkLBL = BookmarkLBL;
 	}
 }
