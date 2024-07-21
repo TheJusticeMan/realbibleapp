@@ -39,7 +39,8 @@ function saveHistoryAndBookmarksToAndroid() {
         const historyAndBookmarks = {
             history: getHistoryData(),
             bookmarks: getBookmarksData(),
-            notes: notes
+            notes: notes,
+            Settings: Settings
         };
         Android.saveData(JSON.stringify(historyAndBookmarks));
         console.log('History and bookmarks saved successfully.');
@@ -57,6 +58,7 @@ function loadHistoryAndBookmarks() {
             History = historyAndBookmarks.history;
             tagManager.deserialize(historyAndBookmarks.bookmarks);
             notes = historyAndBookmarks.notes;
+            Settings = historyAndBookmarks.Settings;
             console.log('History and bookmarks loaded successfully.');
         } else {
             throw new Error('No data found');
@@ -77,4 +79,4 @@ function getBookmarksData() {
     // Your logic to get bookmarks data
     return tagManager.serialize();
 }
-var saveHistoryAndBookmarks=saveHistoryAndBookmarksToAndroid;
+var saveHistoryAndBookmarks = saveHistoryAndBookmarksToAndroid;

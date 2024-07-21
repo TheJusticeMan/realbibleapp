@@ -310,7 +310,7 @@ let existingTags = [];
 
 function populateTagList() {
     const tagList = document.getElementById('tagList');
-    tagList.innerHTML = ''; 
+    tagList.innerHTML = '';
 
     existingTags = tagManager.listAllTags().filter(tag =>
         tagManager.getVersesByTag(tag).some(ref =>
@@ -388,3 +388,79 @@ function saveChanges() {
     notes.push(new BibleNote(currentverseviewing, document.getElementById('noteEditor').value));
     loadVerseListScreen();
 }
+    const helpBubbles = [
+        { id: "helpBubble1", element: "#searchBtn2", position: "bottom" },
+        { id: "helpBubble2", element: "#historyBtn2", position: "bottom" },
+        { id: "helpBubble3", element: "#bookmarksBtn2", position: "bottom" },
+        { id: "helpBubble4", element: "#OPverseList2", position: "top" },
+        { id: "helpBubble5", element: "#addVerseBtn2", position: "top" }
+    ];
+
+function ShowHelpScreen() {
+
+    let currentBubbleIndex = 0;
+
+    function showNextBubble() {
+        document.getElementById("helpBubbleEnd").style.display = "none";
+        if (currentBubbleIndex > 0) {
+            const prevElement = document.querySelector(helpBubbles[currentBubbleIndex - 1].element);
+            document.getElementById(helpBubbles[currentBubbleIndex - 1].id).style.display = "none";
+            prevElement.classList.remove("glow");
+        }
+
+        if (currentBubbleIndex < helpBubbles.length) {
+            const bubble = helpBubbles[currentBubbleIndex];
+            const element = document.querySelector(bubble.element);
+            const rect = element.getBoundingClientRect();
+            const helpBubble = document.getElementById(bubble.id);
+
+            element.classList.add("glow");
+
+            helpBubble.style.display = "block";
+
+            if (bubble.position === "bottom") {
+                helpBubble.style.top = (rect.top + window.scrollY + rect.height + 10) + "px";
+                helpBubble.style.left = (rect.left + window.scrollX) + "px";
+            } else {
+                helpBubble.style.top = (rect.top + window.scrollY - helpBubble.offsetHeight - 10) + "px";
+                helpBubble.style.left = (rect.left + window.scrollX) + "px";
+            }
+
+            // Ensure bubble is on screen
+            const bubbleRect = helpBubble.getBoundingClientRect();
+            if (bubbleRect.right > window.innerWidth - 20) {
+                helpBubble.style.left = (window.innerWidth - 310) + "px";
+            }
+            if (bubbleRect.left < 0) {
+                helpBubble.style.left = "10px";
+            }
+            if (bubbleRect.top < 0) {
+                helpBubble.style.top = (rect.top + window.scrollY + rect.height + 10) + "px";
+            }
+            if (bubbleRect.bottom > window.innerHeight) {
+                helpBubble.style.top = (rect.top + window.scrollY - helpBubble.offsetHeight - 10) + "px";
+            }
+
+            currentBubbleIndex++;
+        } else {
+            // Show the end tutorial bubble in the center of the screen
+            const endBubble = document.getElementById("helpBubbleEnd");
+            endBubble.style.display = "block";
+            endBubble.style.top = "50%";
+            endBubble.style.left = "50%";
+            endBubble.style.transform = "translate(-50%, -50%)";
+            endBubble.onclick = function () {
+                endBubble.style.display = "none";
+                loadVerseListScreen();
+            };
+            currentBubbleIndex = 0;
+        }
+    }
+
+    document.addEventListener("click", showNextBubble);
+    navigateToScreen(8);
+    showNextBubble();
+}
+
+
+

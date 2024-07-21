@@ -137,7 +137,7 @@ class BibleRef {
 		VersesOpen = VersesOpen.filter(verse =>
 			!(verse.Book === element.dataset.Book && verse.Chap === Number(element.dataset.Chap) && verse.Verse === Number(element.dataset.Verse))
 		);
-		BibleRef.loadVerseListScreen();
+		loadVerseListScreen();
 	}
 
 	get searchItalicsFormatted() {
@@ -192,7 +192,7 @@ class BibleRef {
 		hammer.on('swipeleft', BibleRef.goLeft);
 		hammer.on('swiperight', BibleRef.goRight);
 		const bookTitle = `${VersesInviewIndex > 0 ? "<  " : ""}${currentVerse.Book} ${currentVerse.Chap}${VersesInviewIndex < VersesInview.length - 1 ? "  >" : ""}`;
-		BibleRef.loadDetailedVerseReadingScreen(bookTitle, element, currentVerse.Verse);
+		loadDetailedVerseReadingScreen(bookTitle, element, currentVerse.Verse);
 	}
 
 	static goToRef(ref) {

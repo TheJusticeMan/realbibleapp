@@ -319,6 +319,7 @@ span.SearchResult:active {
     font-size: 18px;
     color: #ccc;
 }
+
 /* Tag Item */
 .tag-item {
     display: inline-block;
@@ -334,4 +335,21 @@ span.SearchResult:active {
 .tag-item.selected {
     background-color: var(--MainBGcolor);
     color: var(--Refcolor);
+}
+
+.help-bubble {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.7);
+    background-clip: padding-box;
+    color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    z-index: 1000;
+    display: none;
+    max-width: 300px;
+}
+
+.glow {
+    box-shadow: 0 0 10px 2px rgba(255, 255, 0, 0.7);
 }

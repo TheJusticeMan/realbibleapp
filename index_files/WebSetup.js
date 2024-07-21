@@ -33,7 +33,8 @@ function saveHistoryAndBookmarksToLocalStorage() {
         const historyAndBookmarks = {
             history: getHistoryData(),
             bookmarks: getBookmarksData(),
-            notes: notes
+            notes: notes,
+            Settings: Settings
         };
         localStorage.setItem('historyAndBookmarks', JSON.stringify(historyAndBookmarks));
         console.log('History and bookmarks saved successfully.');
@@ -52,6 +53,7 @@ function loadHistoryAndBookmarks() {
             tagManager.deserialize(historyAndBookmarks.bookmarks);
             notes = historyAndBookmarks.notes;
             console.log('History and bookmarks loaded successfully.');
+            Settings = historyAndBookmarks.Settings;
         } else {
             throw new Error('No data found');
         }
@@ -71,4 +73,4 @@ function getBookmarksData() {
     // Your logic to get bookmarks data
     return tagManager.serialize();
 }
-var saveHistoryAndBookmarks=saveHistoryAndBookmarksToLocalStorage;
+var saveHistoryAndBookmarks = saveHistoryAndBookmarksToLocalStorage;
