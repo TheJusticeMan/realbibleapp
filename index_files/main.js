@@ -1,7 +1,7 @@
 const BibleSearch = {};
 let BibleCrossReferences = {};
 var notes = [];
-var Settings = {};
+var Settings = {initualized:false};
 
 function Load() {
     loadHistoryAndBookmarks();

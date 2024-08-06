@@ -9,6 +9,10 @@ class BibleRef {
 		this.Verse = Number(Verse);
 	}
 
+	isEqual(other) {
+		return this.Book === other.Book && this.Chap === other.Chap && this.Verse === other.Verse;
+	}
+
 	static getRefFromHTML(element) {
 		return new BibleRef(element.dataset.Book, element.dataset.Chap, element.dataset.Verse);
 	}
@@ -134,8 +138,9 @@ class BibleRef {
 
 	handleSwipeRight(element) {
 		console.log('Swiped right on', element.textContent);
+		let verseToRemove = BibleRef.getRefFromHTML(element);
 		VersesOpen = VersesOpen.filter(verse =>
-			!(verse.Book === element.dataset.Book && verse.Chap === Number(element.dataset.Chap) && verse.Verse === Number(element.dataset.Verse))
+			!(verse.isEqual(verseToRemove))
 		);
 		loadVerseListScreen();
 	}
@@ -157,7 +162,10 @@ class BibleRef {
 	static goToVerse(event) {
 		const ref = BibleRef.getRefFromHTML(event.currentTarget);
 		NewHistory(ref);
-		VersesOpen.push(ref);
+		//check if VersesOpen already has the referance
+		if (!VersesOpen.some(openRef => openRef.isEqual(ref))) {
+			VersesOpen.push(ref);
+		}
 		BibleRef.goToRef(ref);
 	}
 

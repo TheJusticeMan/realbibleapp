@@ -1,9 +1,21 @@
+class HistoryItem {
+    constructor(book, chap, verse) {
+        this.Book = book;
+        this.Chap = chap;
+        this.Verse = verse;
+        this.lastSeen = new Date();
+    }
+
+    updateLastSeen() {
+        this.lastSeen = new Date();
+    }
+}
+
 let History = [];
 
 function NewHistory(h) {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    //const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     let existingEntry = History.find(entry =>
         entry.Book === h.Book &&
@@ -13,12 +25,9 @@ function NewHistory(h) {
     );
 
     if (existingEntry) {
-        existingEntry.lastSeen = now;
+        existingEntry.updateLastSeen();
     } else {
-        History.push({
-            ...h,
-            lastSeen: now,
-        });
+        History.push(new HistoryItem(h.Book, h.Chap, h.Verse));
     }
 
     mergeOldEntries();
@@ -80,7 +89,7 @@ function UpdateHistoryTime(c) {
     );
 
     if (existingEntry) {
-        existingEntry.lastSeen = now;
+        existingEntry.updateLastSeen();
     } else {
         console.warn('History entry not found for update.');
     }
@@ -140,6 +149,6 @@ function showHistory() {
     });
 
     // Append the history container to the document body or a specific element
-    document.getElementById("history-list").innerHTML="";
+    document.getElementById("history-list").innerHTML = "";
     document.getElementById("history-list").appendChild(historyContainer);
 }

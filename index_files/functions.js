@@ -58,7 +58,7 @@ function loadVerseContextualInteractionScreen(theVerse) {
     const referenceSpan = document.createElement("span");
     referenceSpan.className = "BibleReference";
     referenceSpan.textContent = theVerse.refText;
-    const notetoload = notes.filter(verse => (verse.BibleVerse.Book === theVerse.Book && verse.BibleVerse.Chap === theVerse.Chap && verse.BibleVerse.Verse === theVerse.Verse));
+    const notetoload = notes.filter(verse => (theVerse.isEqual(verse.BibleVerse)));
     document.getElementById('noteEditor').value = "";
     if (notetoload.length > 0) {
         document.getElementById('noteEditor').value = notetoload[0].Note;
@@ -119,7 +119,7 @@ function GetRelevantVerses() {
 
     const isVerseInVersesOpen = (R) => {
         return VersesOpen.some(openVerse =>
-            openVerse.Book === R.Book && openVerse.Chap === R.Chap && openVerse.Verse === R.Verse
+            openVerse.isEqual(R)
         );
     };
 
@@ -314,7 +314,7 @@ function populateTagList() {
 
     existingTags = tagManager.listAllTags().filter(tag =>
         tagManager.getVersesByTag(tag).some(ref =>
-            ref.Book === currentverseviewing.Book && ref.Chap === currentverseviewing.Chap && ref.Verse === currentverseviewing.Verse
+            ref.isEqual(currentverseviewing)
         )
     );
 
@@ -380,7 +380,7 @@ function updateCrossReferences(query) {
 function saveChanges() {
     const theVerse = currentverseviewing;
     for (let a = 0; a < notes.length; a++) {
-        if (notes[a].BibleVerse.Book === theVerse.Book && notes[a].BibleVerse.Chap === theVerse.Chap && notes[a].BibleVerse.Verse === theVerse.Verse) {
+        if (notes[a].BibleVerse.isEqual(theVerse)) {
             notes[a] = new BibleNote(currentverseviewing, document.getElementById('noteEditor').value);
             return;
         }

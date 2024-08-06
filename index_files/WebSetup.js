@@ -30,13 +30,13 @@ async function loadBible() {
 
 function saveHistoryAndBookmarksToLocalStorage() {
     try {
-        const historyAndBookmarks = {
+        const userData = {
             history: getHistoryData(),
             bookmarks: getBookmarksData(),
             notes: notes,
             Settings: Settings
         };
-        localStorage.setItem('historyAndBookmarks', JSON.stringify(historyAndBookmarks));
+        localStorage.setItem('userData', JSON.stringify(userData));
         console.log('History and bookmarks saved successfully.');
     } catch (error) {
         console.error('Failed to save history and bookmarks:', error);
@@ -46,14 +46,14 @@ function saveHistoryAndBookmarksToLocalStorage() {
 
 function loadHistoryAndBookmarks() {
     try {
-        const data = localStorage.getItem('historyAndBookmarks');
+        const data = localStorage.getItem('userData');
         if (data) {
-            const historyAndBookmarks = JSON.parse(data);
-            History = historyAndBookmarks.history;
-            tagManager.deserialize(historyAndBookmarks.bookmarks);
-            notes = historyAndBookmarks.notes;
+            const userData = JSON.parse(data);
+            if( userData.history) History = userData.history;
+            if( userData.bookmarks) tagManager.deserialize(userData.bookmarks);
+            if( userData.notes) notes = userData.notes;
+            if( userData.Settings) Settings = userData.Settings;
             console.log('History and bookmarks loaded successfully.');
-            Settings = historyAndBookmarks.Settings;
         } else {
             throw new Error('No data found');
         }

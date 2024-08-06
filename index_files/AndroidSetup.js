@@ -36,17 +36,17 @@ async function loadBible() {
 
 function saveHistoryAndBookmarksToAndroid() {
     try {
-        const historyAndBookmarks = {
+        const userData = {
             history: getHistoryData(),
             bookmarks: getBookmarksData(),
             notes: notes,
             Settings: Settings
         };
-        Android.saveData(JSON.stringify(historyAndBookmarks));
-        console.log('History and bookmarks saved successfully.');
+        Android.saveData(JSON.stringify(userData));
+        console.log('User Data saved successfully.');
     } catch (error) {
-        console.error('Failed to save history and bookmarks:', error);
-        alert('Failed to save history and bookmarks: ' + error);
+        console.error('Failed to save User Data:', error);
+        alert('Failed to save User Data: ' + error);
     }
 }
 
@@ -54,22 +54,22 @@ function loadHistoryAndBookmarks() {
     try {
         const data = Android.loadData();
         if (data) {
-            const historyAndBookmarks = JSON.parse(data);
-            History = historyAndBookmarks.history;
-            tagManager.deserialize(historyAndBookmarks.bookmarks);
-            notes = historyAndBookmarks.notes;
-            Settings = historyAndBookmarks.Settings;
-            console.log('History and bookmarks loaded successfully.');
+            const userData = JSON.parse(data);
+            if( userData.history) History = userData.history;
+            if( userData.bookmarks) tagManager.deserialize(userData.bookmarks);
+            if( userData.notes) notes = userData.notes;
+            if( userData.Settings) Settings = userData.Settings;
+            console.log('User Data loaded successfully.');
         } else {
             throw new Error('No data found');
         }
     } catch (error) {
-        console.error('Failed to load history and bookmarks:', error);
-        alert('Failed to load history and bookmarks: ' + error);
+        console.error('Failed to load User Data:', error);
+        alert('Failed to load User Data: ' + error);
     }
 }
 
-// Example functions to get history and bookmarks data
+// Example functions to get User Data data
 function getHistoryData() {
     // Your logic to get history data
     return History;
