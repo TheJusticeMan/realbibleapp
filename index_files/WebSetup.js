@@ -13,6 +13,22 @@ async function loadBibleCrossReferences() {
     }
 }
 
+async function loadBibleCount() {
+    try {
+        const response = await fetch('./index_files/BibleCount.json');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const bibleData = await response.json();
+        Biblewordcounts = bibleData; // Assign it to your global variable or process it as needed
+        console.log('Bible loaded:');
+    } catch (error) {
+        console.error('Failed to load Bible.json:', error);
+        //alert('Failed to load Bible.json: ' + error);
+    }
+}
+
+
 async function loadBible() {
     try {
         const response = await fetch('./index_files/Bible.json');
@@ -45,14 +61,25 @@ function saveHistoryAndBookmarksToLocalStorage() {
 }
 
 function loadHistoryAndBookmarks() {
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+            .register("/service-worker.js")
+            .then(registration => {
+                console.log("Service Worker registered with scope:", registration.scope);
+            })
+            .catch(error => {
+                console.error("Service Worker registration failed:", error);
+            });
+    }
+
     try {
         const data = localStorage.getItem('userData');
         if (data) {
             const userData = JSON.parse(data);
-            if( userData.history) History = userData.history;
-            if( userData.bookmarks) tagManager.deserialize(userData.bookmarks);
-            if( userData.notes) notes = userData.notes;
-            if( userData.Settings) Settings = userData.Settings;
+            if (userData.history) History = userData.history;
+            if (userData.bookmarks) tagManager.deserialize(userData.bookmarks);
+            if (userData.notes) notes = userData.notes;
+            if (userData.Settings) Settings = userData.Settings;
             console.log('History and bookmarks loaded successfully.');
         } else {
             throw new Error('No data found');

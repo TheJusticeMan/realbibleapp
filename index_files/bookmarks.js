@@ -72,9 +72,9 @@ const bibleRef1 = new BibleRef("GENESIS", 1, 1);
 const bibleRef2 = new BibleRef("JOHN", 3, 16);
 
 const tagManager = new TagManager();
-tagManager.addTag(bibleRef1, "Creation");
-tagManager.addTag(bibleRef2, "Salvation");
+//tagManager.addTag(bibleRef1, "Creation");
+//tagManager.addTag(bibleRef2, "Salvation");
 
-console.log("Verses tagged with 'Creation':", tagManager.getVersesByTag("Creation"));
-console.log("All tags:", tagManager.listAllTags());
-console.log("All bookmarked verses:", tagManager.getAllVerses());
+// console.log("Verses tagged with 'Creation':", tagManager.getVersesByTag("Creation"));
+// console.log("All tags:", tagManager.listAllTags());
+// console.log("All bookmarked verses:", tagManager.getAllVerses());

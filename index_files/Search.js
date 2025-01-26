@@ -4,7 +4,7 @@ const DRegExp = /([\](\\\.)?^$|\*\+\{\}\[])/g;
 
 
 class BibleSearchClass {
-    constructor(searchFor, searchType, regExpOn = false, useWholeWords = false, tags = "") {
+    constructor(searchFor, searchType, regExpOn = false, useWholeWords = false, tags = "g") {
         this.MAX_RESULTS = 20; // Define the maximum number of results
         this.results = [];
         this.currentBookIndex = "GENESIS";
@@ -39,16 +39,23 @@ class BibleSearchClass {
         this.status = 2;
     }
 
-    search(query) {
+    search() {
         if (this.status < 2) this.setupSearch();
-        let Started=false;
+        let Started = false;
+        let highlight = this.searchForCpt;
+        if (!(highlight instanceof RegExp)) {
+            highlight = new RegExp(
+                highlight.wdList.map(creg => creg.source).join("|"),
+                "g"
+            );
+        }
 
         outerLoop: for (const B in BibleSearch) { // Iterate through each book
-            if(B!=this.currentBookIndex && Started==false){
+            if (B != this.currentBookIndex && Started == false) {
                 //alert(B);
                 continue
             }
-            Started=true;
+            Started = true;
             const chapters = BibleSearch[B];
             for (let C = this.currentChapterIndex; C < chapters.length; C++) { // Iterate through each chapter
                 const verses = chapters[C];
@@ -56,7 +63,7 @@ class BibleSearchClass {
                     if (this.searchForCpt.test(verses[V])) { // Check if the verse includes the query
                         const bibleRef = new BibleRef(B, C, V);
                         bibleRef.index = this.searchForCpt.test(verses[V]);
-                        bibleRef.SearchQ = this.searchForCpt;
+                        bibleRef.SearchQ = highlight;
                         this.results.push(bibleRef);
                         if (this.results.length >= this.MAX_RESULTS) { // Check if max results are reached
                             this.currentBookIndex = B;
@@ -69,7 +76,7 @@ class BibleSearchClass {
                 this.currentVerseIndex = 0; // Reset verse index for the next chapter
             }
             this.currentChapterIndex = 1; // Reset chapter index for the next book
-            this.currentBookIndex=B;
+            this.currentBookIndex = B;
         }
 
 
@@ -95,61 +102,48 @@ class LogicalSearch {
     constructor(find, flags, searchType, regExpOn, useWholeWords) {
         this.find = find;
         this.wdList = find.match(Word);
-
-        let logiTests = "";
-
-        if (searchType === "All words") {
-            logiTests = "this.wdList[i++].test(s)";
-            for (let i = 1; i < this.wdList.length; i++) {
-                logiTests += " && this.wdList[i++].test(s)";
-            }
-        } else {
-            logiTests = find.replace(Word, "this.wdList[i++].test(s)");
+        if (!this.wdList) {
+            this.test = () => false;
+            return;
         }
 
+        // Construct the logical tests based on the search type
+        const logiTests = (searchType === "All words")
+            ? this.wdList.map((_, i) => `this.wdList[${i}].test(s)`).join(" && ")
+            : find.replace(Word, (match, i) => `this.wdList[${i}].test(s)`);
+
+        // Compile the word list into regular expressions
         try {
-            for (let i = 0; i < this.wdList.length; i++) {
-                let s = this.wdList[i].toString();
-                if (s.charAt(0) === '"' || s.charAt(0) === "'") s = s.slice(1, -1);
-                if (!regExpOn) s = s.replace(DRegExp, "\\$1");
-                if (useWholeWords) s = "\\b" + s + "\\b";
-                this.wdList[i] = new RegExp(s, flags);
-            }
+            this.wdList = this.wdList.map(word => {
+                let pattern = word.toString().replace(/^['"]|['"]$/g, ""); // Remove quotes
+                if (!regExpOn) pattern = pattern.replace(DRegExp, "\\$1"); // Escape special characters
+                if (useWholeWords) pattern = `\\b${pattern}\\b`; // Match whole words
+                return new RegExp(pattern, flags);
+            });
         } catch (e) {
-            alert("Search error: " + e.description);
-            this.test = function (s) { return false; };
+            alert(`Search error: ${e.message}`);
+            this.test = () => false;
+            return;
         }
 
-        const temp = `this.test = function test(s) {
-            var i = 0;
-            return (${logiTests});
-        }`;
-
+        // Dynamically create the test function
         try {
-            eval(temp);
+            this.test = new Function("s", `return (${logiTests});`);
         } catch (e) {
-            prompt("Search error: " + e.description + "\r\n" + temp, "Search error: " + e.description + "\r\n" + temp);
-            this.test = function (s) { return false; };
+            alert(`Search error: ${e.message}`);
+            this.test = () => false;
         }
 
-        this.toString = function () { return this.find; };
+    }
+
+    toString() {
+        return this.find;
     }
 }
 
 function sortSearch(r1, r2) {
     return r2.index - r1.index;
 }
-
-function highlightMatches(inputString, regex) {
-    // Ensure the regex is global to find all matches
-    const globalRegex = new RegExp(regex.source, regex.flags.includes('g') ? regex.flags : regex.flags + 'g');
-
-    // Replace matches with <em> wrapped version
-    const highlightedString = inputString.replace(globalRegex, match => `<span class=resultmark>${match}</span>`);
-
-    return highlightedString;
-}
-
 
 // Example of how to instantiate and use the updated class
 //const searchInstance = new BibleSearchClass("search term", "Phrase", true, false, "i");

@@ -17,6 +17,7 @@ function NewHistory(h) {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
+    // Ensure that every entry in History is an instance of HistoryItem
     let existingEntry = History.find(entry =>
         entry.Book === h.Book &&
         entry.Chap === h.Chap &&
@@ -25,6 +26,10 @@ function NewHistory(h) {
     );
 
     if (existingEntry) {
+        // If the found entry is not an instance of HistoryItem, convert it
+        if (!(existingEntry instanceof HistoryItem)) {
+            Object.setPrototypeOf(existingEntry, HistoryItem.prototype);
+        }
         existingEntry.updateLastSeen();
     } else {
         History.push(new HistoryItem(h.Book, h.Chap, h.Verse));

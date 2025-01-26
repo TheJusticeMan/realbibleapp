@@ -7,11 +7,53 @@
 
     <title>The Real Bible App</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Load external CSS styles -->
-    <link rel="icon" type="image/jpg" href="./index_files/fromthepages_64x64.jpg">
+    <!-- Meta for responsiveness -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+    <!-- Meta description for SEO -->
+    <meta name="description"
+        content="The Real Bible App: A simple yet powerful Bible study tool designed for quick navigation and cross-referencing on mobile devices.">
+
+    <!-- Author -->
+    <meta name="author" content="Justice Vellacott">
+
+    <!-- Keywords for SEO -->
+    <meta name="keywords"
+        content="Bible, Bible app, Bible study, mobile Bible, cross-referencing, Bible tools, study tools, Christianity">
+
+    <!-- Theme color for browsers -->
+    <meta name="theme-color" content="#000000">
+
+    <!-- Apple-specific meta tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="The Real Bible App">
+
+    <!-- Facebook Open Graph meta tags -->
+    <meta property="og:title" content="The Real Bible App">
+    <meta property="og:description"
+        content="A simple yet powerful Bible study tool designed for quick navigation and cross-referencing on mobile devices.">
+    <meta property="og:image" content="./OpenBible.svg">
+    <meta property="og:url" content="https://realbibleapp.w3spaces.com">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Real Bible App">
+    <meta name="twitter:description"
+        content="A simple yet powerful Bible study tool designed for quick navigation and cross-referencing on mobile devices.">
+    <meta name="twitter:image" content="./OpenBible.svg">
+
+    <!-- Link to manifest -->
+    <link rel="manifest" href="./index_files/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg" href="./OpenBible.svg">
+
+    <!-- External CSS -->
     <link rel="stylesheet" href="./index_files/cleanstyle.css">
+
+    <!-- External JavaScript files -->
     <script src="./index_files/hammer.min.js"></script>
     <script src="./index_files/WebSetup.js"></script>
     <script src="./index_files/Bible.js"></script>
@@ -22,9 +64,6 @@
     <script src="./index_files/History.js"></script>
     <script src="./index_files/bookmarks.js"></script>
     <script src="./index_files/main.js"></script>
-
-
-
 </head>
 
 <body onload="Load()">
@@ -52,14 +91,14 @@
 
         updateLoadingText();
     </script>
-    <div class="container">
+    <div id="container" class="container">
         <div id="screen1" class="screen">
             <div class="common-header">
                 <button id="searchBtn">Search</button>
                 <button id="historyBtn">History</button>
                 <button id="bookmarksBtn">Bookmarks</button>
             </div>
-            <div id="OPverseList" class="verse-list">
+            <div id="OPverseList" class="verse-list main-content">
                 <!-- Verse snippets will be dynamically injected here -->
             </div>
             <div class="common-footer">
@@ -71,23 +110,24 @@
                 <button id="backButton1" class="back-button">Back</button>
                 <h1>Select a Verse</h1>
             </div>
-            <div class="selection-area">
+            <div class="selection-area main-content">
                 <span id="oldTestamentBtn" class="verse-nav-button">Old Testament</span>
                 <span id="newTestamentBtn" class="verse-nav-button">New Testament</span>
             </div>
-            <div id="booksList" class="dynamic-list"></div>
-            <div id="chapterList" class="dynamic-list"></div>
-            <div id="verseList" class="dynamic-list"></div>
+            <div id="booksList" class="dynamic-list main-content"></div>
+            <div id="chapterList" class="dynamic-list main-content"></div>
+            <div id="verseList" class="dynamic-list main-content"></div>
         </div>
         <div id="screen3" class="screen">
             <div id="ReadingHeader" class="common-header">
                 <button id="backButton2" class="back-button">Back</button>
                 <h1 id="chapterTitle" class="title">Genesis 1</h1>
             </div>
-            <div id="textDisplayArea" class="text-display">
+            <div id="textDisplayArea" class="text-display main-content bibletext">
                 <!-- Bible chapter text will be dynamically loaded here -->
             </div>
             <div class="common-footer">
+                <span id="addVerseBtn2" class="floating-btn verse-nav-button">+</span>
                 <div>
                     <select id="theme-selector">
                         <option value="">Night Mode</option>
@@ -104,9 +144,9 @@
         <div id="screen4" class="screen">
             <div class="common-header">
                 <input type="text" id="searchInput" placeholder="Search verses..." aria-label="Search verses">
-                <button id="clearSearchButton" class="icon-button">Clear Search</button>
+                <button id="clearSearchButton" class="icon-button">Back</button>
             </div>
-            <div id="searchResults" class="search-results">
+            <div id="searchResults" class="search-results main-content">
                 <!-- Search results will be dynamically loaded here -->
             </div>
             <div class="common-footer">
@@ -118,13 +158,13 @@
                 <button id="backButton3" class="back-button">Back</button>
                 <h1>Reading History</h1>
             </div>
-            <div class="timeline">
+            <div class="timeline main-content">
                 <!-- Markers will be dynamically generated based on history data -->
             </div>
-            <div id="history-list" class="history-list">
+            <div id="history-list" class="history-list main-content">
                 <!-- History entries will be dynamically loaded here -->
             </div>
-            <div class="no-history-message" style="display:none;">
+            <div class="no-history-message main-content" style="display:none;">
                 <p>Start your journey through the Bible today!</p>
                 <button id="startReadingButton">Start Reading</button>
             </div>
@@ -138,23 +178,23 @@
                     <!-- Dynamically populated with available tags -->
                 </select>
             </div>
-            <div class="bible-graphic">
+            <div class="bible-graphic main-content">
                 <!-- Miniaturized Bible graphic with interactive markers -->
             </div>
-            <div id="bookmarksList" class="bookmarks-list">
+            <div id="bookmarksList" class="bookmarks-list main-content">
                 <!-- Bookmarked verses will be dynamically loaded here -->
             </div>
-            <div class="empty-state" style="display:none;">
+            <div class="empty-state main-content" style="display:none;">
                 <p>Bookmark your favorite verses to keep them close!</p>
                 <button id="findVerseButton">Find Verses</button>
             </div>
         </div>
         <div id="screen7" class="screen">
-            <div class="verse-display text-display">
+            <div class="verse-display text-display main-content">
                 <p id="selectedVerseText">John 3:16 - For God so loved the world that he gave his one and only Son...
                 </p>
             </div>
-            <div class="interactive-sections">
+            <div class="interactive-sections main-content">
                 <textarea id="noteEditor" class="note-editor" placeholder="Enter your notes here..."></textarea>
                 <div class="bookmark-tags">
                     <button id="addBookmarkButton" class="bookmark-button">Add Bookmark</button>
@@ -162,7 +202,7 @@
                         <!-- Dynamically filled with available tags -->
                     </div>
                 </div>
-                <div class="cross-references">
+                <div class="cross-references main-content">
                     <input type="text" id="crossReferenceSearch" placeholder="Search for verses...">
                     <div id="crossReferencesList">
                         <!-- Dynamically filled with search results -->
@@ -181,7 +221,7 @@
                 <button id="historyBtn2">History</button>
                 <button id="bookmarksBtn2">Bookmarks</button>
             </div>
-            <div id="OPverseList2" class="verse-list">
+            <div id="OPverseList2" class="verse-list main-content">
                 <span class="SearchResult" data--book="GENESIS" data--chap="1" data--verse="0" style="touch-action: pan-y; user-select: none;">
                 <span class="VerseNum">GENESIS 1:1</span> In the beginning God created the heaven and the earth.
                 </span>
