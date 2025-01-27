@@ -1,4 +1,4 @@
-const CACHE_NAME = "bible-app-cache-v1.01.01";
+const CACHE_NAME = "bible-app-cache-v1.01.05";
 const ASSETS = [
     "/", // Cache the root URL
     "/index.html",
@@ -7,6 +7,7 @@ const ASSETS = [
     "./index_files/BibleCRef.json",
     "./index_files/bible.json",
     "./index_files/fromthepages_64x64.jpg",
+    "./OpenBible.svg",
     "./index_files/cleanstyle.css",
     "./index_files/hammer.min.js",
     "./index_files/WebSetup.js",
@@ -28,6 +29,7 @@ self.addEventListener("install", event => {
             return cache.addAll(ASSETS);
         })
     );
+    self.skipWaiting(); // Immediately activate the new service worker
 });
 
 // Fetch event: Serve cached content when offline
@@ -54,4 +56,5 @@ self.addEventListener("activate", event => {
             );
         })
     );
+    self.clients.claim(); // Immediately control all clients
 });
