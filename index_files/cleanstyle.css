@@ -1,79 +1,102 @@
 :root {
-    --MainBGcolor: #000;
-    --Maincolor: #fff;
-    --InputBGcolor: #ccf;
-    --Inputcolor: #000;
-    --InputHVRcolor: #aaf;
-    --linklistBGcolor: #444;
-    --Refcolor: #0f0;
-    --headerBGcolor: rgba(34, 34, 34, 0.8);
-    --selected: rgba(255, 255, 255, 0.5);
+    --Accent1: #8800ff;
+    /* Vibrant purple */
+    --Accent2: #0f0;
+    /* Bright teal */
+    --Foreground: #fff;
+    /* White */
+    --Background: #000;
+    /* Black */
 }
 
-.light-theme {
-    --MainBGcolor: #f0f0f0;
-    --Maincolor: #333;
-    --InputBGcolor: #ffffff;
-    --Inputcolor: #5c5c5c;
-    --InputHVRcolor: #e0e0e0;
-    --linklistBGcolor: #eaeaea;
-    --Refcolor: #2a9d8f;
-    --headerBGcolor: rgba(255, 255, 255, 0.95);
+:root {
+    /* Main Colors */
+    --MainBGcolor: var(--Background);
+    /* Background */
+    --Maincolor: var(--Foreground);
+    /* Text (foreground) */
+
+    /* Inputs */
+    --InputBGcolor: color-mix(in srgb, var(--Accent1) 10%, var(--Foreground) 90%);
+    /* Teal tinted */
+    --Inputcolor: color-mix(in srgb, var(--Background) 80%, var(--Accent1) 20%);
+    /* Slight purple mix */
+    --InputHVRcolor: color-mix(in srgb, var(--Accent1) 30%, var(--Foreground) 70%);
+    /* Equal blend of purple and teal */
+
+    /* Links and Highlights */
+    --linklistBGcolor: color-mix(in srgb, var(--Background) 70%, var(--Foreground) 30%);
+    /* Dark grayish */
+    --Refcolor: var(--Accent2);
+    /* Use bright teal directly */
+
+    /* Header and Highlights */
+    --headerBGcolor: color-mix(in srgb, var(--Accent1) 40%, transparent);
+    /* Subtle purple tint */
+    --selected: color-mix(in srgb, var(--Foreground) 50%, var(--Background) 50%);
+    /* Semi-transparent white */
+    --accent: color-mix(in srgb, var(--Accent1) 80%, var(--Accent2) 20%);
+    /* Strong purple with a hint of teal */
 }
 
-.Ocean-Breeze {
-    --MainBGcolor: #2b2f77;
-    --Maincolor: #e1ffff;
-    --InputBGcolor: #58a4b0;
-    --Inputcolor: #f6f1d1;
-    --InputHVRcolor: #5dbcd2;
-    --linklistBGcolor: #33658a;
-    --Refcolor: #ade25d;
-    --headerBGcolor: rgba(43, 47, 119, 0.8);
+.main-theme {
+    /* Main Colors */
+    --MainBGcolor: var(--Background);
+    /* Background */
+    --Maincolor: var(--Foreground);
+    /* Text (foreground) */
+
+    /* Inputs */
+    --InputBGcolor: color-mix(in srgb, var(--Accent1) 10%, var(--Background) 90%);
+    /* Teal tinted */
+    --Inputcolor: color-mix(in srgb, var(--Foreground) 80%, var(--Accent1) 20%);
+    /* Slight purple mix */
+    --InputHVRcolor: color-mix(in srgb, var(--Accent1) 30%, var(--Background) 70%);
+    /* Equal blend of purple and teal */
+
+    /* Links and Highlights */
+    --linklistBGcolor: color-mix(in srgb, var(--Background) 70%, var(--Foreground) 30%);
+    /* Dark grayish */
+    --Refcolor: var(--Accent2);
+    /* Use bright teal directly */
+
+    /* Header and Highlights */
+    --headerBGcolor: color-mix(in srgb, var(--Accent1) 40%, transparent);
+    /* Subtle purple tint */
+    --selected: color-mix(in srgb, var(--Foreground) 50%, var(--Background) 50%);
+    /* Semi-transparent white */
+    --accent: color-mix(in srgb, var(--Accent1) 80%, var(--Accent2) 20%);
+    /* Strong purple with a hint of teal */
 }
 
-.Autumn-Warmth {
-    --MainBGcolor: #3b1f2b;
-    --Maincolor: #f4d35e;
-    --InputBGcolor: #ee964b;
-    --Inputcolor: #f95738;
-    --InputHVRcolor: #facf5a;
-    --linklistBGcolor: #552f44;
-    --Refcolor: #cdd422;
-    --headerBGcolor: rgba(59, 31, 43, 0.8);
-}
+.inverted-input-theme {
+    /* Main Colors */
+    --MainBGcolor: var(--Background);
+    /* Background */
+    --Maincolor: var(--Foreground);
+    /* Text (foreground) */
 
-.Forest-Retreat {
-    --MainBGcolor: #004d3a;
-    --Maincolor: #cce3de;
-    --InputBGcolor: #588c7e;
-    --Inputcolor: #f0f3bd;
-    --InputHVRcolor: #8fc1a9;
-    --linklistBGcolor: #35524a;
-    --Refcolor: #f5dd90;
-    --headerBGcolor: rgba(0, 77, 58, 0.8);
-}
+    /* Inputs */
+    --InputBGcolor: color-mix(in srgb, var(--Accent1) 10%, var(--Foreground) 90%);
+    /* Teal tinted */
+    --Inputcolor: color-mix(in srgb, var(--Background) 80%, var(--Accent1) 20%);
+    /* Slight purple mix */
+    --InputHVRcolor: color-mix(in srgb, var(--Accent1) 30%, var(--Foreground) 70%);
+    /* Equal blend of purple and teal */
 
-.Urban-Chic {
-    --MainBGcolor: #333741;
-    --Maincolor: #fff;
-    --InputBGcolor: #484848;
-    --Inputcolor: #cfdac8;
-    --InputHVRcolor: #606c88;
-    --linklistBGcolor: #3e4c59;
-    --Refcolor: #b8d8d8;
-    --headerBGcolor: rgba(51, 55, 65, 0.8);
-}
+    /* Links and Highlights */
+    --linklistBGcolor: color-mix(in srgb, var(--Background) 70%, var(--Foreground) 30%);
+    /* Dark grayish */
+    --Refcolor: var(--Accent2);
+    /* Use bright teal directly */
 
-.Pastel-Dreams {
-    --MainBGcolor: #f7ebec;
-    --Maincolor: #505050;
-    --InputBGcolor: #d6d2f1;
-    --Inputcolor: #555;
-    --InputHVRcolor: #f1d4e0;
-    --linklistBGcolor: #f3d1f4;
-    --Refcolor: #f0c808;
-    --headerBGcolor: rgba(247, 235, 236, 0.8);
+    /* Header and Highlights */
+    --headerBGcolor: color-mix(in srgb, var(--Accent1) 40%, transparent);
+    /* Subtle purple tint */
+    --selected: color-mix(in srgb, var(--Foreground) 50%, var(--Background) 50%);
+    /* Semi-transparent white */
+    --accent: color-mix(in srgb, var(--Accent1) 80%, var(--Accent2) 20%);
+    /* Strong purple with a hint of teal */
 }
 
 body,
@@ -127,7 +150,19 @@ html {
     right: 20px;
     border: none;
     color: var(--Inputcolor);
-    padding: 10px 20px;
+    padding: 20px;
+    border-radius: 50%;
+    font-size: 200px;
+    transition: 0.3s;
+}
+
+.floating-btnLFT {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    border: none;
+    color: var(--Inputcolor);
+    padding: 20px;
     border-radius: 50%;
     font-size: 200px;
     transition: 0.3s;
@@ -389,4 +424,86 @@ span.resultmark {
 
 .glow {
     box-shadow: 0 0 10px 2px rgba(255, 255, 0, 0.7);
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7em;
+    padding: 2em 1em;
+    border-bottom: 1px solid #ccc;
+}
+
+.toggle-wrapper {
+    position: relative;
+    width: 5.0em;
+    height: 2.4em;
+}
+
+.toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.pick-select {
+    position: absolute;
+    left: 0;
+    opacity: 0;
+    width: 100%;
+    height: 6em;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--InputBGcolor);
+    border-radius: 1.2em 0.5em;
+    cursor: pointer;
+    transition: 0.4s;
+    text-wrap: unset;
+}
+
+.toggle-label,
+.pick-label,
+.color-picker-input,
+.color-picker-label,
+.slider-label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    font-size: 2em;
+}
+
+.toggle-input:checked+.toggle-slider {
+    background-color: var(--accent);
+}
+
+.toggle-slider:before {
+    content: "";
+    position: absolute;
+    width: 2.0em;
+    height: 2.0em;
+    left: 0.2em;
+    bottom: 0.2em;
+    background-color: var(--InputHVRcolor);
+    border-radius: 1em 0.5em;
+    transition: 0.4s;
+}
+
+.toggle-input:checked+.toggle-slider:before {
+    transform: translateX(2.6em);
+}
+
+
+.color-picker-container {
+    background-color: var(--Background);
+    color: var(--Foreground);
+    position: absolute;
+    right: 0;
+    width: 100%;
 }

@@ -6,6 +6,15 @@ var notes = [];
 var Settings = { initualized: false };
 
 function Load() {
+    const isDebug = localStorage.getItem("debug") === "true";
+    if (isDebug) {
+        console.log("Debugging is ON");
+        // Add debugging-specific code here
+    } else {
+        console.log("Debugging is OFF");
+        // Add production-specific code here
+    }
+    loadServiceworker();
     loadHistoryAndBookmarks(); // in ./WebSetup.js
     loadBibleCrossReferences(); // in ./WebSetup.js
     loadBibleCount();
@@ -16,6 +25,7 @@ function Load() {
     setupEventListeners(); // in ./domHandlers.js
     populateTagFilter(); // in ./functions.js
     loadBookmarks();  // in ./functions.js
+    setUpSettings(); // in ./functions.js
 
     VersesOpen.push(new BibleRef("ROMANS", 8, 27, 5));
     VersesOpen.push(new BibleRef("PHILIPPIANS", 4, 12, 4));
@@ -32,6 +42,8 @@ function Load() {
 
     document.getElementById("loadingScreen").style.display = "none";
     setupScrollPastMobile();
+    // Check if debugging is enabled
+
 
 }
 

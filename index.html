@@ -63,6 +63,7 @@
     <script src="./index_files/domHandlers.js"></script>
     <script src="./index_files/History.js"></script>
     <script src="./index_files/bookmarks.js"></script>
+    <script src="./index_files/Settings.js"></script>
     <script src="./index_files/main.js"></script>
 </head>
 
@@ -76,17 +77,17 @@
         const loadingText = document.getElementById("loading-text");
 
         function updateLoadingText() {
-        percent++;
-        if (percent > 100) percent = 999;
-        loadingText.textContent = `Loading... ${percent}%`;
+            percent++;
+            if (percent > 100) percent = 999;
+            loadingText.textContent = `Loading... ${percent}%`;
 
-        setTimeout(() => {
-            if (Math.random() < 0.1) {
-            // 10% chance to jump to a random percent
-            percent = Math.floor(Math.random() * 50 + 25);
-            }
-            updateLoadingText();
-        }, 100);
+            setTimeout(() => {
+                if (Math.random() < 0.1) {
+                    // 10% chance to jump to a random percent
+                    percent = Math.floor(Math.random() * 50 + 25);
+                }
+                updateLoadingText();
+            }, 100);
         }
 
         updateLoadingText();
@@ -103,6 +104,7 @@
             </div>
             <div class="common-footer">
                 <span id="addVerseBtn" class="floating-btn verse-nav-button">+</span>
+                <span id="SettingsBtn" class="floating-btnLFT verse-nav-button">#</span>
             </div>
         </div>
         <div id="screen2" class="screen">
@@ -128,17 +130,6 @@
             </div>
             <div class="common-footer">
                 <span id="addVerseBtn2" class="floating-btn verse-nav-button">+</span>
-                <div>
-                    <select id="theme-selector">
-                        <option value="">Night Mode</option>
-                        <option value="Autumn-Warmth">Autumn Warmth</option>
-                        <option value="Urban-Chic">Urban Chic</option>
-                        <option value="Forest-Retreat">Forest Retreat</option>
-                        <option value="Ocean-Breeze">Ocean Breeze</option>
-                        <option value="Pastel-Dreams">Pastel Dreams</option>
-                        <option value="light-theme">Light Theme</option>
-                    </select>
-                </div>
             </div>
         </div>
         <div id="screen4" class="screen">
@@ -222,12 +213,15 @@
                 <button id="bookmarksBtn2">Bookmarks</button>
             </div>
             <div id="OPverseList2" class="verse-list main-content">
-                <span class="SearchResult" data--book="GENESIS" data--chap="1" data--verse="0" style="touch-action: pan-y; user-select: none;">
-                <span class="VerseNum">GENESIS 1:1</span> In the beginning God created the heaven and the earth.
+                <span class="SearchResult" data--book="GENESIS" data--chap="1" data--verse="0"
+                    style="touch-action: pan-y; user-select: none;">
+                    <span class="VerseNum">GENESIS 1:1</span> In the beginning God created the heaven and the earth.
                 </span>
-                <span class="SearchResult" data--book="JOHN" data--chap="3" data--verse="15" style="touch-action: pan-y; user-select: none;">
-                <span class="VerseNum">JOHN 3:16</span> ¶ For God so loved the world, that he gave his only begotten Son,
-                that whosoever believeth in him should not perish, but have everlasting life.
+                <span class="SearchResult" data--book="JOHN" data--chap="3" data--verse="15"
+                    style="touch-action: pan-y; user-select: none;">
+                    <span class="VerseNum">JOHN 3:16</span> ¶ For God so loved the world, that he gave his only begotten
+                    Son,
+                    that whosoever believeth in him should not perish, but have everlasting life.
                 </span>
                 <!-- Additional verses here -->
             </div>
@@ -250,7 +244,15 @@
             <div id="helpBubbleEnd" class="help-bubble" style="max-width: 400px;">This ends the tutorial. Click here to
                 start using the app.</div>
         </div>
-
+        <div id="screen9" class="screen" style="display: flex;">
+            <div class="common-header">
+                <button id="backButton5" class="back-button">back</button>
+            </div>
+            <div id="settings-list">
+            </div>
+            <div id="submunucont">
+            </div>
+        </div>
 
         <!-- Load external JavaScript -->
 

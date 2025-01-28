@@ -35,6 +35,7 @@ function loadDetailedVerseReadingScreen(TheTitle, TheContent, Verse) {
     document.getElementById("chapterTitle").innerText = TheTitle;
     navigateToScreen(3);
     BibleRef.scrollToVerse(Verse);
+    document.getElementById('textDisplayArea').style.fontSize = `${fontSize}px`;
 }
 
 function loadSearchScreen() {
@@ -86,6 +87,10 @@ function loadVerseContextualInteractionScreen(theVerse) {
     navigateToScreen(7);
 }
 
+function loadSettings() {
+    navigateToScreen(9);
+}
+
 function navigateToScreen(screenId) {
     if (VersesInview.length <= 1) {
         const readingHeader = document.getElementById("ReadingHeader");
@@ -95,11 +100,11 @@ function navigateToScreen(screenId) {
         topswipehandler.onSwipeLeft = BibleRef.ShowNextChapter;
         topswipehandler.onSwipeRight = BibleRef.ShowPreviousChapter;
     }
-    currentScreen = screenId;
     document.getElementById('container').scrollTo(0, 0);
     saveHistoryAndBookmarks();
     document.querySelectorAll('.screen').forEach(screen => screen.style.display = 'none');
     document.getElementById(`screen${screenId}`).style.display = 'flex';
+    currentScreen = screenId;
 }
 
 function GetRelevantVerses() {
@@ -210,6 +215,16 @@ let initialDistance = null;
 let verseScrolledTo = 0;
 
 let focusedVerseElement = null; // Store the currently focused verse element
+let containerElement = null;
+let headerHeight = 0;
+
+function getDistance(touches) {
+    const [touch1, touch2] = touches;
+    const dx = touch1.pageX - touch2.pageX;
+    const dy = touch1.pageY - touch2.pageY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
 
 function handleTouchMove(e) {
     if (e.touches.length === 2 && initialDistance !== null) {
@@ -218,7 +233,7 @@ function handleTouchMove(e) {
 
         if (currentDistance !== initialDistance) {
             // Smooth out the zoom factor using a damping effect
-            const zoomFactor = 1 + (currentDistance - initialDistance) / initialDistance; // Dampen zoom
+            const zoomFactor = 1 + (currentDistance - initialDistance) / initialDistance * 2;
             fontSize = oldFontSize * zoomFactor;
 
             // Constrain font size between minimum and maximum
@@ -229,10 +244,7 @@ function handleTouchMove(e) {
 
             // Use the stored element to scroll directly
             if (focusedVerseElement) {
-                const container = document.getElementById('container');
-                const headerHeight = document.getElementById('ReadingHeader').scrollHeight;
-
-                container.scrollTo({
+                containerElement.scrollTo({
                     top: focusedVerseElement.offsetTop - headerHeight,
                     behavior: 'auto', // Avoid smooth scrolling for speed
                 });
@@ -249,12 +261,16 @@ function handleTouchStart(e) {
         // Store the focused verse element
         const verseIndex = BibleRef.getVerseScroll();
         focusedVerseElement = document.querySelectorAll('.Contents')[verseIndex];
+        containerElement = document.getElementById('container');
+        headerHeight = document.getElementById('ReadingHeader').scrollHeight;
     }
 }
 
 function handleTouchEnd(e) {
     // Reset on touch end
     if (e.touches.length < 2) {
+        Settings.fontSize=fontSize;
+        saveHistoryAndBookmarks();
         initialDistance = null;
     }
 }
@@ -606,26 +622,6 @@ function ShowHelpScreen() {
     document.addEventListener("click", showNextBubble);
     navigateToScreen(8);
     showNextBubble();
-}
-
-/**
- * Generates a color in HSL format based on the golden ratio.
- * @param {number} n - The position index to generate the color for.
- * @returns {string} - The color in HSL format (e.g., "hsl(137.5, 100%, 50%)").
- */
-function generateColor(n) {
-    const GOLDEN_ANGLE = (3 - Math.sqrt(5)) * 180; // Derived from the golden ratio
-    const HUE_START = 0; // Starting hue (red)
-
-    // Calculate the hue for the given position
-    const hue = (HUE_START + (n * GOLDEN_ANGLE)) % 360;
-
-    // Fixed saturation and lightness for vivid and consistent colors
-    const saturation = 100;
-    const lightness = 50;
-
-    // Return the color in HSL format
-    return `hsl(${hue.toFixed(1)}, ${saturation}%, ${lightness}%)`;
 }
 
 

@@ -18,9 +18,6 @@ function setupEventListeners() {
 	document.getElementById('textDisplayArea').addEventListener('touchstart', handleTouchStart);
 	document.getElementById('textDisplayArea').addEventListener('touchmove', handleTouchMove);
 	document.getElementById('textDisplayArea').addEventListener('touchend', handleTouchEnd);
-	document.getElementById('theme-selector').addEventListener('change', function () {
-		document.body.className = this.value;
-	});
 
 	// Screen 4
 	document.getElementById('searchInput').addEventListener('input', (event) => updateSearchResults(event.target.value));
@@ -38,6 +35,11 @@ function setupEventListeners() {
 	});
 	//document.getElementById('categoryFilter').addEventListener('change', (event) => filterBookmarksByCategory(event.target.value));
 	//document.getElementById('findVerseButton').onclick = loadDetailedVerseReadingScreen;
+    
+	document.getElementById('backButton5').onclick = loadVerseListScreen;
+	document.getElementById('SettingsBtn').onclick = loadSettings;
+    
+    
 
 	// Screen 7
 	//document.getElementById('addNewLabel').addEventListener('click', addNewLabel);
@@ -48,6 +50,7 @@ function setupEventListeners() {
 			populateTagList();
 		}
 	});
+    
 
 	document.getElementById('crossReferenceSearch').addEventListener('input', (event) => updateCrossReferences(event.target.value));
 	document.getElementById('saveChanges').addEventListener('click', saveChanges);

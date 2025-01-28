@@ -32,14 +32,34 @@ self.addEventListener("install", event => {
     self.skipWaiting(); // Immediately activate the new service worker
 });
 
-// Fetch event: Serve cached content when offline
+let debugMode = false; // Default debug mode
+
+// Listen for messages from the main thread
+self.addEventListener("message", event => {
+    if (event.data && event.data.type === "SET_DEBUG_MODE") {
+        debugMode = event.data.debug; // Update debug mode
+        console.log(`Debug mode is now ${debugMode ? "ON" : "OFF"}`);
+    }
+});
+
+// Fetch event: Serve cached content when offline or force bypass cache
 self.addEventListener("fetch", event => {
-    event.respondWith(
-        caches.match(event.request).then(response => {
-            // Return cached file or fetch it from the network
-            return response || fetch(event.request);
-        })
-    );
+    if (debugMode) {
+        console.log(`Debug mode is ON - Bypassing cache for: ${event.request.url}`);
+        event.respondWith(
+            fetch(event.request, { cache: "no-store" }).catch(() => {
+                console.warn(`Fetch failed for ${event.request.url} - Unable to load resource in debug mode.`);
+                return caches.match(event.request); // Fallback to cache if offline
+            })
+        );
+    } else {
+        console.log(`Debug mode is OFF - Serving cached content or fetching network for: ${event.request.url}`);
+        event.respondWith(
+            caches.match(event.request).then(response => {
+                return response || fetch(event.request);
+            })
+        );
+    }
 });
 
 // Activate event: Clean up old caches
