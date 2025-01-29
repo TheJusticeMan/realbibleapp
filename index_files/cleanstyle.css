@@ -144,28 +144,30 @@ html {
     color: var(--Maincolor);
 }
 
-.floating-btn {
+.floating-btn, .floating-btnLFT {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: 1em;
+    width: 0.3em;
+    height: 0.3em;
     border: none;
-    color: var(--Inputcolor);
-    padding: 20px;
-    border-radius: 50%;
-    font-size: 200px;
-    transition: 0.3s;
+    background-color: var(--linklistBGcolor);
+    color: var(--Foreground);
+    padding: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    text-align: center;
+}
+
+.floating-btn {
+    border-radius: 0.5em 1em;
+    right: 1em;
 }
 
 .floating-btnLFT {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    border: none;
-    color: var(--Inputcolor);
-    padding: 20px;
-    border-radius: 50%;
-    font-size: 200px;
-    transition: 0.3s;
+    border-radius: 1em 0.5em;
+    left: 1em;
 }
 
 .common-header {
@@ -176,6 +178,8 @@ html {
     padding: 10px;
     justify-content: space-between;
     background-color: var(--headerBGcolor);
+    backdrop-filter: blur(0.5em); /* Frosted glass effect */
+    -webkit-backdrop-filter: blur(0.5em); /* Safari support */
     color: var(--Maincolor);
 }
 
@@ -201,7 +205,7 @@ html {
     padding: 0.5em;
     box-sizing: border-box;
     resize: none;
-    transition: 0.3s;
+    transition: height 0.3s;
 }
 
 .note-editor:focus {
@@ -239,7 +243,6 @@ html {
     text-align: justify;
     max-width: 20em;
     margin: auto;
-    transition: font-size 0.2s ease;
 }
 
 .bibletext {
@@ -272,7 +275,7 @@ textarea {
     border-width: 0;
     margin: 0.2em;
     padding: 0.3em;
-    transition: 0.3s;
+    transition: background-color 0.3s;
     color: var(--Inputcolor);
 }
 
@@ -291,12 +294,12 @@ span.SearchResult {
     cursor: pointer;
     display: block;
     padding: 10px;
-    transition: 0.3s;
+    transition: background-color 0.3s;
 }
 
 span.selectedmark {
     background-color: var(--selected);
-    text-shadow: 0px 0px 0.5em black;
+    text-shadow: 0px 0px 0.5em var(--Background);
 }
 
 span.SearchResult:hover,
@@ -310,7 +313,7 @@ span.resultmark {
     border-radius: 0.6em 0.3em;
     padding: 0 0.6em;
     /* Horizontal padding only */
-    text-shadow: 0px 0px 0.5em black;
+    text-shadow: 0px 0px 0.5em var(--Background);
 }
 
 .verse-nav-button {
@@ -430,29 +433,25 @@ span.resultmark {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.7em;
-    padding: 2em 1em;
+    font-size: 1em;
+    padding: 1.5em 1em;
     border-bottom: 1px solid #ccc;
+    background-color: transparent;
+    color: var(--Foreground);
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .toggle-wrapper {
     position: relative;
-    width: 5.0em;
-    height: 2.4em;
+    width: 4em;
+    height: 2em;
+    cursor: pointer;
 }
 
 .toggle-input {
     opacity: 0;
     width: 0;
     height: 0;
-}
-
-.pick-select {
-    position: absolute;
-    left: 0;
-    opacity: 0;
-    width: 100%;
-    height: 6em;
 }
 
 .toggle-slider {
@@ -462,48 +461,185 @@ span.resultmark {
     right: 0;
     bottom: 0;
     background-color: var(--InputBGcolor);
-    border-radius: 1.2em 0.5em;
+    border-radius: 1em 0.5em;
     cursor: pointer;
-    transition: 0.4s;
-    text-wrap: unset;
+    transition: background-color 0.4s;
+    box-shadow: inset 0 0 5px var(--Background);
 }
 
-.toggle-label,
-.pick-label,
-.color-picker-input,
-.color-picker-label,
-.slider-label {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    font-size: 2em;
+.toggle-slider:before {
+    content: "";
+    position: absolute;
+    width: 1.8em;
+    height: 1.8em;
+    left: 0.1em;
+    bottom: 0.1em;
+    background-color: var(--InputHVRcolor);
+    border-radius: 0.8em 0.4em;
+    transition: transform 0.4s;
+    box-shadow: 0 2px 4px var(--Background);
 }
 
 .toggle-input:checked+.toggle-slider {
     background-color: var(--accent);
 }
 
-.toggle-slider:before {
-    content: "";
-    position: absolute;
-    width: 2.0em;
-    height: 2.0em;
-    left: 0.2em;
-    bottom: 0.2em;
-    background-color: var(--InputHVRcolor);
-    border-radius: 1em 0.5em;
-    transition: 0.4s;
-}
-
 .toggle-input:checked+.toggle-slider:before {
-    transform: translateX(2.6em);
+    transform: translateX(2em);
 }
 
+.setting-label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    font-size: 1.5em;
+    padding-right: 1em;
+}
+
+.pick-select {
+    display: block;
+    width: 100%;
+    max-width: 12em;
+    padding: 0.4em;
+    font-size: 1em;
+    color: var(--Foreground);
+    background-color: var(--InputBGcolor);
+    border: 1px solid #ccc;
+    border-radius: 0.5em;
+    appearance: none;
+    transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+}
+
+.pick-select:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 5px var(--accent);
+}
 
 .color-picker-container {
-    background-color: var(--Background);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* background-color: var(--Background); */
     color: var(--Foreground);
     position: absolute;
     right: 0;
     width: 100%;
+    height: 100vh;
+    padding: 1em;
+    box-shadow: 0 2px 10px var(--Foreground);
+    /* z-index: 10; */
+    background-color: color-mix(in srgb, var(--Background) 90%, transparent);
+    backdrop-filter: blur(0.5em); /* Frosted glass effect */
+    -webkit-backdrop-filter: blur(0.5em); /* Safari support */
+}
+
+.color-palette{
+    display: flex;
+    justify-content: center;
+    margin: 10px;
+}
+
+.color-box {
+    width: 20px;
+    height: 20px;
+    margin: 2px;
+    border: 2px solid var(--Foreground);
+    border-radius: 0.5em 0.25em;
+    cursor: pointer;
+    box-shadow: 0 1px 2px var(--Foreground);
+}
+
+.color-preview {
+    width: 100px;
+    height: 100px;
+    margin: 1em 0;
+    border: 2px solid var(--Foreground);
+    border-radius: 50px 25px;
+    box-shadow: 0 2px 5px var(--Foreground);
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.color-preview:hover {
+    border-color: var(--accent);
+}
+
+.color-code {
+    font-size: 1em;
+    margin: 0.5em 0;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.slider-input {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 0.5em;
+    background-color: var(--InputBGcolor);
+    outline: none;
+    border-radius: 0.5em 0.25em;
+    transition: background-color 0.3s;
+}
+
+.slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1em;
+    height: 1em;
+    background: var(--accent);
+    cursor: pointer;
+    border-radius: 0.5em 0.25em;
+    box-shadow: 0 2px 4px var(--Background);
+}
+
+.slider-input::-moz-range-thumb {
+    width: 1em;
+    height: 1em;
+    background: var(--accent);
+    cursor: pointer;
+    border-radius: 0.5em 0.25em;
+    box-shadow: 0 2px 4px var(--Background);
+}
+
+.submenu-window{
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    /* background-color: var(--Background); */
+    background-color: transparent;
+    color: var(--Foreground);
+    backdrop-filter: blur(0.5em); /* Frosted glass effect */
+    -webkit-backdrop-filter: blur(0.5em); /* Safari support */
+
+}
+
+
+/* General transition for all screens */
+.screen {
+    opacity: 0;
+    font-size: 0em;
+    transition: opacity 1s, font-size 0.3s;
+}
+
+/* Active state for all screens */
+.screen.activeK {
+    opacity: 1;
+    font-size: 1em;
+}
+
+/* Override for #screen3: No font-size animation */
+#screen3 {
+    transition: opacity 1s; /* Only animate opacity */
+    font-size: 1em;
+}
+
+#screen3.activeK {
+    opacity: 1;
+    font-size: 1em; /* Font size changes instantly with no animation */
 }

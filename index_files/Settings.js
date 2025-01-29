@@ -1,18 +1,13 @@
 let SubmenuWindow = null;
 
 function setUpSettings() {
+    document.getElementById("submunucont").innerHTML = "";
+    document.getElementById("settings-list").innerHTML = "";
+    SubmenuWindow = null;
     SubmenuWindow = document.createElement("div");
     SubmenuWindow.className = "submenu-window";
     SubmenuWindow.id = 'submenu';
-    SubmenuWindow.style.display = "none";
-    SubmenuWindow.style.position = "absolute";
-    SubmenuWindow.style.top = "0";
-    SubmenuWindow.style.left = "0";
-    SubmenuWindow.style.width = "100%";
-    SubmenuWindow.style.height = "100%";
-    SubmenuWindow.style.backgroundColor = "rgba(0,0,0,0.8)";
     document.getElementById("submunucont").appendChild(SubmenuWindow);
-
     // Example Usage
     // Create a toggle for "Dark Mode" in a container with ID "settings-list"
     for (let setting in defaultSettings) {
@@ -20,7 +15,7 @@ function setUpSettings() {
             Settings[setting] = defaultSettings[setting].defaultValue;
         }
         let settingObj = defaultSettings[setting];
-        new settingObj.type({
+        const mysetting = new settingObj.type({
             containerId: "settings-list",
             label: settingObj.label,
             options: settingObj.options,
@@ -68,7 +63,7 @@ class ToggleSetting {
 
         // Create the label
         const labelEl = document.createElement("label");
-        labelEl.className = "toggle-label";
+        labelEl.className = "setting-label";
         labelEl.textContent = this.label;
         labelEl.setAttribute("for", `toggle-${this.settingKey}`); // Associate label with checkbox
 
@@ -160,7 +155,7 @@ class PickSetting {
         }
         // Create the label
         const labelEl = document.createElement("label");
-        labelEl.className = "pick-label";
+        labelEl.className = "setting-label";
         labelEl.textContent = `${this.label}: ${option.label}`;
         labelEl.setAttribute("for", `pick-${this.settingKey}`); // Associate label with select
 
@@ -250,7 +245,7 @@ class SliderSetting {
 
         // Create the label
         const labelEl = document.createElement("label");
-        labelEl.className = "slider-label";
+        labelEl.className = "setting-label";
         labelEl.textContent = `${this.label}: ${this.getSettingValue()}`;
         labelEl.setAttribute("for", `slider-${this.settingKey}`); // Associate label with input
 
@@ -326,7 +321,7 @@ class ColorPickerSetting {
 
         // Create the label
         const labelEl = document.createElement("label");
-        labelEl.className = "color-picker-label";
+        labelEl.className = "setting-label";
         labelEl.textContent = this.label;
         labelEl.setAttribute("for", `color-picker-${this.settingKey}`); // Associate label with input
 
@@ -408,7 +403,7 @@ class BackButton {
         settingRow.className = "setting-row";
         // Create the back button
         const backButton = document.createElement("div");
-        backButton.className = "toggle-label";
+        backButton.className = "setting-label";
         backButton.textContent = this.label;
 
         settingRow.appendChild(backButton)
@@ -451,7 +446,7 @@ class SettingsSubmenu {
 
         // Create the label
         const labelEl = document.createElement("label");
-        labelEl.className = "toggle-label";
+        labelEl.className = "setting-label";
         labelEl.textContent = this.label;
         labelEl.setAttribute("for", `submenu-${this.settingKey}`); // Associate label with select
         settingRow.appendChild(labelEl);
@@ -491,11 +486,8 @@ class ColorPicker {
     constructor(containerElement) {
         // Create palettes and preview elements dynamically
         this.container = containerElement;
+        this.container.className = "color-picker-container";
         this.container.style.display = 'flex';
-        this.container.style.flexDirection = 'column';
-        this.container.style.alignItems = 'center';
-        this.container.style.justifyContent = 'center';
-        this.container.style.minHeight = '100vh';
         //onColorSelect
         this.onColorSelect = (color) => {
             console.log(`Color selected: ${color}`);
@@ -507,14 +499,12 @@ class ColorPicker {
             lightness: this.createElement('div', 'lightness-palette'),
         };
         this.colorPreview = this.createElement('div', 'color-preview');
+        this.colorPreview.className = "color-preview";
 
         this.colorCode = this.createElement('div', 'color-code');
+        this.colorCode.className = "color-code";
 
         // Style color preview
-        this.colorPreview.style.width = '100px';
-        this.colorPreview.style.height = '100px';
-        this.colorPreview.style.margin = '20px';
-        this.colorPreview.style.border = '1px solid #000';
         this.colorPreview.addEventListener('click', () => {
             const color = `hsl(${this.selectedHue.toFixed(1)}, ${this.selectedSaturation}%, ${this.selectedLightness}%)`;
             this.colorPreview.style.backgroundColor = color;
@@ -523,10 +513,6 @@ class ColorPicker {
             this.destroy();
         })
 
-        // Style color code
-        this.colorCode.style.margin = '10px';
-        this.colorCode.style.fontFamily = 'Arial, sans-serif';
-        this.colorCode.style.fontSize = '16px';
 
         // Parse initial HSL values from container's value
         const initialColor = this.parseHSL(this.container.value || 'hsl(0, 100%, 50%)');
@@ -563,9 +549,7 @@ class ColorPicker {
 
     createPalette(palette, values, type) {
         palette.innerHTML = ''; // Clear existing colors
-        palette.style.display = 'flex';
-        palette.style.justifyContent = 'center';
-        palette.style.margin = '10px';
+        palette.className = 'color-palette';
 
         values.forEach(value => {
             const colorBox = document.createElement('div');
@@ -578,10 +562,6 @@ class ColorPicker {
             colorBox.style.backgroundColor = color;
             colorBox.classList.add('color-box');
             colorBox.dataset.value = type === 'hue' ? (value * this.factor) % 360 : value;
-            colorBox.style.width = '20px';
-            colorBox.style.height = '20px';
-            colorBox.style.margin = '2px';
-            colorBox.style.cursor = 'pointer';
 
             colorBox.addEventListener('click', () => {
                 if (type === 'hue') this.selectedHue = parseFloat(colorBox.dataset.value);

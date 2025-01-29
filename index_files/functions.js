@@ -88,10 +88,12 @@ function loadVerseContextualInteractionScreen(theVerse) {
 }
 
 function loadSettings() {
+    setUpSettings();
     navigateToScreen(9);
 }
 
 function navigateToScreen(screenId) {
+    console.log("Screen:"+screenId);
     if (VersesInview.length <= 1) {
         const readingHeader = document.getElementById("ReadingHeader");
         if (!topswipehandler) {
@@ -102,8 +104,15 @@ function navigateToScreen(screenId) {
     }
     document.getElementById('container').scrollTo(0, 0);
     saveHistoryAndBookmarks();
-    document.querySelectorAll('.screen').forEach(screen => screen.style.display = 'none');
-    document.getElementById(`screen${screenId}`).style.display = 'flex';
+    document.querySelectorAll('.screen').forEach(screen => { screen.style.display = 'none'; screen.classList.remove("activeK") });
+    const Cscreen = document.getElementById(`screen${screenId}`);
+    Cscreen.style.display = 'flex';      // Step 1: make it visible with initial styles
+
+    requestAnimationFrame(() => {
+        // Step 2: Wait for the next frame (browser reflow)
+        Cscreen.classList.add('activeK'); // Step 3: trigger transition
+    });
+
     currentScreen = screenId;
 }
 
@@ -269,7 +278,7 @@ function handleTouchStart(e) {
 function handleTouchEnd(e) {
     // Reset on touch end
     if (e.touches.length < 2) {
-        Settings.fontSize=fontSize;
+        Settings.fontSize = fontSize;
         saveHistoryAndBookmarks();
         initialDistance = null;
     }

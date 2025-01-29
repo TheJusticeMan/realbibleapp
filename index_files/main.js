@@ -3,7 +3,18 @@ let Biblewordcounts = {};
 const Biblewordcount = 793853;
 let BibleCrossReferences = {};
 var notes = [];
-var Settings = { initualized: false };
+var Settings = {
+    "initualized": false,
+    "ShowHelp": false,
+    "fontSize": "16",
+    "debug": false,
+    "reset": false,
+    "invert-inputs": true,
+    "Foreground": "hsl(0,100%,100%)",
+    "Background": "hsl(0,100%,0%)",
+    "Accent1": "hsl(275,100%,50%)",
+    "Accent2": "hsl(105,100%,50%)"
+}
 
 function Load() {
     const isDebug = localStorage.getItem("debug") === "true";
