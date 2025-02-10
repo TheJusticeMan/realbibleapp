@@ -37,6 +37,18 @@ function setUpSettings() {
     document.body.style.setProperty("--Accent2", Settings.Accent2);
 }
 
+function mergeSettings(DefaultSettings, Settings) {
+    const mergedSettings = {};
+    for (const setting in DefaultSettings) {
+        if (Settings.hasOwnProperty(setting) && Settings[setting] !== undefined && Settings[setting] !== null) {
+            mergedSettings[setting] = Settings[setting];
+        } else {
+            mergedSettings[setting] = DefaultSettings[setting];
+        }
+    }
+    return mergedSettings;
+}
+
 class ToggleSetting {
     constructor({ containerId, label, settingKey, defaultValue = false, onChange }) {
         this.containerId = containerId;

@@ -1,50 +1,70 @@
 {
     "name": "The Real Bible App",
     "short_name": "BibleApp",
-    "description": "A simple yet powerful Bible study tool designed for quick navigation and cross-referencing on mobile devices.",
-    "start_url": "../index.html",
+    "description": "A comprehensive Bible study tool designed for seamless navigation, intelligent cross-referencing, and offline access. Dive deeper into Scripture with AI-powered insights and user-driven learning.",
+    "start_url": "index.html",
     "display": "standalone",
     "background_color": "#000000",
     "theme_color": "#444444",
     "orientation": "portrait-primary",
     "icons": [
         {
-            "src": "../OpenBible.svg",
+            "src": "OpenBible.svg",
             "sizes": "any",
             "type": "image/svg+xml"
         },
         {
-            "src": "../OpenBible.svg",
-            "sizes": "48x48",
-            "type": "image/svg+xml"
-        },
-        {
-            "src": "../OpenBible.svg",
-            "sizes": "72x72",
-            "type": "image/svg+xml"
-        },
-        {
-            "src": "../OpenBible.svg",
-            "sizes": "96x96",
-            "type": "image/svg+xml"
-        },
-        {
-            "src": "../OpenBible.svg",
-            "sizes": "144x144",
-            "type": "image/svg+xml"
-        },
-        {
-            "src": "../OpenBible.svg",
+            "src": "icon-192.png",
             "sizes": "192x192",
-            "type": "image/svg+xml"
+            "type": "image/png"
         },
         {
-            "src": "../OpenBible.svg",
+            "src": "icon-512.png",
             "sizes": "512x512",
-            "type": "image/svg+xml"
+            "type": "image/png"
         }
     ],
-    "categories": ["education", "books"],
+    "categories": [
+        "education",
+        "books",
+        "reference",
+        "utilities"
+    ],
     "lang": "en",
-    "dir": "ltr"
+    "dir": "ltr",
+    "screenshots": [
+        {
+            "src": "screenshot1.png",
+            "sizes": "1442x3202",
+            "type": "image/png",
+            "label": "Home Screen"
+        },
+        {
+            "src": "screenshot2.png",
+            "sizes": "1442x3202",
+            "type": "image/png",
+            "label": "Cross-Referencing Feature"
+        }
+    ],
+    "share_target": {
+        "action": "/share-handler.html",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url",
+            "files": [
+                {
+                    "name": "image",
+                    "accept": ["image/*"]
+                }
+            ]
+        }
+    },
+    "permissions": [
+        "clipboard-read",
+        "clipboard-write",
+        "storage"
+    ]
 }

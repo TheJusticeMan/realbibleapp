@@ -8,8 +8,8 @@ class BibleRef {
 		this.Chap = Number(Chap);
 		this.Verse = Number(Verse);
 		this.color = color;
+		if (color instanceof RegExp) this.SearchQ = color;
 	}
-
 	createElement(tag = "div", className = "", contextMenuHandler = null, clickHandler = null, content = "", onSwipeLeft = null, onSwipeRight = null) {
 		const element = document.createElement(tag);
 
@@ -68,7 +68,7 @@ class BibleRef {
 	}
 
 	get ChapterElement() {
-		const chapterElement = this.createElement();
+		const chapterElement = this.createElement("div", "chapterElement");
 		Bible[this.Book][this.Chap].forEach((_, i) => {
 			let verseRef = new BibleRef(this.Book, this.Chap, i);
 			chapterElement.appendChild(verseRef.VerseElement);
@@ -122,6 +122,19 @@ class BibleRef {
 			BibleRef.goToVerse,
 			`${this.Verse + 1}`
 		);
+	}
+
+	get singleVerseElement() {
+		return this.createElement(
+			"p",
+			"Contents",
+			BibleRef.showVerseMenu,
+			BibleRef.goToVerse,
+			`${this.italicsFormatted}<p><span class="VerseNum">${this.refText}</span></p>`);
+	}
+
+	get BookIndex() {
+		return booksOfTheBible.indexOf(this.Book);
 	}
 
 	get singleVerseText() {
@@ -271,7 +284,7 @@ class BibleRef {
 		return Number([...document.querySelectorAll('.Contents')]
 			.find(verseEl => verseEl.offsetTop >= scrollPosition)?.dataset.Verse);
 	}
-	
+
 	static scrollToVerse(Verse) {
 		const verses = document.querySelectorAll('.Contents');
 		const scrollToOffset = verses[Verse].offsetTop;
@@ -283,11 +296,12 @@ class BibleRef {
 		const { ChapterElement: element, Book, Chap, Verse } = currentVerse;
 		const readingHeader = document.getElementById("ReadingHeader");
 
-        if (!topswipehandler) {
-            topswipehandler = new SwipeHandler(readingHeader);
-        }
-        topswipehandler.onSwipeLeft = BibleRef.goLeft;
-        topswipehandler.onSwipeRight = BibleRef.goRight;
+		if (!topswipehandler) {
+			topswipehandler = new SwipeHandler(readingHeader);
+		}
+		topswipehandler.cycleSwipe = true;
+		topswipehandler.onSwipeLeft = BibleRef.goLeft;
+		topswipehandler.onSwipeRight = BibleRef.goRight;
 
 		const bookTitle = `${VersesInviewIndex > 0 ? "<  " : ""}${Book} ${Chap}${VersesInviewIndex < VersesInview.length - 1 ? "  >" : ""}`;
 		currentverseviewing = currentVerse;
@@ -352,6 +366,95 @@ class BibleRef {
 	static getRefFromHTML(element) {
 		const { Book, Chap, Verse } = element.dataset;
 		return new BibleRef(Book, Chap, Verse);
+	}
+}
+
+class BibleRange {
+	constructor(start, end = null) {
+		// Handle array input correctly
+		if (Array.isArray(start)) {
+			this.start = new BibleRef(...start);
+			this.end = end ? new BibleRef(...end) : this.start;
+			return;
+		}
+
+		// Default to the same reference if no range is given
+		this.start = start;
+		this.end = end || start;
+	}
+
+	toString() {
+		// Only show range if start and end are different
+		return this.start.refText + (this.start !== this.end ? `-${this.end.refText}` : '');
+	}
+
+	fromosis(osis) {
+		if (!osis) return null; // Return null if input is empty
+
+		const [start, endRaw] = osis.split('-').map(part => part.split('.'));
+		if (!start[0]) return null; // Ensure book name exists
+
+		const bookIndex = BookShortNames.indexOf(start[0]);
+		if (bookIndex === -1) return null; // Invalid book name
+
+		const book = booksOfTheBible[bookIndex];
+		const chapter = parseInt(start[1] || 1, 10); // Default chapter to 1
+		const verse = parseInt(start[2] || 0, 10); // Default verse to 0
+
+		this.start = new BibleRef(book, chapter, verse);
+		this.end = this.start; // Default end to start
+
+		if (!endRaw) return;
+
+		// Ensure endRaw has the same specificity as start
+		while (endRaw.length < start.length) {
+			endRaw.unshift(start[start.length - endRaw.length - 1]);
+		}
+
+		const endBookIndex = BookShortNames.indexOf(endRaw[0]);
+		const endBook = endBookIndex !== -1 ? booksOfTheBible[endBookIndex] : book;
+		const endChapter = parseInt(endRaw[1] || 1, 10); // Default chapter to 1
+		const endVerse = parseInt(endRaw[2] || 0, 10); // Default verse to 0
+
+		this.end = new BibleRef(endBook, endChapter, endVerse);
+	}
+	get SearchElement() {
+		return this.start.createElement(
+			"span",
+			"SearchResult",
+			BibleRef.showVerseMenu,
+			BibleRef.goToVerse,
+			`<span class="VerseNum">${this.start.refText}</span> ${this.italicsFormatted}`
+		);
+	}
+	get verses() {
+		const verses = [];
+		const { start, end } = this;
+		const startBookIndex = start.BookIndex;
+		const endBookIndex = end.BookIndex;
+
+		for (let i = startBookIndex; i <= endBookIndex; i++) {
+			const book = booksOfTheBible[i];
+			const startChap = i === startBookIndex ? start.Chap : 1;
+			const endChap = i === endBookIndex ? end.Chap : Bible[book].length - 1;
+
+			for (let j = startChap; j <= endChap; j++) {
+				const chapter = Bible[book][j];
+				const startVerse = (i === startBookIndex && j === start.Chap) ? start.Verse : 0;
+				const endVerse = (i === endBookIndex && j === end.Chap) ? end.Verse : chapter.length - 1;
+
+				for (let k = startVerse; k <= endVerse; k++) {
+					verses.push(new BibleRef(book, j, k));
+				}
+			}
+		}
+		return verses;
+	}
+	get italicsFormatted() {
+		return this.verses.map(verse => `<span class="VerseNum">${verse.Verse}</span>  ${verse.italicsFormatted}`).join(" ");
+	}
+	get refText() {
+		return `${this.start.refText}-${this.end.refText}`;
 	}
 }
 

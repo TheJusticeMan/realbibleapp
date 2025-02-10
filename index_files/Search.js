@@ -7,9 +7,7 @@ class BibleSearchClass {
     constructor(searchFor, searchType, regExpOn = false, useWholeWords = false, tags = "g") {
         this.MAX_RESULTS = 20; // Define the maximum number of results
         this.results = [];
-        this.currentBookIndex = "GENESIS";
-        this.currentChapterIndex = 1;
-        this.currentVerseIndex = 0;
+        this.LastS=new BibleRef("GENESIS",1,0);
         this.status = 0; // 0: nothing, 1: data collected, 2: set up, 3: searched, 4: shown
 
         // Initialize search parameters
@@ -41,56 +39,37 @@ class BibleSearchClass {
 
     search() {
         if (this.status < 2) this.setupSearch();
-        let Started = false;
-        let highlight = this.searchForCpt;
-        if (!(highlight instanceof RegExp)) {
-            highlight = new RegExp(
-                highlight.wdList.map(creg => creg.source).join("|"),
-                "g"
-            );
-        }
+        let started = false;
+        let highlight = this.searchForCpt instanceof RegExp 
+            ? this.searchForCpt 
+            : new RegExp(this.searchForCpt.wdList.map(creg => creg.source).join("|"), "g");
 
-        outerLoop: for (const B in BibleSearch) { // Iterate through each book
-            if (B != this.currentBookIndex && Started == false) {
-                //alert(B);
-                continue
-            }
-            Started = true;
+        for (const B in BibleSearch) { 
+            if (!started && B != this.LastS.Book) continue;
+            started = true;
             const chapters = BibleSearch[B];
-            for (let C = this.currentChapterIndex; C < chapters.length; C++) { // Iterate through each chapter
+            for (let C = this.LastS.Chap; C < chapters.length; C++) {
                 const verses = chapters[C];
-                for (let V = this.currentVerseIndex; V < verses.length; V++) { // Iterate through each verse
-                    if (this.searchForCpt.test(verses[V])) { // Check if the verse includes the query
-                        const bibleRef = new BibleRef(B, C, V);
-                        bibleRef.index = this.searchForCpt.test(verses[V]);
-                        bibleRef.SearchQ = highlight;
-                        this.results.push(bibleRef);
-                        if (this.results.length >= this.MAX_RESULTS) { // Check if max results are reached
-                            this.currentBookIndex = B;
-                            this.currentChapterIndex = C;
-                            this.currentVerseIndex = V + 1;
-                            break outerLoop; // Break out of all loops
-                        }
+                for (let V = this.LastS.Verse; V < verses.length; V++) {
+                    if (!this.searchForCpt.test(verses[V])) continue;
+                    this.results.push(new BibleRef(B, C, V, highlight));
+                    if (this.results.length >= this.MAX_RESULTS) {
+                        this.LastS=new BibleRef(B, C, V);
+                        return this.results;
                     }
                 }
-                this.currentVerseIndex = 0; // Reset verse index for the next chapter
+                this.LastS.Verse = 0;
             }
-            this.currentChapterIndex = 1; // Reset chapter index for the next book
-            this.currentBookIndex = B;
+            this.LastS.Chap = 1;
         }
-
-
         return this.results;
     }
 
     reset() {
         this.results = [];
-        this.currentBookIndex = "GENESIS";
-        this.currentChapterIndex = 1;
-        this.currentVerseIndex = 0;
+        this.LastS = new BibleRef("GENESIS", 1, 0);
         this.status = 0;
     }
-
 
     historyText() {
         return `Results for: '${this.searchFor}'`;

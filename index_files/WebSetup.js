@@ -13,6 +13,23 @@ async function loadBibleCrossReferences() {
     }
 }
 
+async function loadTopicsText() {
+    try {
+        const response = await fetch('./index_files/topic-scores.txt');
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+        }
+        const TString = await response.text();
+        console.log('BibleTopics loaded:', TString.substring(0, 100) + '...'); // Preview first 100 characters
+        return TString;
+    } catch (error) {
+        console.error('Failed to load topic-scores.txt:', error);
+        alert('Failed to load topic-scores.txt: ' + error.message);
+        return null;
+    }
+}
+
+
 async function loadBibleCount() {
     try {
         const response = await fetch('./index_files/BibleCount.json');
@@ -68,9 +85,9 @@ function loadHistoryAndBookmarks() {
             if (userData.history) History = userData.history;
             if (userData.bookmarks) tagManager.deserialize(userData.bookmarks);
             if (userData.notes) notes = userData.notes;
-            if (userData.Settings) Settings = userData.Settings;
+            if (userData.Settings) Settings = mergeSettings(Settings,userData.Settings);
             console.log('History and bookmarks loaded successfully.');
-            console.log('settings',Settings);
+            console.log('settings', Settings);
         } else {
             throw new Error('No data found');
         }

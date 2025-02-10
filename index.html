@@ -64,6 +64,7 @@
     <script src="./index_files/History.js"></script>
     <script src="./index_files/bookmarks.js"></script>
     <script src="./index_files/Settings.js"></script>
+    <script src="./index_files/topics.js"></script>
     <script src="./index_files/main.js"></script>
 </head>
 
@@ -74,6 +75,7 @@
     </div>
     <script>
         let percent = 0;
+        let loading = true;
         const loadingText = document.getElementById("loading-text");
 
         function updateLoadingText() {
@@ -86,7 +88,7 @@
                     // 10% chance to jump to a random percent
                     percent = Math.floor(Math.random() * 50 + 25);
                 }
-                updateLoadingText();
+                if (loading) updateLoadingText();
             }, 100);
         }
 
@@ -163,7 +165,7 @@
         <div id="screen6" class="screen">
             <div class="common-header">
                 <button id="backButton4" class="back-button">Back</button>
-                <h1>Bookmarked Verses</h1>
+                <h1>Bookmarks</h1>
                 <select id="tagFilter" class="tag-filter">
                     <option value="all">All Tags</option>
                     <!-- Dynamically populated with available tags -->
@@ -181,12 +183,12 @@
             </div>
         </div>
         <div id="screen7" class="screen">
-            <div class="verse-display text-display main-content">
-                <p id="selectedVerseText">John 3:16 - For God so loved the world that he gave his one and only Son...
-                </p>
+            <div id="selectedVerseText" class="verse-display text-display main-content">
+                <div id="BibleContents"> </div>
             </div>
-            <div class="interactive-sections main-content">
+            <div class="main-content">
                 <textarea id="noteEditor" class="note-editor" placeholder="Enter your notes here..."></textarea>
+                <input type="button" id="noteEditerEscape" class="noteEditerEscape" value="Done">
                 <div class="bookmark-tags">
                     <button id="addBookmarkButton" class="bookmark-button">Add Bookmark</button>
                     <div id="tagList" class="tag-list" style="display:none;">

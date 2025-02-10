@@ -64,7 +64,6 @@ class TagManager {
             this.tags[tag] = new Set(parsedTags[tag]);
         }
     }
-
 }
 
 // Example usage
