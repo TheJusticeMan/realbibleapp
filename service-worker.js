@@ -1,7 +1,7 @@
-const CACHE_NAME = "bible-app-cache-v1.01.05";
+const CACHE_NAME = "bible-app-cache-v2.00.00";
 const ASSETS = [
-    "/", // Cache the root URL
-    "/index.html",
+    "./", // Cache the root URL
+    "./index.html",
     "./index_files/manifest.json",
     "./index_files/BibleCount.json",
     "./index_files/BibleCRef.json",

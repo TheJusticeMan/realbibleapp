@@ -2,7 +2,8 @@
     "name": "The Real Bible App",
     "short_name": "BibleApp",
     "description": "A comprehensive Bible study tool designed for seamless navigation, intelligent cross-referencing, and offline access. Dive deeper into Scripture with AI-powered insights and user-driven learning.",
-    "start_url": "index.html",
+    "start_url": "./index.html",
+    "scope": "./",
     "display": "standalone",
     "background_color": "#000000",
     "theme_color": "#444444",
@@ -10,18 +11,19 @@
     "icons": [
         {
             "src": "OpenBible.svg",
-            "sizes": "any",
             "type": "image/svg+xml"
         },
         {
             "src": "icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
             "src": "icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ],
     "categories": [
@@ -47,24 +49,12 @@
         }
     ],
     "share_target": {
-        "action": "/share-handler.html",
-        "method": "POST",
-        "enctype": "multipart/form-data",
+        "action": "./index.html",
+        "method": "GET",
         "params": {
             "title": "title",
             "text": "text",
-            "url": "url",
-            "files": [
-                {
-                    "name": "image",
-                    "accept": ["image/*"]
-                }
-            ]
+            "url": "url"
         }
-    },
-    "permissions": [
-        "clipboard-read",
-        "clipboard-write",
-        "storage"
-    ]
+    }
 }
