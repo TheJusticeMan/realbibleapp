@@ -1,24 +1,25 @@
 const CACHE_NAME = "bible-app-cache-v2.00.00";
 const ASSETS = [
-    "./", // Cache the root URL
-    "./index.html",
-    "./index_files/manifest.json",
-    "./index_files/BibleCount.json",
-    "./index_files/BibleCRef.json",
-    "./index_files/bible.json",
-    "./index_files/fromthepages_64x64.jpg",
-    "./OpenBible.svg",
-    "./index_files/cleanstyle.css",
-    "./index_files/hammer.min.js",
-    "./index_files/WebSetup.js",
-    "./index_files/Bible.js",
-    "./index_files/Search.js",
-    "./index_files/ShowFuncs.js",
-    "./index_files/functions.js",
-    "./index_files/domHandlers.js",
-    "./index_files/History.js",
-    "./index_files/bookmarks.js",
-    "./index_files/main.js",
+    "/realbibleapp/index.html", // Explicit root page
+    "/realbibleapp/manifest.json",
+    "/realbibleapp/index_files/BibleCount.json",
+    "/realbibleapp/index_files/BibleCRef.json",
+    "/realbibleapp/index_files/bible.json",
+    "/realbibleapp/index_files/fromthepages_64x64.jpg",
+    "/realbibleapp/OpenBible.svg",
+    "/realbibleapp/index_files/cleanstyle.css",
+    "/realbibleapp/index_files/hammer.min.js",
+    "/realbibleapp/index_files/WebSetup.js",
+    "/realbibleapp/index_files/Bible.js",
+    "/realbibleapp/index_files/Search.js",
+    "/realbibleapp/index_files/ShowFuncs.js",
+    "/realbibleapp/index_files/functions.js",
+    "/realbibleapp/index_files/domHandlers.js",
+    "/realbibleapp/index_files/History.js",
+    "/realbibleapp/index_files/bookmarks.js",
+    "/realbibleapp/index_files/topics.js",
+    "/realbibleapp/index_files/Settings.js",
+    "/realbibleapp/index_files/main.js"
 ];
 
 // Install event: Cache files
