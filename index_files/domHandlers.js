@@ -2,7 +2,7 @@ function getElementsByIds(...ids) {
     return ids.map(id => document.getElementById(id) || null);
 }
 
-function addclickhandler(ID,Function){
+function addclickhandler(ID, Function) {
     //if ID and Function are arrays
     if (Array.isArray(ID) && Array.isArray(Function)) {
         for (let i = 0; i < ID.length; i++) {
@@ -59,6 +59,8 @@ function setupEventListeners() {
     addclickhandler('moreOptions', () => {
         // Show more options such as share, copy, etc.
     });
+    addclickhandler('ShareButton', () => { navigateToScreen(10) });
+    addclickhandler('backButton6', () => { navigateToScreen(9) });
 }
 
 
