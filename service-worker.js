@@ -1,4 +1,4 @@
-const CACHE_NAME = "bible-app-cache-v2.01.00";
+const CACHE_NAME = "bible-app-cache-v2.02.00";
 const ASSETS = [
     "/realbibleapp/index.html", // Explicit root page
     "/realbibleapp/manifest.json",
@@ -7,6 +7,11 @@ const ASSETS = [
     "/realbibleapp/index_files/bible.json",
     "/realbibleapp/index_files/fromthepages_64x64.jpg",
     "/realbibleapp/OpenBible.svg",
+    "/realbibleapp/icon-192.svg",
+    "/realbibleapp/icon-512.svg",
+    "/realbibleapp/screenshot1.svg",
+    "/realbibleapp/screenshot2.svg",
+    "/realbibleapp/Share.svg",
     "/realbibleapp/index_files/cleanstyle.css",
     "/realbibleapp/index_files/hammer.min.js",
     "/realbibleapp/index_files/WebSetup.js",
@@ -18,6 +23,7 @@ const ASSETS = [
     "/realbibleapp/index_files/History.js",
     "/realbibleapp/index_files/bookmarks.js",
     "/realbibleapp/index_files/topics.js",
+    "/realbibleapp/index_files/topic-scores.txt",
     "/realbibleapp/index_files/Settings.js",
     "/realbibleapp/index_files/main.js"
 ];
