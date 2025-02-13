@@ -12,6 +12,22 @@ async function loadBibleCrossReferences() {
         //alert('Failed to load BibleCRef.json: ' + error);
     }
 }
+async function loadTopicDescriptionList() {
+    try {
+        const response = await fetch('./index_files/Description.json');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const jsonString = await response.json();
+        TopicDescriptionList = jsonString;
+        console.log('BibleCrossReferences loaded:');
+    } catch (error) {
+        console.error('Failed to load BibleCRef.json:', error);
+        //alert('Failed to load BibleCRef.json: ' + error);
+    }
+}
+
+
 
 async function loadTopicsText() {
     try {

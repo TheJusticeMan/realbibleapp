@@ -2,18 +2,21 @@ const BibleSearch = {};
 let Biblewordcounts = {};
 const Biblewordcount = 793853;
 let BibleCrossReferences = {};
+let TopicDescriptionList=null;
 var notes = [];
 var Settings = {
-    "initualized": false,
+    "initialized": true,
     "ShowHelp": false,
     "fontSize": "16",
-    "debug": false,
+    "debug": true,
     "reset": false,
     "invert-inputs": true,
     "Foreground": "hsl(0,100%,100%)",
     "Background": "hsl(0,100%,0%)",
     "Accent1": "hsl(275,100%,50%)",
-    "Accent2": "hsl(105,100%,50%)"
+    "Accent2": "hsl(105,100%,50%)",
+    "EnhanceSpacing": true,
+    "Font": "Fontserif"
 }
 
 function Load() {
@@ -52,6 +55,7 @@ function initializeApp() {
         loadBibleCrossReferences();
         loadtopics();
         loadBibleCount();
+        //loadTopicDescriptionList();
 
         if (!Settings.initialized) {
             Settings.initialized = true;

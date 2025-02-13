@@ -52,6 +52,9 @@
     <link rel="apple-touch-icon" href="/realbibleapp/icon-192.png">
 
     <!-- External CSS -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Merriweather&family=Noto+Sans&family=Lexend+Deca&family=PT+Serif&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="./index_files/cleanstyle.css">
 
     <!-- External JavaScript files -->
@@ -265,22 +268,6 @@
 
             <p id="ShareLink1" class="ShareLink" onclick="shareLink()">https://thejusticeman.github.io/realbibleapp/</p>
 
-            <script>
-                async function shareLink() {
-                    const shareData = {
-                        title: 'Real Bible App',
-                        text: 'Check out this Bible app!',
-                        url: 'https://thejusticeman.github.io/realbibleapp/'
-                    };
-
-                        try {
-                            await navigator.share(shareData);
-                            console.log("MDN shared successfully");
-                        } catch (err) {
-                            console.log(`Error: ${err}`);
-                        }
-                }
-            </script>
             <img src="Share.svg" alt="Share QR code">
         </div>
 

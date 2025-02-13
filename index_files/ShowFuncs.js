@@ -1,6 +1,6 @@
 let VersesOpen = [];
 //let VersesInview = [];
-//let VersesInviewIndex = 0;
+let VersesInviewIndex = 0;
 
 class BibleRef {
 	constructor(Book, Chap, Verse, color = 0) {
@@ -124,6 +124,16 @@ class BibleRef {
 		);
 	}
 
+	get RefElement() {
+		return this.createElement(
+			"span",
+			"VerseNum",
+			BibleRef.showVerseMenu,
+			BibleRef.goToVerse,
+			this.refText
+		);
+	}
+
 	get singleVerseElement() {
 		return this.createElement(
 			"p",
@@ -166,8 +176,8 @@ class BibleRef {
 		const swipeHandler = new SwipeHandler(element);
 		swipeHandler.onSwipeLeft = this.handleSwipeLeft;
 		swipeHandler.onSwipeRight = this.handleSwipeRight;
-		element.style.borderLeft = `2px solid ${this.HSLcolor}`;
-		element.style.borderRight = `2px solid ${this.HSLcolor}`;
+		element.style.borderLeftColor = `${this.HSLcolor}`;
+		element.style.borderRightColor = `${this.HSLcolor}`;
 		return element;
 	}
 
@@ -371,14 +381,15 @@ class BibleRef {
 
 class BibleRange {
 	constructor(start, end = null) {
-		// Handle array input correctly
+		// Handle array input correctly (e.g. [book, chap, verse])
 		if (Array.isArray(start)) {
 			this.start = new BibleRef(...start);
 			this.end = end ? new BibleRef(...end) : this.start;
 			return;
 		}
 
-		// Default to the same reference if no range is given
+		// If start isn’t an array, we assume it's already a BibleRef.
+		// Default to the same reference if no range is given.
 		this.start = start;
 		this.end = end || start;
 	}
@@ -388,37 +399,60 @@ class BibleRange {
 		return this.start.refText + (this.start !== this.end ? `-${this.end.refText}` : '');
 	}
 
-	fromosis(osis) {
+	// Create a BibleRange from an OSIS formatted string.
+	static fromOsis(osis) {
 		if (!osis) return null; // Return null if input is empty
 
-		const [start, endRaw] = osis.split('-').map(part => part.split('.'));
-		if (!start[0]) return null; // Ensure book name exists
+		// Split on '-' for a range then on '.' for each component.
+		const parts = osis.split('-').map(part => part.split('.'));
+		const startParts = parts[0];
+		const endPartsRaw = parts[1] || null;
+		if (!startParts[0]) return null; // Ensure book name exists
 
-		const bookIndex = BookShortNames.indexOf(start[0]);
+		// Lookup the book from a short name (e.g. "Gen") using an array of short names.
+		const bookIndex = BookShortNames.indexOf(startParts[0]);
 		if (bookIndex === -1) return null; // Invalid book name
 
 		const book = booksOfTheBible[bookIndex];
-		const chapter = parseInt(start[1] || 1, 10); // Default chapter to 1
-		const verse = parseInt(start[2] || 0, 10); // Default verse to 0
+		// Default chapter is 1 and default verse is 0 if not specified
+		const chapter = parseInt(startParts[1] || 1, 10);
+		const verse = parseInt(startParts[2] || 0, 10);
 
-		this.start = new BibleRef(book, chapter, verse);
-		this.end = this.start; // Default end to start
+		const startRef = new BibleRef(book, chapter, verse);
+		let endRef = startRef; // Default end to start
 
-		if (!endRaw) return;
+		// If end parts are provided, adjust the specificity.
+		if (endPartsRaw) {
+			// Prepend missing parts from startParts.
+			while (endPartsRaw.length < startParts.length) {
+				endPartsRaw.unshift(startParts[startParts.length - endPartsRaw.length - 1]);
+			}
 
-		// Ensure endRaw has the same specificity as start
-		while (endRaw.length < start.length) {
-			endRaw.unshift(start[start.length - endRaw.length - 1]);
+			const endBookIndex = BookShortNames.indexOf(endPartsRaw[0]);
+			const endBook = endBookIndex !== -1 ? booksOfTheBible[endBookIndex] : book;
+			const endChapter = parseInt(endPartsRaw[1] || 1, 10);
+			const endVerse = parseInt(endPartsRaw[2] || 0, 10);
+
+			endRef = new BibleRef(endBook, endChapter, endVerse);
 		}
 
-		const endBookIndex = BookShortNames.indexOf(endRaw[0]);
-		const endBook = endBookIndex !== -1 ? booksOfTheBible[endBookIndex] : book;
-		const endChapter = parseInt(endRaw[1] || 1, 10); // Default chapter to 1
-		const endVerse = parseInt(endRaw[2] || 0, 10); // Default verse to 0
-
-		this.end = new BibleRef(endBook, endChapter, endVerse);
+		return new BibleRange(startRef, endRef);
 	}
+
+	// Returns an element representing the reference range.
+	get RefElement() {
+		return this.start.createElement(
+			"span",
+			"VerseNum",
+			BibleRef.showVerseMenu,
+			BibleRef.goToVerse,
+			this.refText
+		);
+	}
+
 	get SearchElement() {
+		// Create a search result element using the start reference and
+		// including formatted text for the range.
 		return this.start.createElement(
 			"span",
 			"SearchResult",
@@ -427,20 +461,27 @@ class BibleRange {
 			`<span class="VerseNum">${this.start.refText}</span> ${this.italicsFormatted}`
 		);
 	}
+
 	get verses() {
 		const verses = [];
 		const { start, end } = this;
 		const startBookIndex = start.BookIndex;
 		const endBookIndex = end.BookIndex;
 
+		// Loop through each book in the range
 		for (let i = startBookIndex; i <= endBookIndex; i++) {
 			const book = booksOfTheBible[i];
+			// For the starting book, start at the given chapter; otherwise default to 1.
 			const startChap = i === startBookIndex ? start.Chap : 1;
+			// For the ending book, end at the given chapter; otherwise go to the last chapter.
 			const endChap = i === endBookIndex ? end.Chap : Bible[book].length - 1;
 
+			// Loop through each chapter within the current book.
 			for (let j = startChap; j <= endChap; j++) {
 				const chapter = Bible[book][j];
+				// For the starting chapter of the starting book, start at the given verse; otherwise start at verse 0.
 				const startVerse = (i === startBookIndex && j === start.Chap) ? start.Verse : 0;
+				// For the ending chapter of the ending book, end at the given verse; otherwise go to the last verse.
 				const endVerse = (i === endBookIndex && j === end.Chap) ? end.Verse : chapter.length - 1;
 
 				for (let k = startVerse; k <= endVerse; k++) {
@@ -450,11 +491,86 @@ class BibleRange {
 		}
 		return verses;
 	}
+
 	get italicsFormatted() {
-		return this.verses.map(verse => `<span class="VerseNum">${verse.Verse}</span>  ${verse.italicsFormatted}`).join(" ");
+		// Combine each verse’s formatted text into a single string.
+		return this.verses
+			.map(verse => `<span class="VerseNum">${verse.Verse}</span> ${verse.italicsFormatted}`)
+			.join(" ");
 	}
+
 	get refText() {
-		return `${this.start.refText}-${this.end.refText}`;
+		// Provide a human-readable range reference.
+		// If both references are in the same book...
+		if (this.start.Book === this.end.Book) {
+			// ...and same chapter, show a single chapter with a verse range.
+			if (this.start.Chap === this.end.Chap) {
+				return `${this.start.Book} ${this.start.Chap}:${this.start.Verse + 1}-${this.end.Verse + 1}`;
+			}
+			// If different chapters in the same book, show both chapters.
+			return `${this.start.Book} ${this.start.Chap}:${this.start.Verse + 1} - ${this.end.Chap}:${this.end.Verse + 1}`;
+		}
+
+		// Otherwise, show full start and end references.
+		return `${this.start.refText} - ${this.end.refText}`;
+	}
+
+	static fromString(input, isOsis = true) {
+		if (!input) return null; // Return null if the input is empty
+
+		// Split the input on '-' for a range and then on '.' for each component.
+		const parts = input.split('-').map(part => part.split('.'));
+		const startParts = parts[0];
+		if (!startParts[0]) return null; // Ensure a book name exists
+
+		// Determine the start book.
+		let startBook;
+		if (isOsis) {
+			const bookIndex = BookShortNames.indexOf(startParts[0]);
+			if (bookIndex === -1) return null; // Invalid book name
+			startBook = booksOfTheBible[bookIndex];
+		} else {
+			startBook = startParts[0].trim().toUpperCase();
+		}
+
+		// Parse chapter and verse, using defaults if needed.
+		const chapter = parseInt(startParts[1] || 1, 10);
+		const verse = parseInt(startParts[2] || 0, 10);
+		const startRef = new BibleRef(startBook, chapter, verse);
+		let endRef = startRef; // Default end reference is the start
+
+		// Process the end part of the range if it exists.
+		if (parts[1]) {
+			const endParts = parts[1];
+
+			// Prepend any missing parts from the start.
+			while (endParts.length < startParts.length) {
+				endParts.unshift(startParts[startParts.length - endParts.length - 1]);
+			}
+
+			let endBook;
+			if (isOsis) {
+				const endBookIndex = BookShortNames.indexOf(endParts[0]);
+				// If the book name is invalid, use the start book.
+				endBook = endBookIndex !== -1 ? booksOfTheBible[endBookIndex] : startBook;
+			} else {
+				endBook = endParts[0].trim().toUpperCase();
+			}
+
+			const endChapter = parseInt(endParts[1] || 1, 10);
+			const endVerse = parseInt(endParts[2] || 0, 10);
+			endRef = new BibleRef(endBook, endChapter, endVerse);
+		}
+
+		return new BibleRange(startRef, endRef);
+	}
+
+	static fromOsis(osis) {
+		return BibleRange.fromString(osis, true);
+	}
+
+	static fromText(text) {
+		return BibleRange.fromString(text, false);
 	}
 }
 

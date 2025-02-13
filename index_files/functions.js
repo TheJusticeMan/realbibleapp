@@ -17,10 +17,12 @@ function handleBackButton() {
     }
 }
 
+var UniqueNumber = 0;
+
 function navigateToScreen(screenId) {
     const [containerElement, Cscreen, readingHeader] = getElementsByIds("container", `screen${screenId}`, "ReadingHeader");
     console.log(`Screen: ${screenId}`);
-    if (ScrollPastScreen3) ScrollPastScreen3.destroy();
+    if (ScrollPastScreen3) ScrollPastScreen3.destroy();// make sure the chapter changing dosnt happen
 
     if (VersesInview.length <= 1) {
         topswipehandler ||= new SwipeHandler(readingHeader);
@@ -42,8 +44,11 @@ function navigateToScreen(screenId) {
     requestAnimationFrame(() => Cscreen.classList.add('activeK'));
 
     currentScreen = screenId;
-    const index = `${BackHistory.length}_screen:${screenId}`
-    history.pushState({ section: index }, "", `#${index}`);
+    const index = `${BackHistory.length}_${UniqueNumber++}_screen_${screenId}`
+    if (!navigatingback) {
+        history.replaceState(null, "", location.pathname);  // Clear the state
+        history.pushState({ section: index, time: Date.now() }, "", `#${index}`);
+    }
 }
 
 /**
@@ -234,7 +239,9 @@ let ScrollPastScreen3 = null;
 function loadDetailedVerseReadingScreen(TheTitle, TheContent, Verse) {
     const [textDisplayElement, chapterTitleElement] = getElementsByIds("textDisplayArea", "chapterTitle");
     //currentverseviewing=Verse;
-    textDisplayElement.style.fontSize = `${fontSize}px`;
+    //document.querySelectorAll(".")
+    //textDisplayElement.style.fontSize = `${fontSize}px`;
+    document.body.style.setProperty("--FontSize", Settings.fontSize + "px");
     textDisplayElement.innerText = "";
     textDisplayElement.appendChild(TheContent);
     chapterTitleElement.innerText = TheTitle;
@@ -244,7 +251,7 @@ function loadDetailedVerseReadingScreen(TheTitle, TheContent, Verse) {
     BackHistory.push(() => loadDetailedVerseReadingScreen(TheTitle, TheContent, Verse));
 }
 
-let fontSize = 18, oldFontSize = 0, zoomSpeed = 2;
+let fontSize = 18, oldFontSize = 0, zoomSpeed = 1;
 let focusedVerseElement = null, containerElement = null, headerHeight = 0;
 
 function setupZoom() {
@@ -258,6 +265,7 @@ function setupZoom() {
         },
         onZoom: (zoomFactor) => {
             fontSize = Math.min(64, Math.max(4, oldFontSize * (1 + (zoomFactor - 1) * zoomSpeed)));
+            //document.body.style.setProperty("--FontSize", Settings.fontSize + "px");
             document.getElementById('textDisplayArea').style.fontSize = `${fontSize}px`;
             if (focusedVerseElement) {
                 containerElement.scrollTo({ top: focusedVerseElement.offsetTop - headerHeight, behavior: 'auto' });
@@ -265,6 +273,7 @@ function setupZoom() {
         },
         onZoomEnd: () => {
             Settings.fontSize = Math.floor(fontSize);
+            document.body.style.setProperty("--FontSize", Settings.fontSize + "px");
             saveHistoryAndBookmarks();
         }
     });
@@ -306,82 +315,132 @@ let SearchingBible = true;
 function MakeSearchingPlaceToggleButton() {
     const c = document.createElement("span");
     c.className = "SearchResult";
-    c.innerText = SearchingBible ? "Bible Search" : "Topics Search";
+    c.innerText = SearchingBible ? "Do Topic Search" : "Do Bible Search";
     c.style.fontSize = "2em";
     c.style.textAlign = "center";
     c.id = "searchingPlaceToggle";
     c.addEventListener("click", () => {
         SearchingBible = !SearchingBible;
-        document.getElementById('searchingPlaceToggle').innerText = SearchingBible ? "Bible Search" : "Topics Search";
+        document.getElementById('searchingPlaceToggle').innerText = SearchingBible ? "Do Topic Search" : "Do Bible Search";
+        document.getElementById('searchInput').placeholder = SearchingBible ? "Search Bible..." : "Search Topics...";
+        updateSearchResults(document.getElementById('searchInput').value);
     });
+    document.getElementById('searchInput').placeholder = SearchingBible ? "Search Bible..." : "Search Topics...";
     return c;
-}
-
-function updateSearchResults(query2) {
-    const [clearSearchButton, resultsContainer] = getElementsByIds("clearSearchButton", "searchResults");
-    insearchstart = false;
-    searchCleared = false;
-    clearSearchButton.innerText = "Clear search";
-    document.getElementById('container').scrollTo(0, 0);
-    if (query2 == "") {
-        document.getElementById('searchInput').value = '';
-        clearSearchButton.innerText = "back";
-        resultsContainer.innerHTML = '';
-        resultsContainer.appendChild(MakeSearchingPlaceToggleButton());
-        searchCleared = true;
-    } else {
-        if (!SearchingBible) {
-            Showtopics(query2.toLowerCase());
-            return;
-        }
-        query = query2;
-        insearchstart = true;
-        bibleSearchInstance = new BibleSearchClass(query2, "Phrase", false, false, "ig");
-        bibleSearchInstance.MAX_RESULTS = FastSearchQTY;
-        const results = bibleSearchInstance.search(query2);
-        resultsContainer.innerHTML = '';
-        results.forEach(result => {
-            resultsContainer.appendChild(result.SearchElement);
-        });
-        if (results.length < bibleSearchInstance.MAX_RESULTS) {
-            clearSearchButton.innerText = `${results.length} result${results.length > 1 ? "s" : ""}`;
-        }
-    }
 }
 
 let topicShowing = "";
 
-function Showtopics(query2) {
+function updateSearchResults(query2) {
     const [clearSearchButton, resultsContainer, searchInput] = getElementsByIds("clearSearchButton", "searchResults", "searchInput");
+    insearchstart = false;
+    searchCleared = false;
+    clearSearchButton.innerText = "Clear search";
+    document.getElementById('container').scrollTo(0, 0);
+
+    if (query2 === "") {
+        searchInput.value = '';
+        clearSearchButton.innerText = "back";
+        resultsContainer.innerHTML = '';
+        resultsContainer.appendChild(MakeSearchingPlaceToggleButton());
+        searchCleared = true;
+        return;
+    }
+
+    if (!SearchingBible) {
+        showTopics(query2.toLowerCase(), resultsContainer, clearSearchButton, searchInput);
+    } else {
+        performBibleSearch(query2, resultsContainer, clearSearchButton);
+    }
+    resultsContainer.appendChild(MakeSearchingPlaceToggleButton());
+}
+
+function performBibleSearch(query2, resultsContainer, clearSearchButton) {
+    query = query2;
+    insearchstart = true;
+
+    const bibleSearchInstance = new BibleSearchClass(query2, "Phrase", false, false, "ig");
+    bibleSearchInstance.MAX_RESULTS = FastSearchQTY;
+    const results = bibleSearchInstance.search(query2);
+
+    resultsContainer.innerHTML = '';
+    results.forEach(result => {
+        resultsContainer.appendChild(result.SearchElement);
+    });
+
+    if (results.length < bibleSearchInstance.MAX_RESULTS) {
+        clearSearchButton.innerText = `${results.length} result${results.length > 1 ? "s" : ""}`;
+    }
+}
+
+function showTopics(query2, resultsContainer, clearSearchButton, searchInput) {
     resultsContainer.innerHTML = '';
     const results = FindTopic(query2);
     if (!results) return;
-    if (results.length == 1) query2 = results[0];
+
+    if (results.length === 1) query2 = results[0];
+
     if (topics[query2]) {
         VersesOfTopic(query2).forEach(result => {
             resultsContainer.appendChild(result.verse.SearchElement);
         });
+
         if (topicShowing !== query2) {
-            searchInput.value = query2.replace(/\b\w/g, char => char.toUpperCase());;
+            searchInput.value = query2.replace(/\b\w/g, char => char.toUpperCase());
             topicShowing = query2;
         }
+        if (TopicDescriptionList) {
+            const TopicDescription = document.createElement("div");
+            TopicDescription.className = "TopicDescription";
+            TopicDescription.innerHTML = TopicDescriptionList[query2].replace(
+                // Updated regex: capture optional end verse (group 4)
+                /\(?\b([1-3]?\s?[A-Za-z]+)\s+(\d{1,3}):(\d{1,3})(?:-?(\d{1,3}))?\)?/g,
+                (match, book, chapter, verse, endVerse) => {
+                    console.log("Full Match:", match);
+                    console.log("Book:", book.trim().toUpperCase());
+                    console.log("Chapter:", chapter);
+                    console.log("Verse:", verse);
+
+                    if (endVerse) {
+                        console.log("End Verse:", endVerse);
+                        // Create a BibleRange if an end verse is provided
+                        const range = new BibleRange(
+                            new BibleRef(book.trim().toUpperCase(), parseInt(chapter, 10), parseInt(verse, 10) - 1),
+                            new BibleRef(book.trim().toUpperCase(), parseInt(chapter, 10), parseInt(endVerse, 10) - 1)
+                        );
+                        // Use the range's SearchElement (or RefElement if you add one) to generate clickable HTML
+                        return range.RefElement.outerHTML;
+                    } else {
+                        // Otherwise, create a single BibleRef element as before
+                        const verseElement = new BibleRef(book.trim().toUpperCase(), parseInt(chapter, 10), parseInt(verse, 10) - 1);
+                        return verseElement.RefElement.outerHTML;
+                    }
+                }
+            );
+            TopicDescription.querySelectorAll(".VerseNum").forEach(element => {
+                element.oncontextmenu = BibleRef.showVerseMenu;
+                element.onclick = BibleRef.goToVerse;
+            });
+            resultsContainer.appendChild(TopicDescription);
+        }
     } else {
-        //if the result starts with the query2 then put it earlier
         results.sort((a, b) => {
-            const t = (a.startsWith(query2) ? -1 : 0) + (b.startsWith(query2) ? 1 : 0);
-            return t;
+            return (a.startsWith(query2) ? -1 : 0) + (b.startsWith(query2) ? 1 : 0);
         });
+
         results.forEach(result => {
             const c = document.createElement("span");
             c.className = "SearchResult";
             c.innerText = result.replace(/\b\w/g, char => char.toUpperCase());
             resultsContainer.appendChild(c);
+
             c.addEventListener("click", () => {
                 searchInput.value = result;
                 updateSearchResults(result);
             });
         });
     }
+
     clearSearchButton.innerText = `${results.length} result${results.length > 1 ? "s" : ""}`;
 }
 
@@ -479,7 +538,11 @@ function loadBookmarks(tag = 'all') {
 }
 
 
-/* Contextual Interaction Screen */
+/**
+ * 
+ *  Contextual Interaction Screen
+ * 
+ * */
 
 function loadVerseContextualInteractionScreen(theVerse) {
     currentverseviewing = theVerse;
@@ -516,9 +579,9 @@ function loadVerseContextualInteractionScreen(theVerse) {
     // Scroll to top and navigate
     containerElement.scrollTo(0, 0);
     populateTagList();
-    if (currentScreen !== 7) {
-        BackHistory.push(() => loadVerseContextualInteractionScreen(theVerse));
-    }
+    //if (currentScreen !== 7) {
+    BackHistory.push(() => loadVerseContextualInteractionScreen(theVerse));
+    //}
     navigateToScreen(7);
 }
 

@@ -1,102 +1,48 @@
 :root {
     --Accent1: #8800ff;
-    /* Vibrant purple */
     --Accent2: #0f0;
-    /* Bright teal */
     --Foreground: #fff;
-    /* White */
     --Background: #000;
-    /* Black */
+    --FontSize: 18px;
 }
 
 :root {
-    /* Main Colors */
     --MainBGcolor: var(--Background);
-    /* Background */
     --Maincolor: var(--Foreground);
-    /* Text (foreground) */
-
-    /* Inputs */
     --InputBGcolor: color-mix(in srgb, var(--Accent1) 10%, var(--Foreground) 90%);
-    /* Teal tinted */
     --Inputcolor: color-mix(in srgb, var(--Background) 80%, var(--Accent1) 20%);
-    /* Slight purple mix */
     --InputHVRcolor: color-mix(in srgb, var(--Accent1) 30%, var(--Foreground) 70%);
-    /* Equal blend of purple and teal */
-
-    /* Links and Highlights */
     --linklistBGcolor: color-mix(in srgb, var(--Background) 70%, var(--Foreground) 30%);
-    /* Dark grayish */
     --Refcolor: var(--Accent2);
-    /* Use bright teal directly */
-
-    /* Header and Highlights */
     --headerBGcolor: color-mix(in srgb, var(--Accent1) 40%, transparent);
-    /* Subtle purple tint */
     --selected: color-mix(in srgb, var(--Foreground) 50%, var(--Background) 50%);
-    /* Semi-transparent white */
     --accent: color-mix(in srgb, var(--Accent1) 80%, var(--Accent2) 20%);
-    /* Strong purple with a hint of teal */
 }
 
 .main-theme {
-    /* Main Colors */
     --MainBGcolor: var(--Background);
-    /* Background */
     --Maincolor: var(--Foreground);
-    /* Text (foreground) */
-
-    /* Inputs */
     --InputBGcolor: color-mix(in srgb, var(--Accent1) 10%, var(--Background) 90%);
-    /* Teal tinted */
     --Inputcolor: color-mix(in srgb, var(--Foreground) 80%, var(--Accent1) 20%);
-    /* Slight purple mix */
     --InputHVRcolor: color-mix(in srgb, var(--Accent1) 30%, var(--Background) 70%);
-    /* Equal blend of purple and teal */
-
-    /* Links and Highlights */
     --linklistBGcolor: color-mix(in srgb, var(--Background) 70%, var(--Foreground) 30%);
-    /* Dark grayish */
     --Refcolor: var(--Accent2);
-    /* Use bright teal directly */
-
-    /* Header and Highlights */
     --headerBGcolor: color-mix(in srgb, var(--Accent1) 40%, transparent);
-    /* Subtle purple tint */
     --selected: color-mix(in srgb, var(--Foreground) 50%, var(--Background) 50%);
-    /* Semi-transparent white */
     --accent: color-mix(in srgb, var(--Accent1) 80%, var(--Accent2) 20%);
-    /* Strong purple with a hint of teal */
 }
 
 .inverted-input-theme {
-    /* Main Colors */
     --MainBGcolor: var(--Background);
-    /* Background */
     --Maincolor: var(--Foreground);
-    /* Text (foreground) */
-
-    /* Inputs */
     --InputBGcolor: color-mix(in srgb, var(--Accent1) 10%, var(--Foreground) 90%);
-    /* Teal tinted */
     --Inputcolor: color-mix(in srgb, var(--Background) 80%, var(--Accent1) 20%);
-    /* Slight purple mix */
     --InputHVRcolor: color-mix(in srgb, var(--Accent1) 30%, var(--Foreground) 70%);
-    /* Equal blend of purple and teal */
-
-    /* Links and Highlights */
     --linklistBGcolor: color-mix(in srgb, var(--Background) 70%, var(--Foreground) 30%);
-    /* Dark grayish */
     --Refcolor: var(--Accent2);
-    /* Use bright teal directly */
-
-    /* Header and Highlights */
     --headerBGcolor: color-mix(in srgb, var(--Accent1) 40%, transparent);
-    /* Subtle purple tint */
     --selected: color-mix(in srgb, var(--Foreground) 50%, var(--Background) 50%);
-    /* Semi-transparent white */
     --accent: color-mix(in srgb, var(--Accent1) 80%, var(--Accent2) 20%);
-    /* Strong purple with a hint of teal */
 }
 
 body,
@@ -144,7 +90,8 @@ html {
     color: var(--Maincolor);
 }
 
-.floating-btn, .floating-btnLFT {
+.floating-btn,
+.floating-btnLFT {
     position: fixed;
     bottom: 1em;
     width: 0.3em;
@@ -178,22 +125,25 @@ html {
     padding: 0.5em;
     justify-content: space-between;
     background-color: var(--headerBGcolor);
-    backdrop-filter: blur(0.5em); /* Frosted glass effect */
-    -webkit-backdrop-filter: blur(0.5em); /* Safari support */
+    backdrop-filter: blur(0.5em);
+    /* Frosted glass effect */
+    -webkit-backdrop-filter: blur(0.5em);
+    /* Safari support */
     color: var(--Maincolor);
     height: 3em;
 }
 
-.common-header h1{
+.common-header h1 {
     margin: 0;
-    font-size: min(10vw - 0.5em, 2em); /* Limits font size */
+    font-size: min(10vw - 0.5em, 2em);
+    /* Limits font size */
     white-space: nowrap;
 }
 
 .common-footer {
     position: fixed;
     bottom: 0;
-    /* padding: 10px; */
+    /* padding: 1em; */
     background-color: var(--headerBGcolor);
     color: var(--Maincolor);
 }
@@ -202,7 +152,7 @@ html {
     position: relative;
     width: 100%;
     height: 5em;
-    font-size: 18px;
+    font-size: 1.5em;
     box-sizing: border-box;
     resize: none;
     transition: height 0.3s, top 0.3s;
@@ -225,8 +175,8 @@ html {
     display: none;
 }
 
-.note-editor:focus + .noteEditerEscape {
-    display:inline-block;
+.note-editor:focus+.noteEditerEscape {
+    display: inline-block;
 }
 
 .back-button {
@@ -234,41 +184,74 @@ html {
 }
 
 .dynamic-list {
-    margin: 10px 0;
+    margin: 0.5em 0;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 5px;
+    padding: 0.5em;
     color: var(--Maincolor);
 }
 
 .dynamic-list div {
-    padding: 10px;
+    padding: 0.5em;
     background-color: var(--MainBGcolor);
     color: var(--Maincolor);
+}
+
+.enhance-spacing .text-display {
+    word-spacing: 0.5em;
+    letter-spacing: 0.1em;
+    line-height: 1.5;
+}
+
+.enhance-spacing p.Contents {
+    margin: 1em;
 }
 
 .text-display {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 0.5em;
-    font-size: 18px;
+    font-size: var(--FontSize);
     color: var(--Maincolor);
-    word-spacing: 0.5em;
-    letter-spacing: 0.1em;
-    line-height: 1.5;
     text-align: justify;
     max-width: 20em;
     margin: auto;
 }
 
-.chapterElement > p.Contents:last-of-type {
-    min-height: calc(100vh - 5em);  /* header height */
+.chapterElement>p.Contents:last-of-type {
+    min-height: calc(100vh - 5em);
+    /* header height */
 }
 
 p.Contents {
     text-indent: 1em;
+    margin: 0;
 }
 
+/* fonts */
+@import url('https://fonts.googleapis.com/css2?family=Merriweather&family=Noto+Sans&family=Lexend+Deca&family=PT+Serif&display=swap');
+.Fontserif {
+    font-family: serif;
+}
+
+.Fontsansserif {
+    font-family: sans-serif;
+}
+
+.Merriweather {
+    font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
+}
+
+.NotoSans {
+    font-family: 'Noto Sans', Arial, Helvetica, sans-serif;
+}
+
+.LexendDeca {
+    font-family: 'Lexend Deca', Verdana, Tahoma, sans-serif;
+}
+
+.PTSerif {
+    font-family: 'PT Serif', 'Times New Roman', serif;
+}
 
 SPAN.VerseNum,
 .BibleReference {
@@ -304,25 +287,28 @@ select:hover {
 }
 
 span.SearchResult {
+    font-size: var(--FontSize);
     background: var(--linklistBGcolor);
-    border-radius: 10px;
-    margin: 2px;
+    border-left: 0.2em solid var(--linklistBGcolor);
+    border-right: 0.2em solid var(--linklistBGcolor);
+    border-radius: 1em;
+    margin: 0.1em;
     color: var(--Maincolor);
     cursor: pointer;
     display: block;
-    padding: 10px;
+    padding: 0.5em;
     transition: background-color 0.3s;
 }
 
 span.selectedmark {
     background-color: var(--selected);
-    text-shadow: 0px 0px 0.5em var(--Background);
+    text-shadow: 0em 0em 0.5em var(--Background);
 }
 
 span.SearchResult:hover,
 span.SearchResult:active {
     text-decoration: none;
-    text-shadow: 0px 0px 1em white;
+    text-shadow: 0em 0em 1em white;
 }
 
 span.resultmark {
@@ -330,13 +316,13 @@ span.resultmark {
     border-radius: 0.6em 0.3em;
     padding: 0 0.6em;
     /* Horizontal padding only */
-    text-shadow: 0px 0px 0.5em var(--Background);
+    text-shadow: 0em 0em 0.5em var(--Background);
 }
 
 .verse-nav-button {
     display: block;
-    padding: 10px 15px;
-    margin: 5px;
+    padding: 0.5em 0.5em;
+    margin: 0.2em;
     font-size: 1.5em;
     font-weight: bold;
     color: var(--Maincolor);
@@ -374,10 +360,10 @@ span.resultmark {
 }
 
 .loading-spinner {
-    border: 8px solid #aaa;
+    border: 0.8em solid #aaa;
     border-radius: 50%;
-    width: 60px;
-    height: 60px;
+    width: 6em;
+    height: 6em;
     animation: spin 2s linear infinite;
 }
 
@@ -404,11 +390,12 @@ span.resultmark {
         border-radius: 100% 0%;
         border-color: #fff #000;
     }
+
 }
 
 .loading-screen p {
-    margin-top: 20px;
-    font-size: 18px;
+    margin-top: 2em;
+    font-size: 1.8em;
     color: #ccc;
 }
 
@@ -434,16 +421,16 @@ span.resultmark {
     background: rgba(0, 0, 0, 0.7);
     background-clip: padding-box;
     color: #fff;
-    padding: 10px;
-    border-radius: 10px;
-    border: 5px solid rgba(255, 255, 255, 0.3);
+    padding: 1em;
+    border-radius: 1em;
+    border: 0.5em solid rgba(255, 255, 255, 0.3);
     z-index: 1000;
     display: none;
-    max-width: 300px;
+    max-width: 30em;
 }
 
 .glow {
-    box-shadow: 0 0 10px 2px rgba(255, 255, 0, 0.7);
+    box-shadow: 0 0 1em 0.2em rgba(255, 255, 0, 0.7);
 }
 
 .setting-row {
@@ -452,7 +439,7 @@ span.resultmark {
     align-items: center;
     font-size: 1em;
     padding: 1.5em 1em;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 0.1em solid #ccc;
     background-color: transparent;
     color: var(--Foreground);
     transition: background-color 0.3s, color 0.3s;
@@ -481,7 +468,7 @@ span.resultmark {
     border-radius: 1em 0.5em;
     cursor: pointer;
     transition: background-color 0.4s;
-    box-shadow: inset 0 0 5px var(--Background);
+    box-shadow: inset 0 0 0.5em var(--Background);
     box-shadow: 0 0 0.5em 0.1em var(--Inputcolor);
 }
 
@@ -495,7 +482,7 @@ span.resultmark {
     background-color: var(--InputHVRcolor);
     border-radius: 0.8em 0.4em;
     transition: transform 0.4s;
-    box-shadow: 0 2px 4px var(--Background);
+    box-shadow: 0 0.2em 0.4em var(--Background);
 }
 
 .toggle-input:checked+.toggle-slider {
@@ -515,15 +502,15 @@ span.resultmark {
 }
 
 .pick-select {
+    position: absolute;
+    opacity: 0;
+    right: 0;
     display: block;
-    width: 100%;
-    max-width: 12em;
-    padding: 0.4em;
-    font-size: 1em;
-    color: var(--Foreground);
-    background-color: var(--InputBGcolor);
-    border: 1px solid #ccc;
-    border-radius: 0.5em;
+    width: 100vw;
+    padding: 0;
+    font-size: 4em;
+    color: var(--Inputcolor);
+    background-color: transparent;
     appearance: none;
     transition: background-color 0.3s, color 0.3s;
     cursor: pointer;
@@ -532,7 +519,7 @@ span.resultmark {
 .pick-select:focus {
     border-color: var(--accent);
     outline: none;
-    box-shadow: 0 0 5px var(--accent);
+    box-shadow: 0 0 0.5em var(--accent);
 }
 
 .color-picker-container {
@@ -543,40 +530,44 @@ span.resultmark {
     /* background-color: var(--Background); */
     color: var(--Foreground);
     position: absolute;
-    right: 0;
-    width: 100%;
+    left: 0;
+    top: 0;
+    width: 100vw;
     height: 100vh;
-    padding: 1em;
-    box-shadow: 0 2px 10px var(--Foreground);
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 0.2em 1em var(--Foreground);
     /* z-index: 10; */
     background-color: color-mix(in srgb, var(--Background) 90%, transparent);
-    backdrop-filter: blur(0.5em); /* Frosted glass effect */
-    -webkit-backdrop-filter: blur(0.5em); /* Safari support */
+    backdrop-filter: blur(0.5em);
+    /* Frosted glass effect */
+    -webkit-backdrop-filter: blur(0.5em);
+    /* Safari support */
 }
 
-.color-palette{
+.color-palette {
     display: flex;
     justify-content: center;
-    margin: 10px;
+    margin: 1vw;
 }
 
 .color-box {
-    width: 20px;
-    height: 20px;
-    margin: 2px;
-    border: 2px solid var(--Foreground);
-    border-radius: 0.5em 0.25em;
+    width: 8vw;
+    height: 8vw;
+    margin: 0.5vw;
+    border: none;
+    border-radius: 4vw 2vw;
     cursor: pointer;
-    box-shadow: 0 1px 2px var(--Foreground);
+    box-shadow: 0 1vw 2vw var(--Foreground);
 }
 
 .color-preview {
-    width: 100px;
-    height: 100px;
+    width: 10em;
+    height: 10em;
     margin: 1em 0;
-    border: 2px solid var(--Foreground);
-    border-radius: 50px 25px;
-    box-shadow: 0 2px 5px var(--Foreground);
+    border: none;
+    border-radius: 5em 2.5em;
+    box-shadow: 0 1em 2em var(--Foreground);
     cursor: pointer;
     transition: border-color 0.3s;
 }
@@ -588,7 +579,6 @@ span.resultmark {
 .color-code {
     font-size: 1em;
     margin: 0.5em 0;
-    font-family: Arial, sans-serif;
     text-align: center;
 }
 
@@ -611,7 +601,7 @@ span.resultmark {
     background: var(--accent);
     cursor: pointer;
     border-radius: 0.5em 0.25em;
-    box-shadow: 0 2px 4px var(--Background);
+    box-shadow: 0 0.2em 0.4em var(--Background);
 }
 
 .slider-input::-moz-range-thumb {
@@ -620,10 +610,10 @@ span.resultmark {
     background: var(--accent);
     cursor: pointer;
     border-radius: 0.5em 0.25em;
-    box-shadow: 0 2px 4px var(--Background);
+    box-shadow: 0 0.2em 0.4em var(--Background);
 }
 
-.submenu-window{
+.submenu-window {
     display: none;
     position: absolute;
     top: 0;
@@ -633,11 +623,9 @@ span.resultmark {
     /* background-color: var(--Background); */
     background-color: transparent;
     color: var(--Foreground);
-    backdrop-filter: blur(0.5em); /* Frosted glass effect */
-    -webkit-backdrop-filter: blur(0.5em); /* Safari support */
-
+    backdrop-filter: blur(0.5em);
+   -webkit-backdrop-filter: blur(0.5em);
 }
-
 
 /* General transition for all screens */
 .screen {
@@ -654,11 +642,13 @@ span.resultmark {
 
 /* Override for #screen3: No font-size animation */
 #screen3 {
-    transition: opacity 1s; /* Only animate opacity */
+    transition: opacity 1s;
+    /* Only animate opacity */
     font-size: 1em;
 }
 
 #screen3.activeK {
     opacity: 1;
-    font-size: 1em; /* Font size changes instantly with no animation */
+    font-size: 1em;
+    /* Font size changes instantly with no animation */
 }

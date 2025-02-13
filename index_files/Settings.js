@@ -35,6 +35,17 @@ function setUpSettings() {
     document.body.style.setProperty("--Background", Settings.Background);
     document.body.style.setProperty("--Accent1", Settings.Accent1);
     document.body.style.setProperty("--Accent2", Settings.Accent2);
+    if (Settings.EnhanceSpacing) {
+        document.body.classList.add("enhance-spacing");
+    } else {
+        document.body.classList.remove("enhance-spacing");
+    }
+    defaultSettings.Font.options.map((option) => {
+        document.body.classList.remove(option.value);
+    });
+    document.body.classList.add(Settings.Font);
+    console.log(`Font changed to ${Settings.Font}`);
+    document.body.style.setProperty("--FontSize", Settings.fontSize + "px");
 }
 
 function mergeSettings(DefaultSettings, Settings) {
@@ -676,7 +687,42 @@ let defaultSettings = {
         max: 64,
         step: 1,
         onChange: (value) => {
+            document.body.style.setProperty("--FontSize", value + "px");
             fontSize = value;
+        }
+    },
+    "Font": {
+        type: PickSetting,
+        label: "Font",
+        defaultValue: "Fontserif",
+        options: [
+            { value: "Fontserif", label: "Serif" },
+            { value: "Fontsansserif", label: "Sans" },
+            { value: "Merriweather", label: "Merriweather" },
+            { value: "NotoSans", label: "Noto Sans" },
+            { value: "LexendDeca", label: "Lexend Deca" },
+            { value: "PTSerif", label: "PT Serif" }],
+        onChange: (value) => {
+            // Add the class for the font
+            defaultSettings.Font.options.map((option) => {
+                document.body.classList.remove(option.value);
+            });
+            document.body.classList.add(value);
+            document.body.style.setProperty("--Font", value);
+            console.log(`Font changed to ${value}`);
+        }
+    },
+    "EnhanceSpacing": {
+        type: ToggleSetting,
+        label: "Add extra spacing around words",
+        defaultValue: true,
+        onChange: (value) => {
+            if (value) {
+                document.body.classList.add("enhance-spacing");
+            } else {
+                document.body.classList.remove("enhance-spacing");
+            }
+            console.log(`Help will now be ${value ? "shown" : "hidden"} on Load`);
         }
     },
     "ShowHelp": {

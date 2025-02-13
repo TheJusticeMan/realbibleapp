@@ -157,22 +157,25 @@ function showHistory() {
     document.getElementById("history-list").innerHTML = "";
     document.getElementById("history-list").appendChild(historyContainer);
 }
-var popstateTriggered =false;
+var popstateTriggered = false;
 var BackHistory = [];
+var navigatingback=false;
 
 function SetUpBackTrigger() {
-    window.addEventListener("popstate", () => {
-        if (popstateTriggered) return;
+    window.addEventListener("popstate", (event) => {
+        if (popstateTriggered) {
+            console.log("popstate alredy triggered");
+            return;
+        }
         popstateTriggered = true;
         setTimeout(() => (popstateTriggered = false), 100); // Prevents double execution
         if (BackHistory.length > 1) {
+            navigatingback=true;
             BackHistory.pop();
             const previousState = BackHistory.pop();
             console.log(previousState);
             previousState();
+            navigatingback=false;
         }
-        //if (location.hash) {
-        //    document.getElementById(location.hash.substring(1))?.scrollIntoView({ behavior: "smooth" });
-        //}
     });
 }

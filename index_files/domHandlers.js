@@ -61,8 +61,29 @@ function setupEventListeners() {
     });
     addclickhandler('ShareButton', () => { navigateToScreen(10) });
     addclickhandler('backButton6', () => { navigateToScreen(9) });
+    addclickhandler('ShareLink1', shareLink);
 }
 
+async function shareLink() {
+    const shareData = {
+        title: 'Real Bible App',
+        text: 'Check out this Bible app!',
+        url: 'https://thejusticeman.github.io/realbibleapp/'
+    };
+
+    try {
+        await navigator.share(shareData);
+        console.log("MDN shared successfully");
+    } catch (err) {
+        //copy "https://thejusticeman.github.io/realbibleapp/" to the clipboard
+        navigator.clipboard.writeText(shareData.url).then(() => {
+            console.LOG("Link copied to clipboard");
+        }).catch(err => {
+            console.error("Clipboard copy failed:", err);
+        });
+        console.log(`Error: ${err}`);
+    }
+}
 
 class SwipeHandler {
     /**
