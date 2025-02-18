@@ -1,38 +1,25 @@
-class HistoryItem {
-    constructor(book, chap, verse) {
-        this.Book = book;
-        this.Chap = chap;
-        this.Verse = verse;
-        this.lastSeen = new Date();
-    }
-
-    updateLastSeen() {
-        this.lastSeen = new Date();
-    }
-}
-
 let History = [];
 
-function NewHistory(h) {
-    const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+// We use 'color' to represent the last seen date.
 
-    // Ensure that every entry in History is an instance of HistoryItem
-    let existingEntry = History.find(entry =>
-        entry.Book === h.Book &&
-        entry.Chap === h.Chap &&
-        entry.Verse === h.Verse &&
-        (new Date(entry.lastSeen) > oneHourAgo)
-    );
+function NewHistory(h) {
+    var now = new Date();
+    var oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+    var existingEntry = History.find(function (entry) {
+        return entry.Book === h.Book &&
+            entry.Chap === h.Chap &&
+            entry.Verse === h.Verse &&
+            new Date(entry.color) > oneHourAgo;
+    });
 
     if (existingEntry) {
-        // If the found entry is not an instance of HistoryItem, convert it
-        if (!(existingEntry instanceof HistoryItem)) {
-            Object.setPrototypeOf(existingEntry, HistoryItem.prototype);
+        if (!(existingEntry instanceof BibleRef)) {
+            Object.setPrototypeOf(existingEntry, BibleRef.prototype);
         }
         existingEntry.updateLastSeen();
     } else {
-        History.push(new HistoryItem(h.Book, h.Chap, h.Verse));
+        History.push(new BibleRef(h.Book, h.Chap, h.Verse, new Date()));
     }
 
     mergeOldEntries();
@@ -40,63 +27,65 @@ function NewHistory(h) {
 }
 
 function mergeOldEntries() {
-    const oneWeekAgo = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
+    var oneWeekAgo = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
+    var mergedHistory = [];
+    var mergeMap = new Map();
 
-    const mergedHistory = [];
-    const mergeMap = new Map();
-
-    History.forEach(entry => {
-        const lastSeen = new Date(entry.lastSeen);
-        if (lastSeen < oneWeekAgo) {
-            const key = `${entry.Book}-${entry.Chap}-${entry.Verse}`;
+    History.forEach(function (entry) {
+        var color = new Date(entry.color);
+        if (color < oneWeekAgo) {
+            var key = entry.Book + "-" + entry.Chap + "-" + entry.Verse;
             if (!mergeMap.has(key)) {
-                mergeMap.set(key, { ...entry, lastSeen: [] });
+                mergeMap.set(key, { ...entry, color: [] });
             }
-            mergeMap.get(key).lastSeen.push(lastSeen);
+            mergeMap.get(key).color.push(color);
         } else {
             mergedHistory.push(entry);
         }
     });
 
-    mergeMap.forEach((value, key) => {
-        const { lastSeen, ...rest } = value;
-        if (lastSeen.length > 1) {
-            const uniqueDays = new Set(lastSeen.map(date => date.toISOString().split('T')[0]));
-            uniqueDays.forEach(day => {
+    mergeMap.forEach(function (value) {
+        var color = value.color;
+        var rest = { ...value };
+        delete rest.color;
+
+        if (color.length > 1) {
+            var uniqueDays = new Set(color.map(function (date) {
+                return date.toISOString().split("T")[0];
+            }));
+
+            uniqueDays.forEach(function (day) {
                 mergedHistory.push({
                     ...rest,
-                    lastSeen: new Date(`${day}T12:00:00.000Z`)
+                    color: new Date(day + "T12:00:00.000Z")
                 });
             });
         } else {
             mergedHistory.push({
                 ...rest,
-                lastSeen: lastSeen[0]
+                color: color[0]
             });
         }
     });
 
-    History.length = 0;
-    mergedHistory.forEach(entry => History.push(entry));
+    History = mergedHistory;
 }
 
 function sortHistory() {
-    History.sort((a, b) => new Date(b.lastSeen) - new Date(a.lastSeen));
+    History.sort(function (a, b) {
+        return new Date(b.color) - new Date(a.color);
+    });
 }
 
 function UpdateHistoryTime(c) {
-    const now = new Date();
-
-    let existingEntry = History.find(entry =>
-        entry.Book === c.Book &&
-        entry.Chap === c.Chap &&
-        entry.Verse === c.Verse
-    );
+    var existingEntry = History.find(function (entry) {
+        return entry.Book === c.Book && entry.Chap === c.Chap && entry.Verse === c.Verse;
+    });
 
     if (existingEntry) {
         existingEntry.updateLastSeen();
     } else {
-        console.warn('History entry not found for update.');
+        console.warn("History entry not found for update.");
     }
 
     sortHistory();
@@ -105,77 +94,141 @@ function UpdateHistoryTime(c) {
 function showHistory() {
     const now = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
-    const historyMap = new Map();
+    const historyGroups = new Map();
+    const toMonthString = now.toLocaleString("default", { month: "long" });
 
-    // Group history by day
-    History.forEach(entry => {
-        const lastSeen = new Date(entry.lastSeen);
-        const day = Math.floor((now - lastSeen) / oneDay);
+    // Check if two dates fall on the same day.
+    const isSameDay = (d1, d2) =>
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
 
-        if (!historyMap.has(day)) {
-            historyMap.set(day, []);
+    // Determine the grouping info based on the entry's date.
+    const getGroupInfo = (date) => {
+        let groupKey, sortValue;
+        if (isSameDay(date, now)) {
+            groupKey = "Today";
+            sortValue = now.getTime();
+        } else if (isSameDay(date, new Date(now.getTime() - oneDay))) {
+            groupKey = "Yesterday";
+            sortValue = now.getTime() - oneDay;
+        } else if (date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()) {
+            groupKey = toMonthString + " " + date.getDate();
+            // Use noon of that day for sorting.
+            sortValue = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12).getTime();
+        } else if (date.getFullYear() === now.getFullYear()) {
+            groupKey = date.toLocaleString("default", { month: "long" });
+            sortValue = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
+        } else {
+            groupKey = date.getFullYear().toString();
+            sortValue = new Date(date.getFullYear(), 0, 1).getTime();
         }
 
-        historyMap.get(day).push(entry);
+        // Determine container class based on the group key.
+        const containerClass =
+            groupKey === "Today" ||
+                groupKey === "Yesterday" ||
+                groupKey.startsWith("Day ")
+                ? "day-container"
+                : isNaN(parseInt(groupKey))
+                    ? "month-container"
+                    : "year-container";
+
+        return { groupKey, sortValue, containerClass };
+    };
+
+    // Group history entries.
+    History.forEach((entry) => {
+        const date = new Date(entry.color);
+        const { groupKey, sortValue } = getGroupInfo(date);
+        if (!historyGroups.has(groupKey)) {
+            historyGroups.set(groupKey, { sortValue, entries: [] });
+        }
+        historyGroups.get(groupKey).entries.push(entry);
     });
 
-    // Create container for the history display
-    const historyContainer = document.createElement('div');
-    historyContainer.className = 'history-container';
+    // Create the main container.
+    const historyContainer = document.createElement("div");
+    historyContainer.className = "history-container";
 
-    // Sort and display history
-    [...historyMap.keys()].sort((a, b) => a - b).forEach(day => {
-        const dayEntries = historyMap.get(day);
-        const dayContainer = document.createElement('div');
-        dayContainer.className = 'day-container';
+    // Sort group keys by sortValue (newest first).
+    const sortedGroupKeys = [...historyGroups.keys()].sort(
+        (a, b) => historyGroups.get(b).sortValue - historyGroups.get(a).sortValue
+    );
 
-        // Set day label
-        let dayLabel;
-        if (day === 0) {
-            dayLabel = 'Today';
-        } else if (day === 1) {
-            dayLabel = 'Yesterday';
-        } else {
-            dayLabel = `${day} days ago`;
-        }
+    // Build and append each group container.
+    sortedGroupKeys.forEach((groupKey) => {
+        // Use the first entry's date to determine the container class.
+        const { containerClass } = getGroupInfo(new Date(historyGroups.get(groupKey).entries[0].color));
+        const groupContainer = document.createElement("div");
+        groupContainer.className = containerClass;
 
-        const dayLabelElement = document.createElement('h3');
-        dayLabelElement.textContent = dayLabel;
-        dayContainer.appendChild(dayLabelElement);
+        const groupHeader = document.createElement("h3");
+        groupHeader.textContent = groupKey;
+        groupContainer.appendChild(groupHeader);
 
-        // Add entries for the day
-        dayEntries.forEach(entry => {
+        historyGroups.get(groupKey).entries.forEach((entry) => {
             const bibleRef = new BibleRef(entry.Book, entry.Chap, entry.Verse);
-            const entryElement = bibleRef.createHistoryElement(new Date(entry.lastSeen));
-            dayContainer.appendChild(entryElement);
+            const entryElement = bibleRef.createHistoryElement(new Date(entry.color));
+            groupContainer.appendChild(entryElement);
         });
 
-        historyContainer.appendChild(dayContainer);
+        historyContainer.appendChild(groupContainer);
     });
 
-    // Append the history container to the document body or a specific element
-    document.getElementById("history-list").innerHTML = "";
-    document.getElementById("history-list").appendChild(historyContainer);
+    // Update the DOM.
+    const historyListEl = document.getElementById("history-list");
+    historyListEl.innerHTML = "";
+    historyListEl.appendChild(historyContainer);
 }
+
 var popstateTriggered = false;
 var BackHistory = [];
-var navigatingback=false;
+var navigatingBack = false;
 
 function SetUpBackTrigger() {
-    window.addEventListener("popstate", (event) => {
-        if (popstateTriggered) {
-            console.log("popstate alredy triggered");
-            return;
-        }
+    window.addEventListener("popstate", function () {
+        if (popstateTriggered) return;
         popstateTriggered = true;
-        setTimeout(() => (popstateTriggered = false), 100); // Prevents double execution
+        setTimeout(function () { popstateTriggered = false; }, 100);
+
         if (BackHistory.length > 1) {
-            navigatingback=true;
+            navigatingBack = true;
             BackHistory.pop();
-            const previousState = BackHistory.pop();
+            var previousState = BackHistory.pop();
             console.log(previousState);
             previousState();
-            navigatingback=false;
+            navigatingBack = false;
         }
     });
+}
+
+/**
+ * Converts the History array into a compact array of strings.
+ * Each string is formatted as: "Book:Chap:Verse:lastSeenNumber"
+ */
+function exportHistoryAsStrings() {
+    return History.map(item =>
+        `${item.Book}:${item.Chap}:${item.Verse}:${new Date(item.color).getTime()}`
+    );
+}
+
+/**
+ * Imports an array of history strings.
+ * Each string should be in the format: "Book:Chap:Verse:lastSeenNumber"
+ */
+function importHistoryFromStrings(stringArray) {
+    return stringArray.map(str => {
+        const parts = str.split(":");
+        if (parts.length !== 4) {
+            console.warn("Skipping invalid history string:", str);
+            return null;
+        }
+        return new BibleRef(
+            parts[0],
+            parts[1],
+            parts[2],
+            new Date(Number(parts[3]))
+        );
+    }).filter(item => item !== null);
 }

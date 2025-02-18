@@ -22,7 +22,7 @@
         content="Bible, Bible app, Bible study, mobile Bible, cross-referencing, Bible tools, study tools, Christianity">
 
     <!-- Theme color for browsers -->
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#880088">
 
     <!-- Apple-specific meta tags -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -116,7 +116,7 @@
         <div id="screen2" class="screen">
             <div class="common-header">
                 <button id="backButton1" class="back-button">Back</button>
-                <h1>Select a Verse</h1>
+                <h1 id="VerseSelectScreenHeader">Select a Verse</h1>
             </div>
             <div class="selection-area main-content">
                 <span id="oldTestamentBtn" class="verse-nav-button">Old Testament</span>
@@ -128,7 +128,7 @@
         </div>
         <div id="screen3" class="screen">
             <div id="ReadingHeader" class="common-header">
-                <button id="backButton2" class="back-button">Back</button>
+                <button id="backButton2" class="back-button">Home</button>
                 <h1 id="chapterTitle" class="title">Genesis 1</h1>
             </div>
             <div id="textDisplayArea" class="text-display main-content bibletext">
@@ -183,7 +183,6 @@
             </div>
             <div class="empty-state main-content" style="display:none;">
                 <p>Bookmark your favorite verses to keep them close!</p>
-                <button id="findVerseButton">Find Verses</button>
             </div>
         </div>
         <div id="screen7" class="screen">
@@ -192,24 +191,21 @@
             </div>
             <div class="main-content">
                 <textarea id="noteEditor" class="note-editor" placeholder="Enter your notes here..."></textarea>
-                <input type="button" id="noteEditerEscape" class="noteEditerEscape" value="Done">
+                <button id="noteEditerEscape" class="noteEditerEscape">Done</button>
                 <div class="bookmark-tags">
-                    <button id="addBookmarkButton" class="bookmark-button">Add Bookmark</button>
-                    <div id="tagList" class="tag-list" style="display:none;">
+                    <div id="tagList" class="tag-list">
                         <!-- Dynamically filled with available tags -->
                     </div>
                 </div>
                 <div class="cross-references main-content">
                     <input type="text" id="crossReferenceSearch" placeholder="Search for verses...">
-                    <div id="crossReferencesList">
-                        <!-- Dynamically filled with search results -->
-                    </div>
+                </div>
+                <div id="crossReferencesList" class="cross-references">
+                    <!-- Dynamically filled with search results -->
                 </div>
             </div>
             <div class="action-buttons common-footer">
-                <button id="saveChanges">Save Changes</button>
-                <button id="closeMenu">Close</button>
-                <button id="moreOptions">More Options</button>
+                <button id="closeMenu" class="floating-btnLFT">x</button>
             </div>
         </div>
         <div id="screen8" class="screen" style="display: flex;">
@@ -253,6 +249,7 @@
         <div id="screen9" class="screen" style="display: flex;">
             <div class="common-header">
                 <button id="backButton5" class="back-button">back</button>
+                <button id="SyncButton" class="back-button">Sync</button>
                 <button id="ShareButton" class="back-button">Share</button>
             </div>
             <div id="settings-list">
@@ -269,6 +266,16 @@
             <p id="ShareLink1" class="ShareLink" onclick="shareLink()">https://thejusticeman.github.io/realbibleapp/</p>
 
             <img src="Share.svg" alt="Share QR code">
+        </div>
+        <div id="screen11" class="screen" style="display: flex;">
+            <div class="common-header">
+                <button id="backButton7" class="back-button">back</button>
+            </div>
+            <button id="CopySettingsLink" class="back-button">Copy User Data</button>
+            <button id="ImportData" class="back-button">Paste User Data</button>
+            <button id="downloadData" class="back-button">Download User Data</button>
+            <button id="uploadData" class="back-button">Upload User Data</button>
+            
         </div>
 
         <!-- Load external JavaScript -->

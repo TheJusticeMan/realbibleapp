@@ -54,15 +54,29 @@ class TagManager {
         for (const tag in this.tags) {
             serializedTags[tag] = Array.from(this.tags[tag]);
         }
-        return JSON.stringify(serializedTags);
+        return serializedTags;
     }
 
     deserialize(jsonString) {
-        const parsedTags = JSON.parse(jsonString);
-        this.tags = {};
+        const parsedTags = typeof jsonString === 'string'
+            ? JSON.parse(jsonString)
+            : jsonString;
+
         for (const tag in parsedTags) {
-            this.tags[tag] = new Set(parsedTags[tag]);
+            // If the tag already exists, merge the sets; otherwise, create a new set.
+            if (this.tags[tag]) {
+                for (const value of parsedTags[tag]) {
+                    this.tags[tag].add(value);
+                }
+            } else {
+                this.tags[tag] = new Set(parsedTags[tag]);
+            }
         }
+    }
+
+    isBookmarked(verseRef) {
+        const refKey = this.getRefKey(verseRef);
+        return Object.values(this.tags).some(tagSet => tagSet.has(refKey));
     }
 }
 
@@ -74,6 +88,3 @@ const tagManager = new TagManager();
 //tagManager.addTag(bibleRef1, "Creation");
 //tagManager.addTag(bibleRef2, "Salvation");
 
-// console.log("Verses tagged with 'Creation':", tagManager.getVersesByTag("Creation"));
-// console.log("All tags:", tagManager.listAllTags());
-// console.log("All bookmarked verses:", tagManager.getAllVerses());

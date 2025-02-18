@@ -41,27 +41,23 @@ function setupEventListeners() {
         loadBookmarks(this.value);
     });
     //addclickhandler('categoryFilter', (event) => filterBookmarksByCategory(event.target.value));
-    //addclickhandler('findVerseButton', loadDetailedVerseReadingScreen);
     addclickhandler('backButton5', handleBackButton);
     // Screen 7
     //addclickhandler('addNewLabel', addNewLabel);
-    addclickhandler('addBookmarkButton', function () {
-        const tagList = document.getElementById('tagList');
-        tagList.style.display = tagList.style.display === 'none' ? 'block' : 'none';
-        if (tagList.style.display === 'block') {
-            populateTagList();
-        }
-    });
-    addclickhandler('noteEditerEscape', saveChanges);
     document.getElementById('crossReferenceSearch').addEventListener('input', (event) => updateCrossReferences(event.target.value));
-    addclickhandler('saveChanges', saveChanges);
     addclickhandler('closeMenu', handleBackButton);
-    addclickhandler('moreOptions', () => {
-        // Show more options such as share, copy, etc.
-    });
     addclickhandler('ShareButton', () => { navigateToScreen(10) });
+    addclickhandler('SyncButton', () => navigateToScreen(11));
     addclickhandler('backButton6', () => { navigateToScreen(9) });
     addclickhandler('ShareLink1', shareLink);
+    //importDataFromClipboard
+    //document.getElementById('container').innerHTML+=""
+    // Screen 11
+    addclickhandler('backButton7', handleBackButton);
+    addclickhandler('ImportData', importDataFromClipboard);
+    addclickhandler('CopySettingsLink', copyHistoryAndBookmarksToClipboard);
+    addclickhandler('downloadData',downloadHistoryAndBookmarks)
+    addclickhandler('uploadData',uploadHistoryAndBookmarks)
 }
 
 async function shareLink() {
@@ -322,7 +318,6 @@ class ScrollPastBoundsHandler {
             }
             this.isAtTop = false;
             this.isAtBottom = false;
-
         }
     }
 

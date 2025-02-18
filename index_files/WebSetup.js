@@ -1,43 +1,44 @@
+// Helper functions for fetching resources
+async function fetchJSON(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Network response was not ok for ${url}`);
+    }
+    return response.json();
+}
+
+async function fetchText(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Network response was not ok for ${url}`);
+    }
+    return response.text();
+}
+
+// Simplified loading functions
 async function loadBibleCrossReferences() {
     try {
-        const response = await fetch('./index_files/BibleCRef.json');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const jsonString = await response.json();
-        BibleCrossReferences = jsonString;
-        console.log('BibleCrossReferences loaded:');
+        BibleCrossReferences = await fetchJSON('./index_files/BibleCRef.json');
+        console.log('BibleCrossReferences loaded');
     } catch (error) {
         console.error('Failed to load BibleCRef.json:', error);
-        //alert('Failed to load BibleCRef.json: ' + error);
     }
 }
+
 async function loadTopicDescriptionList() {
     try {
-        const response = await fetch('./index_files/Description.json');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const jsonString = await response.json();
-        TopicDescriptionList = jsonString;
-        console.log('BibleCrossReferences loaded:');
+        TopicDescriptionList = await fetchJSON('./index_files/Description.json');
+        console.log('TopicDescriptionList loaded');
     } catch (error) {
-        console.error('Failed to load BibleCRef.json:', error);
-        //alert('Failed to load BibleCRef.json: ' + error);
+        console.error('Failed to load Description.json:', error);
     }
 }
-
-
 
 async function loadTopicsText() {
     try {
-        const response = await fetch('./index_files/topic-scores.txt');
-        if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
-        }
-        const TString = await response.text();
-        console.log('BibleTopics loaded:', TString.substring(0, 100) + '...'); // Preview first 100 characters
-        return TString;
+        const text = await fetchText('./index_files/topic-scores.txt');
+        console.log('BibleTopics loaded');
+        return text;
     } catch (error) {
         console.error('Failed to load topic-scores.txt:', error);
         alert('Failed to load topic-scores.txt: ' + error.message);
@@ -45,85 +46,154 @@ async function loadTopicsText() {
     }
 }
 
-
 async function loadBibleCount() {
     try {
-        const response = await fetch('./index_files/BibleCount.json');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const bibleData = await response.json();
-        Biblewordcounts = bibleData; // Assign it to your global variable or process it as needed
-        console.log('Bible loaded:');
+        Biblewordcounts = await fetchJSON('./index_files/BibleCount.json');
+        console.log('BibleCount loaded');
     } catch (error) {
-        console.error('Failed to load Bible.json:', error);
-        //alert('Failed to load Bible.json: ' + error);
+        console.error('Failed to load BibleCount.json:', error);
     }
 }
 
-
 async function loadBible() {
     try {
-        const response = await fetch('./index_files/Bible.json');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const jsonString = await response.json();
-        const Bible = jsonString;
-        console.log('Bible loaded:');
+        const bible = await fetchJSON('./index_files/Bible.json');
+        console.log('Bible loaded');
+        // Use the bible data as needed
     } catch (error) {
         console.error('Failed to load Bible.json:', error);
-        //alert('Failed to load Bible.json: ' + error);
     }
+}
+
+// Simplified localStorage functions
+function getUserData() {
+    return {
+        history: exportHistoryAsStrings(),
+        bookmarks: tagManager.serialize(),
+        notes: notes.map(note => note.toObject()),
+        Settings: Settings,
+        VersesOpen: VersesOpen
+    };
 }
 
 function saveHistoryAndBookmarksToLocalStorage() {
     try {
-        const userData = {
-            history: getHistoryData(),
-            bookmarks: getBookmarksData(),
-            notes: notes,
-            Settings: Settings
-        };
+        const userData = getUserData();
         localStorage.setItem('userData', JSON.stringify(userData));
         console.log('History and bookmarks saved successfully.');
     } catch (error) {
         console.error('Failed to save history and bookmarks:', error);
-        //alert('Failed to save history and bookmarks: ' + error);
     }
+}
+
+async function copyHistoryAndBookmarksToClipboard() {
+    try {
+        const userData = getUserData();
+        const jsonString = JSON.stringify(userData, null, 2); // Pretty-print with indentation
+        await navigator.clipboard.writeText(jsonString);
+        console.log('History and bookmarks copied to clipboard successfully.');
+    } catch (error) {
+        console.error('Failed to copy history and bookmarks to clipboard:', error);
+    }
+}
+
+function downloadHistoryAndBookmarks() {
+    try {
+        const userData = getUserData();
+        const jsonString = JSON.stringify(userData, null, 2); // Pretty-print with indentation
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'userData.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+        console.log('History and bookmarks downloaded successfully.');
+    } catch (error) {
+        console.error('Failed to download history and bookmarks:', error);
+    }
+}
+
+function processUserData(userData) {
+    if (userData.history) {
+        // Check if the history data is in string format.
+        const isStringHistory = typeof userData.history[0] === 'string';
+        const importedHistory = isStringHistory
+            ? importHistoryFromStrings(userData.history)
+            : userData.history.map(item =>
+                new BibleRef(item.Book, item.Chap, item.Verse, item.lastSeen ? new Date(item.lastSeen) : undefined)
+            );
+
+        // Either replace or merge the imported history.
+        History.push(...importedHistory);
+    }
+    if (userData.bookmarks) tagManager.deserialize(userData.bookmarks);
+    if (userData.notes) notes.push(...userData.notes.map(note => BibleNote.fromObject(note)));
+    if (userData.Settings) Settings = mergeSettings(Settings, userData.Settings);
+    if (userData.VersesOpen)
+        VersesOpen = userData.VersesOpen.map(item => new BibleRef(item.Book, item.Chap, item.Verse, item.color));
+
 }
 
 function loadHistoryAndBookmarks() {
     try {
         const data = localStorage.getItem('userData');
-        if (data) {
-            const userData = JSON.parse(data);
-            if (userData.history) History = userData.history;
-            if (userData.bookmarks) tagManager.deserialize(userData.bookmarks);
-            if (userData.notes) notes = userData.notes;
-            if (userData.Settings) Settings = mergeSettings(Settings,userData.Settings);
-            console.log('History and bookmarks loaded successfully.');
-            console.log('settings', Settings);
-        } else {
+        if (!data) {
             throw new Error('No data found');
         }
+        const userData = JSON.parse(data);
+        processUserData(userData);
+        console.log('History and bookmarks loaded successfully.');
     } catch (error) {
         console.error('Failed to load history and bookmarks:', error);
-        //alert('Failed to load history and bookmarks: ' + error);
     }
 }
 
-// Example functions to get history and bookmarks data
-function getHistoryData() {
-    // Your logic to get history data
-    return History;
+async function importDataFromClipboard() {
+    try {
+        const text = await navigator.clipboard.readText();
+        if (!text.trim()) {
+            return alert("Clipboard is empty! Copy data first.");
+        }
+        const userData = JSON.parse(text);
+        processUserData(userData);
+        alert("Data imported successfully!");
+    } catch (error) {
+        console.error("Failed to import data:", error);
+        alert("Invalid data format. Make sure you copied the correct JSON.");
+    }
 }
 
-function getBookmarksData() {
-    // Your logic to get bookmarks data
-    return tagManager.serialize();
+function uploadHistoryAndBookmarks() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const userData = JSON.parse(e.target.result);
+                processUserData(userData); // Replace history data
+                console.log('History and bookmarks uploaded successfully.');
+            } catch (error) {
+                console.error('Failed to parse the uploaded file:', error);
+                alert('Invalid file format. Please upload a valid JSON file.');
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
 }
-var saveHistoryAndBookmarks = saveHistoryAndBookmarksToLocalStorage;
+
+
+// alias the save function
+const saveHistoryAndBookmarks = saveHistoryAndBookmarksToLocalStorage;
 
 function loadServiceworker() {
     if ("serviceWorker" in navigator) {

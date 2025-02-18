@@ -27,8 +27,8 @@ function setUpSettings() {
             step: settingObj.step
         });
     }
-    document.body.className = Settings.theme;
-    console.log(`Theme changed to ${Settings.theme}`);
+    //document.body.className = Settings.theme;
+    //console.log(`Theme changed to ${Settings.theme}`);
     fontSize = Settings.fontSize;
     document.body.className = Settings["invert-inputs"] ? "inverted-input-theme" : "main-theme";
     document.body.style.setProperty("--Foreground", Settings.Foreground);
@@ -111,7 +111,7 @@ class ToggleSetting {
         settingRow.appendChild(toggleWrapper);
         container.appendChild(settingRow);
 
-        this.saveSetting(toggleInput.checked);
+        //this.saveSetting(toggleInput.checked);
         // Listen for changes
         toggleInput.addEventListener("change", () => {
             this.saveSetting(toggleInput.checked);
@@ -203,7 +203,7 @@ class PickSetting {
         settingRow.appendChild(selectEl);
         container.appendChild(settingRow);
 
-        this.saveSetting(selectEl.value);
+        //this.saveSetting(selectEl.value);
         settingRow.addEventListener("click", () => {
             // open up selectEl
             selectEl.focus();
@@ -286,7 +286,7 @@ class SliderSetting {
         settingRow.appendChild(slider);
         container.appendChild(settingRow);
 
-        this.saveSetting(slider.value);
+        //this.saveSetting(slider.value);
         // Listen for changes
         slider.addEventListener("input", () => {
             labelEl.textContent = `${this.label}: ${slider.value}`;
@@ -366,7 +366,7 @@ class ColorPickerSetting {
         settingRow.appendChild(colorInput);
         container.appendChild(settingRow);
 
-        this.saveSetting(colorInput.value);
+        //this.saveSetting(colorInput.value);
 
         // Listen for changes
         colorInput.addEventListener("click", () => {

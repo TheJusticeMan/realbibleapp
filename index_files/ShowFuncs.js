@@ -1,6 +1,5 @@
 let VersesOpen = [];
 //let VersesInview = [];
-let VersesInviewIndex = 0;
 
 class BibleRef {
 	constructor(Book, Chap, Verse, color = 0) {
@@ -9,7 +8,53 @@ class BibleRef {
 		this.Verse = Number(Verse);
 		this.color = color;
 		if (color instanceof RegExp) this.SearchQ = color;
+		this.validateReference();
 	}
+
+	toString() {
+		return `${this.Book}:${this.Chap}:${this.Verse}:${this.color}`;
+	}
+
+	// A static method that returns a new BibleRef from a string.
+	static fromString(str) {
+		let [Book, Chap, Verse, color] = str.split(":");
+		return new BibleRef(Book, Chap, Verse, Number(color));
+	}
+
+	/**
+	 * Validates that the BibleRef has a valid book name,
+	 * chapter, and verse number. If any value is invalid,
+	 * the reference defaults to GENESIS 1:1.
+	 *
+	 * @returns {boolean} true if the reference was valid, 
+	 * or false if it had to be defaulted.
+	 */
+	validateReference() {
+		let isValid = true;
+
+		if (!booksOfTheBible.includes(this.Book)) {
+			console.warn(`Invalid book "${this.Book}". Defaulting to GENESIS.`);
+			this.Book = "GENESIS";
+			isValid = false;
+		}
+
+		const maxChapters = Bible[this.Book]?.length || 1;
+		if (this.Chap < 1 || this.Chap >= maxChapters) {
+			console.warn(`Invalid chapter "${this.Chap}" in "${this.Book}". Defaulting to chapter 1.`);
+			this.Chap = 1;
+			isValid = false;
+		}
+
+		const maxVerses = Bible[this.Book][this.Chap]?.length || 1;
+		if (this.Verse < 0 || this.Verse >= maxVerses) {
+			console.warn(`Invalid verse "${this.Verse + 1}" in "${this.Book} ${this.Chap}". Defaulting to verse 1.`);
+			this.Verse = 0;
+			isValid = false;
+		}
+
+		return isValid;
+	}
+
 	createElement(tag = "div", className = "", contextMenuHandler = null, clickHandler = null, content = "", onSwipeLeft = null, onSwipeRight = null) {
 		const element = document.createElement(tag);
 
@@ -77,12 +122,15 @@ class BibleRef {
 	}
 
 	get VerseElement() {
+		//console.log(tagManager.isBookmarked(this));
+		const BookMarktag = tagManager.isBookmarked(this) ? ' BookmarkNumber' : '';
+		const NoteTag = notes.some(verse => this.isEqual(verse.BibleVerse)) ? ' NoteNumber' : '';
 		return this.createElement(
 			"p",
 			"Contents",
 			BibleRef.showVerseMenu,
 			null,
-			`<span class="VerseNum">${this.Verse + 1}</span> ${this.italicsFormatted}`
+			`<span class="VerseNum${BookMarktag}${NoteTag}">${this.Verse + 1}</span> ${this.italicsFormatted}`
 		);
 	}
 
@@ -244,11 +292,49 @@ class BibleRef {
 			&& this.Verse === other.Verse;
 	}
 
+	updateLastSeen() {
+		this.color = new Date();
+	}
+
 	static showVerseMenu(event) {
 		loadVerseContextualInteractionScreen(BibleRef.getRefFromHTML(event.currentTarget));
 		event.returnValue = false;
 	}
 
+	static copy(event) {
+		const CElement = event.currentTarget;
+		const ref = BibleRef.getRefFromHTML(CElement);
+		const verseText = ref.singleVerseText;
+		const verseURL = `https://thejusticeman.github.io/realbibleapp/?verse=${encodeURIComponent(ref.toString())}`;
+		const fullText = `${verseText} — Read more: ${verseURL}`;
+	
+		if (navigator.share) {
+			// If sharing is supported, open the share dialog
+			navigator.share({
+				title: "Bible Verse",
+				text: fullText,
+				url: verseURL
+			}).catch(err => console.error("Sharing failed", err));
+		} else {
+			// Fallback: Copy to clipboard
+			navigator.clipboard.writeText(fullText).then(() => {
+				CElement.classList.add("copymark");
+	
+				// Disable text selection
+				if (window.getSelection) {
+					window.getSelection().removeAllRanges();
+				}
+	
+				event.returnValue = false;
+	
+				// Remove the visual feedback after 1 second
+				setTimeout(() => {
+					CElement.classList.remove("copymark");
+				}, 1000);
+			}).catch(err => console.error("Copy failed", err));
+		}
+	}
+	
 	static goToVerse(event) {
 		const ref = BibleRef.getRefFromHTML(event.currentTarget);
 		NewHistory(ref);
@@ -303,7 +389,7 @@ class BibleRef {
 
 	static loadVersesInview() {
 		const currentVerse = VersesInview[VersesInviewIndex];
-		const { ChapterElement: element, Book, Chap, Verse } = currentVerse;
+		const { Book, Chap } = currentVerse;
 		const readingHeader = document.getElementById("ReadingHeader");
 
 		if (!topswipehandler) {
@@ -315,7 +401,7 @@ class BibleRef {
 
 		const bookTitle = `${VersesInviewIndex > 0 ? "<  " : ""}${Book} ${Chap}${VersesInviewIndex < VersesInview.length - 1 ? "  >" : ""}`;
 		currentverseviewing = currentVerse;
-		loadDetailedVerseReadingScreen(bookTitle, element, Verse);
+		loadDetailedVerseReadingScreen(currentVerse, bookTitle);
 	}
 
 	static ShowPreviousChapter(event) {
@@ -340,7 +426,7 @@ class BibleRef {
 		}
 		ref.Verse = Bible[ref.Book][ref.Chap].length - 1; // Reset verse to the beginning
 		currentverseviewing = ref;
-		loadDetailedVerseReadingScreen(`${ref.Book} ${ref.Chap}`, ref.ChapterElement, ref.Verse);
+		loadDetailedVerseReadingScreen(ref);
 	}
 
 	static ShowNextChapter(event) {
@@ -363,14 +449,14 @@ class BibleRef {
 		}
 		ref.Verse = 0; // Reset verse to the beginning
 		currentverseviewing = ref;
-		loadDetailedVerseReadingScreen(`${ref.Book} ${ref.Chap}`, ref.ChapterElement, ref.Verse);
+		loadDetailedVerseReadingScreen(ref);
 	}
 
 
 	static goToRef(ref) {
 		currentverseviewing = ref;
 		UpdateHistoryTime(ref);
-		loadDetailedVerseReadingScreen(`${ref.Book} ${ref.Chap}`, ref.ChapterElement, ref.Verse);
+		loadDetailedVerseReadingScreen(ref);
 	}
 
 	static getRefFromHTML(element) {
@@ -572,6 +658,7 @@ class BibleRange {
 	static fromText(text) {
 		return BibleRange.fromString(text, false);
 	}
+
 }
 
 class BibleNote {
@@ -579,5 +666,22 @@ class BibleNote {
 		this.BibleVerse = BibleVerse;
 		this.Note = note;
 		this.BookmarkLBL = BookmarkLBL;
+	}
+	static fromObject(obj) {
+		if (typeof obj.BibleVerse === 'string') {
+			obj.BibleVerse = BibleRef.fromString(obj.BibleVerse);
+		}
+		return new BibleNote(
+			new BibleRef(obj.BibleVerse.Book, obj.BibleVerse.Chap, obj.BibleVerse.Verse),
+			obj.Note,
+			obj.BookmarkLBL
+		);
+	}
+	toObject() {
+		return {
+			BibleVerse: this.BibleVerse.toString(),
+			Note: this.Note,
+			BookmarkLBL: this.BookmarkLBL
+		};
 	}
 }

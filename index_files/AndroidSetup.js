@@ -37,8 +37,8 @@ async function loadBible() {
 function saveHistoryAndBookmarksToAndroid() {
     try {
         const userData = {
-            history: getHistoryData(),
-            bookmarks: getBookmarksData(),
+            history: History,
+            bookmarks: tagManager.serialize(),
             notes: notes,
             Settings: Settings
         };
@@ -69,14 +69,4 @@ function loadHistoryAndBookmarks() {
     }
 }
 
-// Example functions to get User Data data
-function getHistoryData() {
-    // Your logic to get history data
-    return History;
-}
-
-function getBookmarksData() {
-    // Your logic to get bookmarks data
-    return tagManager.serialize();
-}
-var saveHistoryAndBookmarks = saveHistoryAndBookmarksToAndroid;
+const saveHistoryAndBookmarks = saveHistoryAndBookmarksToAndroid;

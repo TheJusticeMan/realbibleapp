@@ -17,13 +17,18 @@ function handleBackButton() {
     }
 }
 
+let ScreenCleanup = null;
+
 var UniqueNumber = 0;
 
 function navigateToScreen(screenId) {
     const [containerElement, Cscreen, readingHeader] = getElementsByIds("container", `screen${screenId}`, "ReadingHeader");
     console.log(`Screen: ${screenId}`);
     if (ScrollPastScreen3) ScrollPastScreen3.destroy();// make sure the chapter changing dosnt happen
-
+    if (ScreenCleanup) {
+        ScreenCleanup();
+        ScreenCleanup = null;
+    }
     if (VersesInview.length <= 1) {
         topswipehandler ||= new SwipeHandler(readingHeader);
         topswipehandler.cycleSwipe = true;
@@ -45,7 +50,7 @@ function navigateToScreen(screenId) {
 
     currentScreen = screenId;
     const index = `${BackHistory.length}_${UniqueNumber++}_screen_${screenId}`
-    if (!navigatingback) {
+    if (!navigatingBack) {
         history.replaceState(null, "", location.pathname);  // Clear the state
         history.pushState({ section: index, time: Date.now() }, "", `#${index}`);
     }
@@ -58,14 +63,16 @@ function navigateToScreen(screenId) {
  * 
  * */
 
+let VersesInview = [];
+let VersesInviewIndex = 0;
 
 function loadVerseListScreen() {
+    //saveHistoryAndBookmarks();
     VersesInviewIndex = 0;
     VersesInview = [];
 
     const verseList = document.getElementById('OPverseList');
     verseList.innerHTML = ""; // Clear existing content
-
     [...VersesOpen].reverse().forEach(verse => verseList.appendChild(verse.SwipeLink));
 
     navigateToScreen(1);
@@ -85,6 +92,7 @@ function loadVerseSelectionScreen() {
     toggleDisplay(["booksList", "chapterList", "verseList"], "none");
     toggleDisplay(["oldTestamentBtn", "newTestamentBtn"], "");
     GetRelevantVerses();
+    document.getElementById("VerseSelectScreenHeader").innerText = "Select Verse";
     navigateToScreen(2);
     BackHistory.push(() => loadVerseSelectionScreen());
 }
@@ -136,9 +144,10 @@ function loadBooks(testament) {
     booksList.innerHTML = '';
     const start = testament === "Old" ? 0 : 39;
     const end = testament === "Old" ? 39 : 66;
+    document.getElementById("VerseSelectScreenHeader").innerText = "Select Book";
 
     for (let i = start; i < end; i++) {
-        const Booklink = new BibleRef(booksOfTheBible[i], 0, 0);
+        const Booklink = new BibleRef(booksOfTheBible[i], 1, 0);
         booksList.appendChild(Booklink.BookNameElement);
     }
 
@@ -150,6 +159,7 @@ function loadChapters(event) {
     const chapterList = document.getElementById('chapterList');
     chapterList.innerHTML = '';
     const Book = event.currentTarget.dataset.Book;
+    document.getElementById("VerseSelectScreenHeader").innerText = "Select Chapter";
 
     Bible[Book].slice(1).forEach((_, index) => {
         const Chaplink = new BibleRef(Book, index + 1, 0);
@@ -164,6 +174,7 @@ function loadVerses(event) {
     const verseList = document.getElementById('verseList');
     verseList.innerHTML = '';
     const { Book, Chap } = event.currentTarget.dataset;
+    document.getElementById("VerseSelectScreenHeader").innerText = "Select Verse";
 
     Bible[Book][Chap].forEach((_, index) => {
         const verselink = new BibleRef(Book, Chap, index);
@@ -188,7 +199,7 @@ function goToBibleReference(distanceThrough) {
 
     for (let i = 1; i < booksOfTheBible.length; i++) {
         const book = booksOfTheBible[i];
-        const bookWordCount = Biblewordcounts[book][Object.keys(Biblewordcounts[book]).pop()];
+        const bookWordCount = Biblewordcounts[book][0];
         if (bookWordCount > targetWord) {
             const previousBook = i > 0 ? booksOfTheBible[i - 1] : book;
             for (const chapter in Biblewordcounts[previousBook]) {
@@ -199,7 +210,7 @@ function goToBibleReference(distanceThrough) {
                     const versePosition = Math.ceil(
                         (targetWord - previousWords) /
                         ((cumulativeWords - previousWords) / Bible[previousBook][parseInt(chapter)].length)
-                    );
+                    ) - 1;
                     return new BibleRef(previousBook, parseInt(chapter), versePosition);
                 }
             }
@@ -230,26 +241,23 @@ function goToBibleReference(distanceThrough) {
  * */
 
 
-let VersesInview = [];
 let currentverseviewing;
 let currentScreen;
 let topswipehandler = null;
 let ScrollPastScreen3 = null;
 
-function loadDetailedVerseReadingScreen(TheTitle, TheContent, Verse) {
+function loadDetailedVerseReadingScreen(cverse, ChapterTitle = "") {
+    navigateToScreen(3);
     const [textDisplayElement, chapterTitleElement] = getElementsByIds("textDisplayArea", "chapterTitle");
-    //currentverseviewing=Verse;
-    //document.querySelectorAll(".")
-    //textDisplayElement.style.fontSize = `${fontSize}px`;
     document.body.style.setProperty("--FontSize", Settings.fontSize + "px");
     textDisplayElement.innerText = "";
-    textDisplayElement.appendChild(TheContent);
-    chapterTitleElement.innerText = TheTitle;
-    navigateToScreen(3);
+    textDisplayElement.appendChild(cverse.ChapterElement);
+    chapterTitleElement.innerText = ChapterTitle ? ChapterTitle : `${cverse.Book} ${cverse.Chap}`;
     setupScrollPast();
-    BibleRef.scrollToVerse(Verse);
-    BackHistory.push(() => loadDetailedVerseReadingScreen(TheTitle, TheContent, Verse));
+    BibleRef.scrollToVerse(cverse.Verse);
+    BackHistory.push(() => loadDetailedVerseReadingScreen(cverse, ChapterTitle));
 }
+
 
 let fontSize = 18, oldFontSize = 0, zoomSpeed = 1;
 let focusedVerseElement = null, containerElement = null, headerHeight = 0;
@@ -265,7 +273,6 @@ function setupZoom() {
         },
         onZoom: (zoomFactor) => {
             fontSize = Math.min(64, Math.max(4, oldFontSize * (1 + (zoomFactor - 1) * zoomSpeed)));
-            //document.body.style.setProperty("--FontSize", Settings.fontSize + "px");
             document.getElementById('textDisplayArea').style.fontSize = `${fontSize}px`;
             if (focusedVerseElement) {
                 containerElement.scrollTo({ top: focusedVerseElement.offsetTop - headerHeight, behavior: 'auto' });
@@ -355,11 +362,12 @@ function updateSearchResults(query2) {
     resultsContainer.appendChild(MakeSearchingPlaceToggleButton());
 }
 
+
 function performBibleSearch(query2, resultsContainer, clearSearchButton) {
     query = query2;
     insearchstart = true;
 
-    const bibleSearchInstance = new BibleSearchClass(query2, "Phrase", false, false, "ig");
+    bibleSearchInstance = new BibleSearchClass(query2, "Phrase", false, false, "ig");
     bibleSearchInstance.MAX_RESULTS = FastSearchQTY;
     const results = bibleSearchInstance.search(query2);
 
@@ -456,7 +464,7 @@ function clearSearchResults() {
 
 function loadMoreResults() {
     if (query && bibleSearchInstance.MAX_RESULTS == FastSearchQTY && insearchstart) {
-        bibleSearchInstance.MAX_RESULTS = 1000;
+        bibleSearchInstance.MAX_RESULTS = 10000;
         const results = bibleSearchInstance.search(query);
         const resultsContainer = document.getElementById('searchResults');
         document.getElementById('clearSearchButton').innerText =
@@ -465,6 +473,7 @@ function loadMoreResults() {
         results.forEach(result => {
             resultsContainer.appendChild(result.SearchElement);
         });
+        bibleSearchInstance.MAX_RESULTS = FastSearchQTY;
     }
     insearchstart = false;
 }
@@ -549,7 +558,9 @@ function loadVerseContextualInteractionScreen(theVerse) {
     const [noteEditor, selectedVerseText, crossReferencesList, containerElement] = getElementsByIds("noteEditor", "selectedVerseText", "crossReferencesList", "container");
     // Create and set up the verse display element
     selectedVerseText.innerHTML = "";
-    selectedVerseText.appendChild(theVerse.singleVerseElement);
+    const theVerseElament = theVerse.singleVerseElement;
+    theVerseElament.oncontextmenu=BibleRef.copy;
+    selectedVerseText.appendChild(theVerseElament);
 
     // Load existing note, if any
     const existingNote = notes.find(verse => theVerse.isEqual(verse.BibleVerse));
@@ -579,12 +590,10 @@ function loadVerseContextualInteractionScreen(theVerse) {
     // Scroll to top and navigate
     containerElement.scrollTo(0, 0);
     populateTagList();
-    //if (currentScreen !== 7) {
     BackHistory.push(() => loadVerseContextualInteractionScreen(theVerse));
-    //}
     navigateToScreen(7);
+    ScreenCleanup = saveChanges;
 }
-
 
 function populateTagList() {
     const tagList = document.getElementById('tagList');
@@ -665,7 +674,14 @@ function updateCrossReferences(query) {
 function saveChanges() {
     const noteEditor = document.getElementById('noteEditor');
     const note = noteEditor.value.trim();
+    //if (note.length === 0) return;
+    console.log(note);
     const theVerse = currentverseviewing;
+    if (note.length == 0) {
+        notes = notes.filter(note => !note.BibleVerse.isEqual(theVerse));
+        console.log("Note deleted");
+        return;
+    }
     for (let a = 0; a < notes.length; a++) {
         if (notes[a].BibleVerse.isEqual(theVerse)) {
             notes[a] = new BibleNote(currentverseviewing, note);
@@ -673,7 +689,7 @@ function saveChanges() {
         }
     }
     notes.push(new BibleNote(currentverseviewing, note));
-    loadVerseListScreen();
+    //loadVerseListScreen();
 }
 
 /**

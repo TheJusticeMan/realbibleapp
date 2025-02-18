@@ -229,6 +229,7 @@ p.Contents {
 
 /* fonts */
 @import url('https://fonts.googleapis.com/css2?family=Merriweather&family=Noto+Sans&family=Lexend+Deca&family=PT+Serif&display=swap');
+
 .Fontserif {
     font-family: serif;
 }
@@ -258,6 +259,18 @@ SPAN.VerseNum,
     padding: 1em;
     color: var(--Refcolor);
     font-style: italic;
+}
+
+SPAN.BookmarkNumber {
+    border: 1px solid var(--Refcolor);
+    border-radius: 50%;
+    padding: 0.5em;
+}
+
+SPAN.NoteNumber {
+    border-radius: 50%;
+    padding: 0.5em;
+    box-shadow: 0 0 0.5em 0.1em var(--Accent1);
 }
 
 strong.LORDCAPS {
@@ -298,7 +311,18 @@ span.SearchResult {
     display: block;
     padding: 0.5em;
     transition: background-color 0.3s;
+    overflow: hidden;
+    /* Helps contain floated children */
 }
+
+.last-seen {
+    float: right;
+    font-size: 0.85em;
+    font-style: italic;
+    margin-left: 1em;
+    /* Pushes it to the right edge */
+}
+
 
 span.selectedmark {
     background-color: var(--selected);
@@ -414,6 +438,22 @@ span.resultmark {
 .tag-item.selected {
     background-color: var(--MainBGcolor);
     color: var(--Refcolor);
+}
+
+.copymark {
+    color: var(--selected);
+    transform: scale(1.1);
+    transition: color 0.5s ease, transform 0.5s;
+}
+
+.copymark::after {
+    content: "Copied!";
+    font-size: 3em;
+    color: var(--Maincolor);
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .help-bubble {
@@ -624,7 +664,7 @@ span.resultmark {
     background-color: transparent;
     color: var(--Foreground);
     backdrop-filter: blur(0.5em);
-   -webkit-backdrop-filter: blur(0.5em);
+    -webkit-backdrop-filter: blur(0.5em);
 }
 
 /* General transition for all screens */
