@@ -306,18 +306,17 @@ class BibleRef {
 		const ref = BibleRef.getRefFromHTML(CElement);
 		const verseText = ref.singleVerseText;
 		const verseURL = `https://thejusticeman.github.io/realbibleapp/?verse=${encodeURIComponent(ref.toString())}`;
-		const fullText = `${verseText} — Read more: ${verseURL}`;
 	
 		if (navigator.share) {
 			// If sharing is supported, open the share dialog
 			navigator.share({
 				title: "Bible Verse",
-				text: fullText,
+				text: verseText,
 				url: verseURL
 			}).catch(err => console.error("Sharing failed", err));
 		} else {
 			// Fallback: Copy to clipboard
-			navigator.clipboard.writeText(fullText).then(() => {
+			navigator.clipboard.writeText(verseText).then(() => {
 				CElement.classList.add("copymark");
 	
 				// Disable text selection
