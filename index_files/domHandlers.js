@@ -40,18 +40,13 @@ function setupEventListeners() {
     document.getElementById('tagFilter').addEventListener('change', function () {
         loadBookmarks(this.value);
     });
-    //addclickhandler('categoryFilter', (event) => filterBookmarksByCategory(event.target.value));
     addclickhandler('backButton5', handleBackButton);
     // Screen 7
-    //addclickhandler('addNewLabel', addNewLabel);
-    document.getElementById('crossReferenceSearch').addEventListener('input', (event) => updateCrossReferences(event.target.value));
     addclickhandler('closeMenu', handleBackButton);
     addclickhandler('ShareButton', () => { navigateToScreen(10) });
     addclickhandler('SyncButton', () => navigateToScreen(11));
     addclickhandler('backButton6', () => { navigateToScreen(9) });
     addclickhandler('ShareLink1', shareLink);
-    //importDataFromClipboard
-    //document.getElementById('container').innerHTML+=""
     // Screen 11
     addclickhandler('backButton7', handleBackButton);
     addclickhandler('ImportData', importDataFromClipboard);
@@ -77,7 +72,7 @@ async function shareLink() {
         }).catch(err => {
             console.error("Clipboard copy failed:", err);
         });
-        console.log(`Error: ${err}`);
+        console.error(`Error: ${err}`);
     }
 }
 
@@ -488,11 +483,3 @@ class ZoomHandler {
 }
 
 
-
-
-// Usage Example
-//const element = document.getElementById("swipeable-element");
-//const swipeHandler = new SwipeHandler(element, {
-//  onSwipeLeft: () => console.log("Swiped left!"),
-//  onSwipeRight: () => console.log("Swiped right!"),
-//});

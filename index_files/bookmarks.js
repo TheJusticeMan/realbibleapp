@@ -81,8 +81,8 @@ class TagManager {
 }
 
 // Example usage
-const bibleRef1 = new BibleRef("GENESIS", 1, 1);
-const bibleRef2 = new BibleRef("JOHN", 3, 16);
+//const bibleRef1 = new BibleRef("GENESIS", 1, 1);
+//const bibleRef2 = new BibleRef("JOHN", 3, 16);
 
 const tagManager = new TagManager();
 //tagManager.addTag(bibleRef1, "Creation");

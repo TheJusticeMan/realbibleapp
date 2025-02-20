@@ -3,10 +3,10 @@ let History = [];
 // We use 'color' to represent the last seen date.
 
 function NewHistory(h) {
-    var now = new Date();
-    var oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    let now = new Date();
+    let oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
-    var existingEntry = History.find(function (entry) {
+    let existingEntry = History.find(function (entry) {
         return entry.Book === h.Book &&
             entry.Chap === h.Chap &&
             entry.Verse === h.Verse &&
@@ -27,14 +27,14 @@ function NewHistory(h) {
 }
 
 function mergeOldEntries() {
-    var oneWeekAgo = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
-    var mergedHistory = [];
-    var mergeMap = new Map();
+    let oneWeekAgo = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
+    let mergedHistory = [];
+    let mergeMap = new Map();
 
     History.forEach(function (entry) {
-        var color = new Date(entry.color);
+        let color = new Date(entry.color);
         if (color < oneWeekAgo) {
-            var key = entry.Book + "-" + entry.Chap + "-" + entry.Verse;
+            let key = entry.Book + "-" + entry.Chap + "-" + entry.Verse;
             if (!mergeMap.has(key)) {
                 mergeMap.set(key, { ...entry, color: [] });
             }
@@ -45,12 +45,12 @@ function mergeOldEntries() {
     });
 
     mergeMap.forEach(function (value) {
-        var color = value.color;
-        var rest = { ...value };
+        let color = value.color;
+        let rest = { ...value };
         delete rest.color;
 
         if (color.length > 1) {
-            var uniqueDays = new Set(color.map(function (date) {
+            let uniqueDays = new Set(color.map(function (date) {
                 return date.toISOString().split("T")[0];
             }));
 
@@ -78,7 +78,7 @@ function sortHistory() {
 }
 
 function UpdateHistoryTime(c) {
-    var existingEntry = History.find(function (entry) {
+    let existingEntry = History.find(function (entry) {
         return entry.Book === c.Book && entry.Chap === c.Chap && entry.Verse === c.Verse;
     });
 
@@ -182,9 +182,9 @@ function showHistory() {
     historyListEl.appendChild(historyContainer);
 }
 
-var popstateTriggered = false;
-var BackHistory = [];
-var navigatingBack = false;
+let popstateTriggered = false;
+let BackHistory = [];
+let navigatingBack = false;
 
 function SetUpBackTrigger() {
     window.addEventListener("popstate", function () {
@@ -195,8 +195,7 @@ function SetUpBackTrigger() {
         if (BackHistory.length > 1) {
             navigatingBack = true;
             BackHistory.pop();
-            var previousState = BackHistory.pop();
-            console.log(previousState);
+            let previousState = BackHistory.pop();
             previousState();
             navigatingBack = false;
         }

@@ -1,6 +1,6 @@
-const Word = /("[^"]+"|'[^']+'|[^ ]*[a-zA-Z_]+[^ ]*)/g;
-const nWord = /[^"]*?(?=[^ ]*[a-zA-Z_]+[^ ]*|"[^"]+"|'[^']+')/g;
-const DRegExp = /([\](\\\.)?^$|\*\+\{\}\[])/g;
+const Word = /("[^"]*"|'[^']*'|[a-zA-Z_]+)/gm;
+const nWord = /[^"]*?(?=[^ ]*[a-zA-Z_]+[^ ]*|"[^"]+"|'[^']+')/g;// Don't say it.
+const DRegExp = /[\\^$*+?.()|[\]{}]/g;
 
 
 class BibleSearchClass {
@@ -27,7 +27,6 @@ class BibleSearchClass {
 
         if (this.searchType === "Phrase") {
             if (!this.regExpOn) this.searchForCpt = this.searchForCpt.replace(DRegExp, "\\$1");
-            //alert(this.searchForCpt);
             if (this.useWholeWords) this.searchForCpt = "\\b" + this.searchForCpt + "\\b";
             this.searchForCpt = new RegExp(this.searchForCpt, this.tags);
         } else {
@@ -100,7 +99,7 @@ class LogicalSearch {
                 return new RegExp(pattern, flags);
             });
         } catch (e) {
-            alert(`Search error: ${e.message}`);
+            console.error(`Search error: ${e.message}`);
             this.test = () => false;
             return;
         }
@@ -109,10 +108,9 @@ class LogicalSearch {
         try {
             this.test = new Function("s", `return (${logiTests});`);
         } catch (e) {
-            alert(`Search error: ${e.message}`);
+            console.error(`Search error: ${e.message}`);
             this.test = () => false;
         }
-
     }
 
     toString() {
@@ -124,7 +122,3 @@ function sortSearch(r1, r2) {
     return r2.index - r1.index;
 }
 
-// Example of how to instantiate and use the updated class
-//const searchInstance = new BibleSearchClass("search term", "Phrase", true, false, "i");
-//searchInstance.search();
-//searchInstance.showContent();

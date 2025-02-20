@@ -3,10 +3,10 @@ let Biblewordcounts = {};
 const Biblewordcount = 793853;
 let BibleCrossReferences = {};
 let TopicDescriptionList = null;
-var notes = [];
-var Settings = {
+let Bible = null;
+let notes = [];
+let Settings = {
     "initialized": false,
-    "ShowHelp": false,
     "fontSize": "16",
     "debug": false,
     "reset": false,
@@ -16,13 +16,15 @@ var Settings = {
     "Accent1": "hsl(275,100%,50%)",
     "Accent2": "hsl(105,100%,50%)",
     "EnhanceSpacing": true,
-    "Font": "Fontserif"
+    "Font": "Fontserif",
+    "includeAI": false,
+    "flipPages": false
 }
 
-function Load() {
+async function Load() {
     const params = new URLSearchParams(window.location.search);
     const verseRef = params.get("verse"); // e.g., JOHN:3:16:0
-    initializeApp();
+    await initializeApp();
 
     // Preload Verses
     preloadVerses();
@@ -57,15 +59,17 @@ function handleDebugMode() {
 async function initializeApp() {
     try {
         loadServiceworker();
+        await loadBible();
         loadHistoryAndBookmarks();
         await loadBibleCrossReferences();
-        await loadtopics();
+        const topicData = await loadTopicsText();
         await loadBibleCount();
-        //loadTopicDescriptionList();
+        loadtopics(topicData);
+        if (Settings.includeAI)
+            await loadTopicDescriptionList();
 
         if (!Settings.initialized) {
             Settings.initialized = true;
-            Settings.ShowHelp = false;  // Disable help screen after first load
             const bibleRef1 = new BibleRef("GENESIS", 1, 0, 0);
             const bibleRef2 = new BibleRef("MATTHEW", 1, 0, 0);
             tagManager.addTag(bibleRef1, "Creation");
@@ -77,12 +81,15 @@ async function initializeApp() {
             //testHistory();
             //testtagManager();
             //testNotes();
-            //console.log("Debug mode is on");
             console.log("Settings:", Settings);
             console.log("History:", History);
             console.log("Bookmarks:", tagManager.deserialize);
             console.log("Notes:", notes);
             console.log("VersesOpen:", VersesOpen);
+            console.log("Bible:", Bible);
+            console.log("Biblewordcounts:", Biblewordcounts);
+            console.log("BibleCrossReferences:", BibleCrossReferences);
+            console.log("TopicDescriptionList:", TopicDescriptionList);
         }
 
         setupEventListeners();
@@ -107,11 +114,6 @@ function preloadVerses() {
         VersesOpen = VersesOpen.map(ref => new BibleRef(ref.Book, ref.Chap, ref.Verse, ref.color));
     }
     loadVerseListScreen();
-
-    if (Settings.ShowHelp) {
-        ShowHelpScreen();
-        Settings.ShowHelp = false;
-    }
 }
 
 // Example function to fetch selected verse (modify based on your app's logic)

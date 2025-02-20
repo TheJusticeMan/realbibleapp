@@ -122,7 +122,6 @@ class BibleRef {
 	}
 
 	get VerseElement() {
-		//console.log(tagManager.isBookmarked(this));
 		const BookMarktag = tagManager.isBookmarked(this) ? ' BookmarkNumber' : '';
 		const NoteTag = notes.some(verse => this.isEqual(verse.BibleVerse)) ? ' NoteNumber' : '';
 		return this.createElement(
@@ -230,9 +229,9 @@ class BibleRef {
 	}
 
 	handleSwipeLeft(event) {
-		var element = event.currentTarget;
+		let element = event.currentTarget;
 		console.log('Swiped left on', element.textContent);
-		var ref = BibleRef.getRefFromHTML(event.currentTarget);
+		let ref = BibleRef.getRefFromHTML(event.currentTarget);
 		VersesInview = VersesInview.filter(openRef => !openRef.isEqual(ref));
 		VersesInview.push(ref);
 		element.classList.add("selectedmark");
@@ -306,7 +305,7 @@ class BibleRef {
 		const ref = BibleRef.getRefFromHTML(CElement);
 		const verseText = ref.singleVerseText;
 		const verseURL = `https://thejusticeman.github.io/realbibleapp/?verse=${encodeURIComponent(ref.toString())}`;
-	
+
 		if (navigator.share) {
 			// If sharing is supported, open the share dialog
 			navigator.share({
@@ -318,14 +317,14 @@ class BibleRef {
 			// Fallback: Copy to clipboard
 			navigator.clipboard.writeText(verseText).then(() => {
 				CElement.classList.add("copymark");
-	
+
 				// Disable text selection
 				if (window.getSelection) {
 					window.getSelection().removeAllRanges();
 				}
-	
+
 				event.returnValue = false;
-	
+
 				// Remove the visual feedback after 1 second
 				setTimeout(() => {
 					CElement.classList.remove("copymark");
@@ -333,7 +332,7 @@ class BibleRef {
 			}).catch(err => console.error("Copy failed", err));
 		}
 	}
-	
+
 	static goToVerse(event) {
 		const ref = BibleRef.getRefFromHTML(event.currentTarget);
 		NewHistory(ref);
@@ -404,7 +403,7 @@ class BibleRef {
 	}
 
 	static ShowPreviousChapter(event) {
-		var ref = currentverseviewing;
+		let ref = currentverseviewing;
 		// Get the current index of the book
 		const currentIndex = booksOfTheBible.indexOf(ref.Book);
 
@@ -417,8 +416,6 @@ class BibleRef {
 				ref.Book = booksOfTheBible[currentIndex - 1];
 			} else {
 				// Wrap around to the last book
-				console.log(booksOfTheBible.length)
-				console.log(booksOfTheBible[booksOfTheBible.length - 1])
 				ref.Book = booksOfTheBible[booksOfTheBible.length - 1];
 			}
 			ref.Chap = Bible[ref.Book].length - 1; // Set to the last chapter
@@ -429,7 +426,7 @@ class BibleRef {
 	}
 
 	static ShowNextChapter(event) {
-		var ref = currentverseviewing;
+		let ref = currentverseviewing;
 		// Get the current index of the book
 		const currentIndex = booksOfTheBible.indexOf(ref.Book);
 
@@ -501,9 +498,9 @@ class BibleRange {
 		const book = booksOfTheBible[bookIndex];
 		// Default chapter is 1 and default verse is 0 if not specified
 		const chapter = parseInt(startParts[1] || 1, 10);
-		const verse = parseInt(startParts[2] || 0, 10);
+		const verse = parseInt(startParts[2] || 1, 10);
 
-		const startRef = new BibleRef(book, chapter, verse);
+		const startRef = new BibleRef(book, chapter, verse - 1);
 		let endRef = startRef; // Default end to start
 
 		// If end parts are provided, adjust the specificity.
@@ -516,9 +513,9 @@ class BibleRange {
 			const endBookIndex = BookShortNames.indexOf(endPartsRaw[0]);
 			const endBook = endBookIndex !== -1 ? booksOfTheBible[endBookIndex] : book;
 			const endChapter = parseInt(endPartsRaw[1] || 1, 10);
-			const endVerse = parseInt(endPartsRaw[2] || 0, 10);
+			const endVerse = parseInt(endPartsRaw[2] || 1, 10);
 
-			endRef = new BibleRef(endBook, endChapter, endVerse);
+			endRef = new BibleRef(endBook, endChapter, endVerse - 1);
 		}
 
 		return new BibleRange(startRef, endRef);
@@ -538,12 +535,21 @@ class BibleRange {
 	get SearchElement() {
 		// Create a search result element using the start reference and
 		// including formatted text for the range.
+		if (this.start === this.end) {
+			return this.start.createElement(
+				"span",
+				"SearchResult",
+				BibleRef.showVerseMenu,
+				BibleRef.goToVerse,
+				`<span class="VerseNum">${this.start.refText}</span> ${this.start.italicsFormatted}`
+			);
+		}
 		return this.start.createElement(
 			"span",
 			"SearchResult",
 			BibleRef.showVerseMenu,
 			BibleRef.goToVerse,
-			`<span class="VerseNum">${this.start.refText}</span> ${this.italicsFormatted}`
+			`<span class="VerseNum">${this.refText}</span> ${this.italicsFormatted}`
 		);
 	}
 
@@ -580,7 +586,11 @@ class BibleRange {
 	get italicsFormatted() {
 		// Combine each verse’s formatted text into a single string.
 		return this.verses
-			.map(verse => `<span class="VerseNum">${verse.Verse}</span> ${verse.italicsFormatted}`)
+			.map((verse, index) =>
+				index === 0
+					? verse.italicsFormatted
+					: `<span class="VerseNum">${verse.Verse + 1}</span> ${verse.italicsFormatted}`
+			)
 			.join(" ");
 	}
 
@@ -590,6 +600,9 @@ class BibleRange {
 		if (this.start.Book === this.end.Book) {
 			// ...and same chapter, show a single chapter with a verse range.
 			if (this.start.Chap === this.end.Chap) {
+				if (this.start.Verse === this.end.Verse) {
+					return `${this.start.Book} ${this.start.Chap}:${this.start.Verse + 1}`;
+				}
 				return `${this.start.Book} ${this.start.Chap}:${this.start.Verse + 1}-${this.end.Verse + 1}`;
 			}
 			// If different chapters in the same book, show both chapters.
@@ -620,8 +633,8 @@ class BibleRange {
 
 		// Parse chapter and verse, using defaults if needed.
 		const chapter = parseInt(startParts[1] || 1, 10);
-		const verse = parseInt(startParts[2] || 0, 10);
-		const startRef = new BibleRef(startBook, chapter, verse);
+		const verse = parseInt(startParts[2] || 1, 10);
+		const startRef = new BibleRef(startBook, chapter, verse - 1);
 		let endRef = startRef; // Default end reference is the start
 
 		// Process the end part of the range if it exists.
@@ -643,8 +656,8 @@ class BibleRange {
 			}
 
 			const endChapter = parseInt(endParts[1] || 1, 10);
-			const endVerse = parseInt(endParts[2] || 0, 10);
-			endRef = new BibleRef(endBook, endChapter, endVerse);
+			const endVerse = parseInt(endParts[2] || 1, 10);
+			endRef = new BibleRef(endBook, endChapter, endVerse - 1);
 		}
 
 		return new BibleRange(startRef, endRef);

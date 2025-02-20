@@ -27,8 +27,6 @@ function setUpSettings() {
             step: settingObj.step
         });
     }
-    //document.body.className = Settings.theme;
-    //console.log(`Theme changed to ${Settings.theme}`);
     fontSize = Settings.fontSize;
     document.body.className = Settings["invert-inputs"] ? "inverted-input-theme" : "main-theme";
     document.body.style.setProperty("--Foreground", Settings.Foreground);
@@ -44,8 +42,8 @@ function setUpSettings() {
         document.body.classList.remove(option.value);
     });
     document.body.classList.add(Settings.Font);
-    console.log(`Font changed to ${Settings.Font}`);
     document.body.style.setProperty("--FontSize", Settings.fontSize + "px");
+    document.getElementById("fullscreenDiv").style.display = Settings.flipPages ? "flex" : "none";
 }
 
 function mergeSettings(DefaultSettings, Settings) {
@@ -480,10 +478,8 @@ class SettingsSubmenu {
                 containerId: "submenu",
                 label: "Back",
                 onClick: () => {
-                    console.log(SubmenuWindow.style.display);
                     SubmenuWindow.style.display = "none";
                     SubmenuWindow.innerHTML = "";
-                    console.log(SubmenuWindow.style.display);
                 }
             });
             for (let setting in this.options) {
@@ -635,7 +631,8 @@ let defaultSettings = {
                 label: "Invert Inputs",
                 defaultValue: true,
                 onChange: (value) => {
-                    document.body.className = value ? "inverted-input-theme" : "main-theme";
+                    document.body.classList.remove(value ? "main-theme" : "inverted-input-theme");
+                    document.body.classList.add(value ? "inverted-input-theme" : "main-theme");
                     console.log(`Invert Inputs is now ${value ? "enabled" : "disabled"}`);
                 }
             },
@@ -722,15 +719,7 @@ let defaultSettings = {
             } else {
                 document.body.classList.remove("enhance-spacing");
             }
-            console.log(`Help will now be ${value ? "shown" : "hidden"} on Load`);
-        }
-    },
-    "ShowHelp": {
-        type: ToggleSetting,
-        label: "Show Help On Load",
-        defaultValue: true,
-        onChange: (value) => {
-            console.log(`Help will now be ${value ? "shown" : "hidden"} on Load`);
+            console.log(`There will now be ${value ? "more" : "less"} spacing around words`);
         }
     },
     "debug": {
@@ -741,14 +730,36 @@ let defaultSettings = {
             console.log(`Debug Mode is now ${value ? "enabled" : "disabled"}`);
         }
     },
+    "flipPages": {
+        type: ToggleSetting,
+        label: "Break the app",/* Flip through the Bible */
+        defaultValue: false,
+        onChange: (value) => {
+            document.getElementById("fullscreenDiv").style.display = value ? "flex" : "none";
+            console.log(`AI descriptions will ${value ? "load" : "not load"} next time.`);
+        }
+    },
+    "includeAI": {
+        type: ToggleSetting,
+        label: "Load AI topic bot",
+        defaultValue: false,
+        onChange: (value) => {
+            console.log(`AI descriptions will ${value ? "load" : "not load"} next time.`);
+            if (!value) {
+                TopicDescriptionList = null;
+            } else {
+                loadTopicDescriptionList();
+            }
+        }
+    },
     "reset": {
         type: ToggleSetting,
         label: "Reset Settings",
         defaultValue: false,
-        onClick: () => {
+        onChange: () => {
             Settings = {};
-            saveHistoryAndBookmarks();
             localStorage.clear();
+            saveHistoryAndBookmarks();
             location.reload();
         }
     }

@@ -41,7 +41,6 @@ async function loadTopicsText() {
         return text;
     } catch (error) {
         console.error('Failed to load topic-scores.txt:', error);
-        alert('Failed to load topic-scores.txt: ' + error.message);
         return null;
     }
 }
@@ -57,7 +56,7 @@ async function loadBibleCount() {
 
 async function loadBible() {
     try {
-        const bible = await fetchJSON('./index_files/Bible.json');
+        Bible = await fetchJSON('./index_files/Bible.json');
         console.log('Bible loaded');
         // Use the bible data as needed
     } catch (error) {

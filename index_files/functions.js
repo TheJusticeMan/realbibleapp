@@ -10,7 +10,6 @@ function handleBackButton() {
     if (BackHistory.length > 1) {
         BackHistory.pop();
         const previousState = BackHistory.pop();
-        console.log(previousState);
         previousState();
     } else {
         loadVerseListScreen();
@@ -19,7 +18,7 @@ function handleBackButton() {
 
 let ScreenCleanup = null;
 
-var UniqueNumber = 0;
+let UniqueNumber = 0;
 
 function navigateToScreen(screenId) {
     const [containerElement, Cscreen, readingHeader] = getElementsByIds("container", `screen${screenId}`, "ReadingHeader");
@@ -92,9 +91,40 @@ function loadVerseSelectionScreen() {
     toggleDisplay(["booksList", "chapterList", "verseList"], "none");
     toggleDisplay(["oldTestamentBtn", "newTestamentBtn"], "");
     GetRelevantVerses();
+    if (Settings.flipPages) {
+        SetUpFlipping();
+    }
     document.getElementById("VerseSelectScreenHeader").innerText = "Select Verse";
     navigateToScreen(2);
     BackHistory.push(() => loadVerseSelectionScreen());
+}
+
+function SetUpFlipping() {
+    console.log("Setting up flipping");
+    const listofclicks = document.querySelectorAll(".Flipline");
+    console.log(listofclicks);
+    for (let i = 0; i < listofclicks.length; i++) {
+        listofclicks[i].innerText = goToBibleReference(i / 32).refText;
+        listofclicks[i].ontouchstart = SetUpFlipping2;
+        listofclicks[i].dataset.index = i;
+    }
+}
+
+function SetUpFlipping2(event) {
+    event.preventDefault();
+    const i = parseInt(event.currentTarget.dataset.index);
+    const listofclicks = document.querySelectorAll(".Flipline");
+    for (let l = 0; l < listofclicks.length; l++) {
+        const Ref = goToBibleReference((i + (l / 32)) / 32);
+        listofclicks[l].innerText = Ref.refText;
+        listofclicks[l].ontouchend = BibleRef.goToVerse;
+        Object.assign(listofclicks[l].dataset, {
+            Book: Ref.Book,
+            Chap: Ref.Chap,
+            Verse: Ref.Verse,
+        });
+        listofclicks[l].dataset.index = i + (l / 32);
+    }
 }
 
 function GetRelevantVerses() {
@@ -312,7 +342,7 @@ function loadSearchScreen() {
     BackHistory.push(() => loadSearchScreen());
 }
 
-let bibleSearchInstance = new BibleSearchClass("", "Phrase", false, false, "ig");
+let bibleSearchInstance = null;
 let query = "";
 let insearchstart = false;
 let searchCleared = true;
@@ -404,13 +434,8 @@ function showTopics(query2, resultsContainer, clearSearchButton, searchInput) {
                 // Updated regex: capture optional end verse (group 4)
                 /\(?\b([1-3]?\s?[A-Za-z]+)\s+(\d{1,3}):(\d{1,3})(?:-?(\d{1,3}))?\)?/g,
                 (match, book, chapter, verse, endVerse) => {
-                    console.log("Full Match:", match);
-                    console.log("Book:", book.trim().toUpperCase());
-                    console.log("Chapter:", chapter);
-                    console.log("Verse:", verse);
 
                     if (endVerse) {
-                        console.log("End Verse:", endVerse);
                         // Create a BibleRange if an end verse is provided
                         const range = new BibleRange(
                             new BibleRef(book.trim().toUpperCase(), parseInt(chapter, 10), parseInt(verse, 10) - 1),
@@ -424,7 +449,7 @@ function showTopics(query2, resultsContainer, clearSearchButton, searchInput) {
                         return verseElement.RefElement.outerHTML;
                     }
                 }
-            );
+            ).replace("Biblical Explanation", "Biblical Explanation by a bot");
             TopicDescription.querySelectorAll(".VerseNum").forEach(element => {
                 element.oncontextmenu = BibleRef.showVerseMenu;
                 element.onclick = BibleRef.goToVerse;
@@ -559,7 +584,7 @@ function loadVerseContextualInteractionScreen(theVerse) {
     // Create and set up the verse display element
     selectedVerseText.innerHTML = "";
     const theVerseElament = theVerse.singleVerseElement;
-    theVerseElament.oncontextmenu=BibleRef.copy;
+    theVerseElament.oncontextmenu = BibleRef.copy;
     selectedVerseText.appendChild(theVerseElament);
 
     // Load existing note, if any
@@ -660,22 +685,9 @@ function addNewLabel() {
     dropdown.appendChild(option);
 }
 
-function updateCrossReferences(query) {
-    const results = ['Psalm 23:1 - The Lord is my shepherd', 'Ephesians 2:8 - For by grace you have been saved...'];
-    const list = document.getElementById('crossReferencesList');
-    list.innerHTML = '';
-    results.forEach(result => {
-        const li = document.createElement('li');
-        li.textContent = result;
-        list.appendChild(li);
-    });
-}
-
 function saveChanges() {
     const noteEditor = document.getElementById('noteEditor');
     const note = noteEditor.value.trim();
-    //if (note.length === 0) return;
-    console.log(note);
     const theVerse = currentverseviewing;
     if (note.length == 0) {
         notes = notes.filter(note => !note.BibleVerse.isEqual(theVerse));
@@ -706,111 +718,4 @@ function loadSettings() {
     setUpSettings();
     navigateToScreen(9);
     BackHistory.push(() => loadSettingsScreen());
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const helpBubbles = [
-    { id: "helpBubble1", element: "#searchBtn2", position: "bottom" },
-    { id: "helpBubble2", element: "#historyBtn2", position: "bottom" },
-    { id: "helpBubble3", element: "#bookmarksBtn2", position: "bottom" },
-    { id: "helpBubble4", element: "#OPverseList2", position: "top" },
-    { id: "helpBubble5", element: "#addVerseBtn2", position: "top" }
-];
-
-function ShowHelpScreen() {
-
-    let currentBubbleIndex = 0;
-
-    function showNextBubble() {
-        document.getElementById("helpBubbleEnd").style.display = "none";
-        if (currentBubbleIndex > 0) {
-            const prevElement = document.querySelector(helpBubbles[currentBubbleIndex - 1].element);
-            document.getElementById(helpBubbles[currentBubbleIndex - 1].id).style.display = "none";
-            prevElement.classList.remove("glow");
-        }
-
-        if (currentBubbleIndex < helpBubbles.length) {
-            const bubble = helpBubbles[currentBubbleIndex];
-            const element = document.querySelector(bubble.element);
-            const rect = element.getBoundingClientRect();
-            const helpBubble = document.getElementById(bubble.id);
-
-            element.classList.add("glow");
-
-            helpBubble.style.display = "block";
-
-            if (bubble.position === "bottom") {
-                helpBubble.style.top = (rect.top + window.scrollY + rect.height + 10) + "px";
-                helpBubble.style.left = (rect.left + window.scrollX) + "px";
-            } else {
-                helpBubble.style.top = (rect.top + window.scrollY - helpBubble.offsetHeight - 10) + "px";
-                helpBubble.style.left = (rect.left + window.scrollX) + "px";
-            }
-
-            // Ensure bubble is on screen
-            const bubbleRect = helpBubble.getBoundingClientRect();
-            if (bubbleRect.right > window.innerWidth - 20) {
-                helpBubble.style.left = (window.innerWidth - 310) + "px";
-            }
-            if (bubbleRect.left < 0) {
-                helpBubble.style.left = "10px";
-            }
-            if (bubbleRect.top < 0) {
-                helpBubble.style.top = (rect.top + window.scrollY + rect.height + 10) + "px";
-            }
-            if (bubbleRect.bottom > window.innerHeight) {
-                helpBubble.style.top = (rect.top + window.scrollY - helpBubble.offsetHeight - 10) + "px";
-            }
-
-            currentBubbleIndex++;
-        } else {
-            // Show the end tutorial bubble in the center of the screen
-            const endBubble = document.getElementById("helpBubbleEnd");
-            endBubble.style.display = "block";
-            endBubble.style.top = "50%";
-            endBubble.style.left = "50%";
-            endBubble.style.transform = "translate(-50%, -50%)";
-            endBubble.onclick = function () {
-                endBubble.style.display = "none";
-                loadVerseListScreen();
-            };
-            currentBubbleIndex = 0;
-        }
-    }
-
-    document.addEventListener("click", showNextBubble);
-    navigateToScreen(8);
-    showNextBubble();
 }
