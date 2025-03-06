@@ -249,14 +249,12 @@ class BibleRef {
 		const CElement = event.currentTarget;
 		const ref = BibleRef.getRefFromHTML(CElement);
 		const verseText = ref.singleVerseMarkdown;
-		const verseURL = `https://thejusticeman.github.io/realbibleapp/?verse=${encodeURIComponent(ref.toString())}`;
 
 		if (navigator.share) {
 			// If sharing is supported, open the share dialog
 			navigator.share({
 				title: "Bible Verse",
 				text: verseText,
-				url: verseURL
 			}).catch(err => console.error("Sharing failed", err));
 		} else {
 			// Fallback: Copy to clipboard
