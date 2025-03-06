@@ -23,10 +23,16 @@ function setupEventListeners() {
     addclickhandler('SettingsBtn', loadSettings);
     // Screen 2
     addclickhandler('backButton1', handleBackButton);
-    addclickhandler('oldTestamentBtn', () => loadBooks('Old'));
-    // Load Old Testament books
-    addclickhandler('newTestamentBtn', () => loadBooks('New')); // Load New Testament books
+    addclickhandler('Lookup', loadBooks);
     addclickhandler('addVerseBtn2', loadVerseSelectionScreen);
+    const fullscreenDiv = document.getElementById('fullscreenDiv');
+    for (let i = 1; i <= 32; i++) {
+        let div = document.createElement("div");
+        div.className = "Flipline";
+        div.id = `line${i}`;
+        div.textContent = `Line ${i}`;
+        fullscreenDiv.appendChild(div);
+    }
     // Screen 3
     addclickhandler('backButton2', loadVerseListScreen);
     // Screen 4
@@ -51,8 +57,8 @@ function setupEventListeners() {
     addclickhandler('backButton7', handleBackButton);
     addclickhandler('ImportData', importDataFromClipboard);
     addclickhandler('CopySettingsLink', copyHistoryAndBookmarksToClipboard);
-    addclickhandler('downloadData',downloadHistoryAndBookmarks)
-    addclickhandler('uploadData',uploadHistoryAndBookmarks)
+    addclickhandler('downloadData', downloadHistoryAndBookmarks)
+    addclickhandler('uploadData', uploadHistoryAndBookmarks)
 }
 
 async function shareLink() {

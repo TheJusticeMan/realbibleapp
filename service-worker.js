@@ -1,4 +1,4 @@
-const CACHE_NAME = "bible-app-cache-v2.22.11";
+const CACHE_NAME = "bible-app-cache-v3.00.00";
 const ASSETS = [
     "/realbibleapp/index.html", // Explicit root page
     "/realbibleapp/manifest.json",

@@ -56,17 +56,27 @@ function handleDebugMode() {
     }
 }
 
+//lazy load files
+async function lazyload() {
+    await loadBibleCrossReferences();
+    const topicData = await loadTopicsText();
+    await loadBibleCount();
+    loadtopics(topicData);
+    if (Settings.includeAI)
+        await loadTopicDescriptionList();
+}
+
+
 async function initializeApp() {
     try {
         loadServiceworker();
         await loadBible();
         loadHistoryAndBookmarks();
-        await loadBibleCrossReferences();
-        const topicData = await loadTopicsText();
-        await loadBibleCount();
-        loadtopics(topicData);
-        if (Settings.includeAI)
-            await loadTopicDescriptionList();
+        if (Settings.debug) {
+            await lazyload();
+        } else {
+            lazyload();
+        }
 
         if (!Settings.initialized) {
             Settings.initialized = true;
@@ -132,9 +142,9 @@ function getSelectedVerse() {
 function testHistory() {
     const now = Date.now();
     // Define a range of 30 days (in milliseconds)
-    const daterange = 2 * 360 * 24 * 60 * 60 * 1000;// 2 years
+    const daterange = 4 * 360 * 24 * 60 * 60 * 1000;// 2 years
     History = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 400; i++) {
         const bibleRef = goToBibleReference(Math.random());
         // Generate a date within the past 30 days
         const randomDate = new Date(now - Math.random() * daterange);

@@ -89,7 +89,7 @@ function loadVerseListScreen() {
 
 function loadVerseSelectionScreen() {
     toggleDisplay(["booksList", "chapterList", "verseList"], "none");
-    toggleDisplay(["oldTestamentBtn", "newTestamentBtn"], "");
+    toggleDisplay(["Lookup"], "");
     GetRelevantVerses();
     if (Settings.flipPages) {
         SetUpFlipping();
@@ -100,9 +100,7 @@ function loadVerseSelectionScreen() {
 }
 
 function SetUpFlipping() {
-    console.log("Setting up flipping");
     const listofclicks = document.querySelectorAll(".Flipline");
-    console.log(listofclicks);
     for (let i = 0; i < listofclicks.length; i++) {
         listofclicks[i].innerText = goToBibleReference(i / 32).refText;
         listofclicks[i].ontouchstart = SetUpFlipping2;
@@ -112,76 +110,118 @@ function SetUpFlipping() {
 
 function SetUpFlipping2(event) {
     event.preventDefault();
-    const i = parseInt(event.currentTarget.dataset.index);
+    const i = parseFloat(event.currentTarget.dataset.index) || 0;
     const listofclicks = document.querySelectorAll(".Flipline");
-    for (let l = 0; l < listofclicks.length; l++) {
-        const Ref = goToBibleReference((i + (l / 32)) / 32);
-        listofclicks[l].innerText = Ref.refText;
-        listofclicks[l].ontouchend = BibleRef.goToVerse;
-        Object.assign(listofclicks[l].dataset, {
-            Book: Ref.Book,
-            Chap: Ref.Chap,
-            Verse: Ref.Verse,
-        });
-        listofclicks[l].dataset.index = i + (l / 32);
-    }
+
+    listofclicks.forEach((el, l) => {
+        const newIndex = i + l / 32;
+        const Ref = goToBibleReference(newIndex / 32) || {};
+
+        el.innerText = Ref.refText; // Assuming refText is a getter
+        Object.assign(el.dataset, { Book: Ref.Book, Chap: Ref.Chap, Verse: Ref.Verse, index: newIndex });
+
+        let lastTouch = { x: null, y: null };
+
+        el.ontouchmove = (event) => {
+            event.preventDefault();
+            ({ clientX: lastTouch.x, clientY: lastTouch.y } = event.touches[0]);
+        };
+
+        el.ontouchend = (event) => {
+            const element = lastTouch.x !== null && lastTouch.y !== null
+                ? document.elementFromPoint(lastTouch.x, lastTouch.y)
+                : null;
+
+            if (element && element !== el) {
+                element.dispatchEvent(new Event("touchend"));
+            } else {
+                BibleRef.goToVerse(event);
+            }
+        };
+    });
 }
 
 function GetRelevantVerses() {
     const versesRefs = [];
 
-    // Collect relevant verses
-    VersesOpen.forEach(verse => {
-        const refBookShort = BookShortNames[booksOfTheBible.indexOf(verse.Book)];
-        const chapterRefs = BibleCrossReferences[refBookShort]?.[verse.Chap];
-        const verseRefs = chapterRefs?.[verse.Verse + 1];
+    // Collect and process relevant verses
+    VersesOpen.forEach(({ Book, Chap, Verse }) => {
+        const refBookShort = BookShortNames[booksOfTheBible.indexOf(Book)];
+        const verseRefs = BibleCrossReferences[refBookShort]?.[Chap]?.[Verse + 1];
 
         if (verseRefs) {
-            verseRefs.forEach(ref => {
-                versesRefs.push(new BibleRef(booksOfTheBible[ref[0]], ref[1], ref[2] - 1, ref[3]));
+            verseRefs.forEach(([bookIndex, chap, verse, votes]) => {
+                const book = booksOfTheBible[bookIndex];
+                const color = 1 - (1 / Math.max(votes + 1, 2)); // Normalized vote weight
+                versesRefs.push(new BibleRef(book, chap, verse - 1, color));
             });
         }
     });
 
-    // Merge duplicate verses by summing their colors
+    // Merge duplicate verses by summing their color weight
     const mergedVerses = new Map();
     versesRefs.forEach(verse => {
         const key = verse.refText;
+
         if (mergedVerses.has(key)) {
-            mergedVerses.get(key).color += verse.color;
+            const { color: existingColor } = mergedVerses.get(key);
+
+            const prevVoteCount = 1 / (1 - (existingColor % 1)); // Extract vote count from fractional part
+            const newVoteCount = 1 / (1 - verse.color);
+            const newColor = 1 - (1 / (prevVoteCount + newVoteCount)); // Compute new fractional vote
+
+            mergedVerses.get(key).color = Math.floor(existingColor) + newColor + 1;
         } else {
             mergedVerses.set(key, verse);
         }
     });
 
+
     // Sort by color
-    const sortedVerses = [...mergedVerses.values()].sort((a, b) => a.color - b.color);
+    const sortedVerses = [...mergedVerses.values()].sort((a, b) => b.color - a.color);
 
     // Remove already open verses
     const verseList = document.getElementById('booksList');
-    verseList.innerHTML = "";
+    verseList.innerHTML = "<H1>Related Verses</H1>";
     sortedVerses.forEach(ref => {
         if (!VersesOpen.some(openVerse => openVerse.isEqual(ref))) {
-            verseList.appendChild(ref.SearchElement);
+            verseList.appendChild(ref.CrossRefElement);
         }
     });
 
     verseList.style.display = "";
 }
 
-function loadBooks(testament) {
+function loadBooks() {
     const booksList = document.getElementById('booksList');
     booksList.innerHTML = '';
-    const start = testament === "Old" ? 0 : 39;
-    const end = testament === "Old" ? 39 : 66;
     document.getElementById("VerseSelectScreenHeader").innerText = "Select Book";
 
-    for (let i = start; i < end; i++) {
-        const Booklink = new BibleRef(booksOfTheBible[i], 1, 0);
-        booksList.appendChild(Booklink.BookNameElement);
-    }
+    const sections = [
+        { name: "Pentateuch (Law)", start: 0, end: 5 },
+        { name: "Historical Books", start: 5, end: 17 },
+        { name: "Poetry & Wisdom", start: 17, end: 22 },
+        { name: "Major Prophets", start: 22, end: 27 },
+        { name: "Minor Prophets", start: 27, end: 39 },
+        { name: "Gospels & Acts", start: 39, end: 44 },
+        { name: "Pauline Epistles", start: 44, end: 57 },
+        { name: "General Epistles & Revelation", start: 57, end: 66 }
+    ];
 
-    toggleDisplay(["oldTestamentBtn", "newTestamentBtn", "chapterList", "verseList"], "none");
+    sections.forEach(section => {
+        // Add section header
+        const sectionHeader = document.createElement("h2");
+        sectionHeader.innerText = section.name;
+        booksList.appendChild(sectionHeader);
+
+        // Load books for the section
+        for (let i = section.start; i < section.end; i++) {
+            const Booklink = new BibleRef(booksOfTheBible[i], 1, 0);
+            booksList.appendChild(Booklink.BookNameElement);
+        }
+    });
+
+    toggleDisplay(["Lookup", "chapterList", "verseList"], "none");
     toggleDisplay(["booksList"], "");
 }
 
@@ -196,7 +236,7 @@ function loadChapters(event) {
         chapterList.appendChild(Chaplink.ChapterNumberElement);
     });
 
-    toggleDisplay(["oldTestamentBtn", "newTestamentBtn", "booksList", "verseList"], "none");
+    toggleDisplay(["Lookup", "booksList", "verseList"], "none");
     toggleDisplay(["chapterList"], "");
 }
 
@@ -211,7 +251,7 @@ function loadVerses(event) {
         verseList.appendChild(verselink.VerseNumberElement);
     });
 
-    toggleDisplay(["oldTestamentBtn", "newTestamentBtn", "booksList", "chapterList"], "none");
+    toggleDisplay(["Lookup", "booksList", "chapterList"], "none");
     toggleDisplay(["verseList"], "");
 }
 
@@ -594,7 +634,7 @@ function loadVerseContextualInteractionScreen(theVerse) {
     // Display the selected verse
 
     // Clear cross-references list
-    crossReferencesList.innerHTML = "";
+    crossReferencesList.innerHTML = "<H1>Related Verses</H1>";
 
     // Retrieve cross-references
     const bookIndex = booksOfTheBible.indexOf(theVerse.Book);
@@ -603,12 +643,13 @@ function loadVerseContextualInteractionScreen(theVerse) {
     const chapterRefs = BibleCrossReferences[BookShortNames[bookIndex]]?.[theVerse.Chap];
     const versesRefs = chapterRefs?.[theVerse.Verse + 1];
     if (!versesRefs) return;
+    versesRefs.sort((a, b) => b[3] - a[3]);
 
     // Populate cross-references
     versesRefs.forEach(ref => {
         const refBookLongForm = booksOfTheBible[ref[0]];
         if (refBookLongForm) {
-            crossReferencesList.appendChild(new BibleRef(refBookLongForm, ref[1], ref[2] - 1).SearchElement);
+            crossReferencesList.appendChild(new BibleRef(refBookLongForm, ref[1], ref[2] - 1, ref[3]).CrossRefElement);
         }
     });
 

@@ -94,8 +94,14 @@ function UpdateHistoryTime(c) {
 function showHistory() {
     const now = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
-    const historyGroups = new Map();
-    const toMonthString = now.toLocaleString("default", { month: "long" });
+    const historyContainer = document.createElement("div");
+    historyContainer.className = "history-container";
+
+    // Sort history entries chronologically
+    const sortedHistory = [...History].sort((a, b) => new Date(b.color) - new Date(a.color));
+
+    let lastGroupKey = null;
+    let currentGroupContainer = null;
 
     // Check if two dates fall on the same day.
     const isSameDay = (d1, d2) =>
@@ -103,85 +109,48 @@ function showHistory() {
         d1.getMonth() === d2.getMonth() &&
         d1.getDate() === d2.getDate();
 
-    // Determine the grouping info based on the entry's date.
-    const getGroupInfo = (date) => {
-        let groupKey, sortValue;
-        if (isSameDay(date, now)) {
-            groupKey = "Today";
-            sortValue = now.getTime();
-        } else if (isSameDay(date, new Date(now.getTime() - oneDay))) {
-            groupKey = "Yesterday";
-            sortValue = now.getTime() - oneDay;
-        } else if (date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()) {
-            groupKey = toMonthString + " " + date.getDate();
-            // Use noon of that day for sorting.
-            sortValue = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12).getTime();
-        } else if (date.getFullYear() === now.getFullYear()) {
-            groupKey = date.toLocaleString("default", { month: "long" });
-            sortValue = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
-        } else {
-            groupKey = date.getFullYear().toString();
-            sortValue = new Date(date.getFullYear(), 0, 1).getTime();
+    // Determine the group key based on the entry's date.
+    const getGroupKey = (date) => {
+        if (isSameDay(date, now)) return "Today";
+        if (isSameDay(date, new Date(now.getTime() - oneDay))) return "Yesterday";
+        if (date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()) {
+            return date.toLocaleString("default", { month: "long" }) + " " + date.getDate();
         }
-
-        // Determine container class based on the group key.
-        const containerClass =
-            groupKey === "Today" ||
-                groupKey === "Yesterday" ||
-                groupKey.startsWith("Day ")
-                ? "day-container"
-                : isNaN(parseInt(groupKey))
-                    ? "month-container"
-                    : "year-container";
-
-        return { groupKey, sortValue, containerClass };
+        if (date.getFullYear() === now.getFullYear()) {
+            return date.toLocaleString("default", { month: "long" });
+        }
+        return date.getFullYear().toString();
     };
 
-    // Group history entries.
-    History.forEach((entry) => {
+    // Iterate through sorted history and dynamically create groups
+    sortedHistory.forEach((entry) => {
         const date = new Date(entry.color);
-        const { groupKey, sortValue } = getGroupInfo(date);
-        if (!historyGroups.has(groupKey)) {
-            historyGroups.set(groupKey, { sortValue, entries: [] });
+        const groupKey = getGroupKey(date);
+
+        if (groupKey !== lastGroupKey) {
+            // Create new group container
+            currentGroupContainer = document.createElement("div");
+            currentGroupContainer.className = isNaN(parseInt(groupKey)) ? "month-container" : "year-container";
+
+            const groupHeader = document.createElement("h3");
+            groupHeader.textContent = groupKey;
+            currentGroupContainer.appendChild(groupHeader);
+            historyContainer.appendChild(currentGroupContainer);
+            lastGroupKey = groupKey;
         }
-        historyGroups.get(groupKey).entries.push(entry);
+
+        if (!(entry instanceof BibleRef)) {
+            Object.setPrototypeOf(entry, BibleRef.prototype);
+        }
+        const entryElement = entry.HistoryElement;
+        currentGroupContainer.appendChild(entryElement);
     });
 
-    // Create the main container.
-    const historyContainer = document.createElement("div");
-    historyContainer.className = "history-container";
-
-    // Sort group keys by sortValue (newest first).
-    const sortedGroupKeys = [...historyGroups.keys()].sort(
-        (a, b) => historyGroups.get(b).sortValue - historyGroups.get(a).sortValue
-    );
-
-    // Build and append each group container.
-    sortedGroupKeys.forEach((groupKey) => {
-        // Use the first entry's date to determine the container class.
-        const { containerClass } = getGroupInfo(new Date(historyGroups.get(groupKey).entries[0].color));
-        const groupContainer = document.createElement("div");
-        groupContainer.className = containerClass;
-
-        const groupHeader = document.createElement("h3");
-        groupHeader.textContent = groupKey;
-        groupContainer.appendChild(groupHeader);
-
-        historyGroups.get(groupKey).entries.forEach((entry) => {
-            const bibleRef = new BibleRef(entry.Book, entry.Chap, entry.Verse);
-            const entryElement = bibleRef.createHistoryElement(new Date(entry.color));
-            groupContainer.appendChild(entryElement);
-        });
-
-        historyContainer.appendChild(groupContainer);
-    });
-
-    // Update the DOM.
+    // Update the DOM
     const historyListEl = document.getElementById("history-list");
     historyListEl.innerHTML = "";
     historyListEl.appendChild(historyContainer);
 }
-
 let popstateTriggered = false;
 let BackHistory = [];
 let navigatingBack = false;

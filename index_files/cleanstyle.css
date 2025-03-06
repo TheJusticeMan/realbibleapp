@@ -62,9 +62,6 @@ html {
 #container {
     height: 100%;
     overflow: auto;
-    touch-action: none;
-    -ms-touch-action: none;
-    /* For IE */
 }
 
 .main-content {
@@ -329,6 +326,10 @@ span.SearchResult {
 span.selectedmark {
     background-color: var(--selected);
     text-shadow: 0em 0em 0.5em var(--Background);
+}
+p.selectedmark .VerseNum{
+    text-shadow: 0em 0em 0.5em var(--Accent1);
+    color: var(--Accent1);
 }
 
 span.SearchResult:hover,
