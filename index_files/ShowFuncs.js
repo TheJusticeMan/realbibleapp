@@ -254,7 +254,7 @@ class BibleRef {
 			// If sharing is supported, open the share dialog
 			navigator.share({
 				title: "Bible Verse",
-				text: verseText,
+				text: verseText
 			}).catch(err => console.error("Sharing failed", err));
 		} else {
 			// Fallback: Copy to clipboard
