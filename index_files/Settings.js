@@ -3,46 +3,42 @@ let SubmenuWindow = null;
 function setUpSettings() {
     document.getElementById("submunucont").innerHTML = "";
     document.getElementById("settings-list").innerHTML = "";
-    SubmenuWindow = null;
-    SubmenuWindow = document.createElement("div");
-    SubmenuWindow.className = "submenu-window";
-    SubmenuWindow.id = 'submenu';
+    SubmenuWindow = createElement("div", { className: "submenu-window", id: "submenu" });
     document.getElementById("submunucont").appendChild(SubmenuWindow);
-    // Example Usage
-    // Create a toggle for "Dark Mode" in a container with ID "settings-list"
-    for (let setting in defaultSettings) {
-        if (!(setting in Settings)) {
-            Settings[setting] = defaultSettings[setting].defaultValue;
-        }
-        let settingObj = defaultSettings[setting];
-        const mysetting = new settingObj.type({
+    Object.entries(defaultSettings).forEach(([setting, settingObj]) => {
+        Settings[setting] ??= settingObj.defaultValue;
+
+        Object.assign(settingObj, {
             containerId: "settings-list",
-            label: settingObj.label,
-            options: settingObj.options,
-            settingKey: setting,
-            defaultValue: settingObj.defaultValue,
-            onChange: settingObj.onChange,
-            min: settingObj.min,
-            max: settingObj.max,
-            step: settingObj.step
+            settingKey: setting
         });
-    }
-    fontSize = Settings.fontSize;
-    document.body.className = Settings["invert-inputs"] ? "inverted-input-theme" : "main-theme";
-    document.body.style.setProperty("--Foreground", Settings.Foreground);
-    document.body.style.setProperty("--Background", Settings.Background);
-    document.body.style.setProperty("--Accent1", Settings.Accent1);
-    document.body.style.setProperty("--Accent2", Settings.Accent2);
-    if (Settings.EnhanceSpacing) {
-        document.body.classList.add("enhance-spacing");
-    } else {
-        document.body.classList.remove("enhance-spacing");
-    }
-    defaultSettings.Font.options.map((option) => {
-        document.body.classList.remove(option.value);
+
+        new settingObj.type({
+            ...settingObj
+        });
     });
-    document.body.classList.add(Settings.Font);
-    document.body.style.setProperty("--FontSize", Settings.fontSize + "px");
+    fontSize = Settings.fontSize;
+    const body = document.body;
+
+    // Apply theme and font size
+    body.className = Settings["invert-inputs"] ? "inverted-input-theme" : "main-theme";
+    body.style.cssText = `
+        --Foreground: ${Settings.Foreground};
+        --Background: ${Settings.Background};
+        --Accent1: ${Settings.Accent1};
+        --Accent2: ${Settings.Accent2};
+        --FontSize: ${Settings.fontSize}px;
+        --Font: ${Settings.Font};
+    `;
+
+    // Toggle enhance-spacing class
+    body.classList.toggle("enhance-spacing", Settings.EnhanceSpacing);
+
+    // Remove previous font classes and apply new font
+    defaultSettings.Font.options.forEach(option => body.classList.remove(option.value));
+    body.classList.add(Settings.Font);
+
+    // Toggle fullscreenDiv visibility
     document.getElementById("fullscreenDiv").style.display = Settings.flipPages ? "flex" : "none";
 }
 
@@ -58,6 +54,14 @@ function mergeSettings(DefaultSettings, Settings) {
     return mergedSettings;
 }
 
+function createElement(type, attributes = {}, children = []) {
+    const element = Object.assign(document.createElement(type), attributes);
+    children.forEach(child => element.appendChild(
+        typeof child === "string" ? document.createTextNode(child) : child
+    ));
+    return element;
+}
+
 class ToggleSetting {
     constructor({ containerId, label, settingKey, defaultValue = false, onChange }) {
         this.containerId = containerId;
@@ -65,81 +69,52 @@ class ToggleSetting {
         this.settingKey = settingKey;
         this.defaultValue = defaultValue;
         this.onChange = onChange;
-
-        // Initialize the toggle setting
         this.init();
     }
 
     init() {
-        // Get or create the container
         const container = document.getElementById(this.containerId);
-        if (!container) {
-            console.error(`Container with ID '${this.containerId}' not found.`);
-            return;
-        }
+        if (!container) return console.error(`Container with ID '${this.containerId}' not found.`);
 
-        // Create the setting row
-        const settingRow = document.createElement("div");
-        settingRow.className = "setting-row";
+        const toggleInput = createElement("input", {
+            type: "checkbox",
+            className: "toggle-input",
+            id: `toggle-${this.settingKey}`,
+            checked: this.getSettingValue()
+        });
 
-        // Create the label
-        const labelEl = document.createElement("label");
-        labelEl.className = "setting-label";
-        labelEl.textContent = this.label;
-        labelEl.setAttribute("for", `toggle-${this.settingKey}`); // Associate label with checkbox
+        const settingRow = createElement("div", { className: "setting-row" }, [
+            createElement("label", { className: "setting-label", htmlFor: `toggle-${this.settingKey}` }, [this.label]),
+            createElement("div", { className: "toggle-wrapper" }, [
+                toggleInput,
+                createElement("span", { className: "toggle-slider" })
+            ])
+        ]);
 
-        // Create the toggle switch
-        const toggleWrapper = document.createElement("div");
-        toggleWrapper.className = "toggle-wrapper";
-
-        const toggleInput = document.createElement("input");
-        toggleInput.type = "checkbox";
-        toggleInput.className = "toggle-input";
-        toggleInput.id = `toggle-${this.settingKey}`;
-        toggleInput.checked = this.getSettingValue();
-
-        const toggleSlider = document.createElement("span");
-        toggleSlider.className = "toggle-slider";
-
-        toggleWrapper.appendChild(toggleInput);
-        toggleWrapper.appendChild(toggleSlider);
-
-        // Append to the setting row
-        settingRow.appendChild(labelEl);
-        settingRow.appendChild(toggleWrapper);
         container.appendChild(settingRow);
 
-        //this.saveSetting(toggleInput.checked);
-        // Listen for changes
-        toggleInput.addEventListener("change", () => {
+        const handleChange = () => {
             this.saveSetting(toggleInput.checked);
-            if (this.onChange) {
-                this.onChange(toggleInput.checked);
-            }
-        });
-        toggleSlider.addEventListener("click", () => {
+            this.onChange?.(toggleInput.checked);
+        };
+
+        toggleInput.addEventListener("change", handleChange);
+        settingRow.querySelector(".toggle-slider").addEventListener("click", () => {
             toggleInput.checked = !toggleInput.checked;
-            this.saveSetting(toggleInput.checked);
-            if (this.onChange) {
-                this.onChange(toggleInput.checked);
-            }
+            handleChange();
         });
     }
 
-    // Save the toggle state to localStorage
     saveSetting(value) {
         localStorage.setItem(this.settingKey, value);
         Settings[this.settingKey] = value;
         saveHistoryAndBookmarks();
     }
 
-    // Get the toggle state from localStorage
     getSettingValue() {
-        if (this.settingKey in Settings) {
-            return Settings[this.settingKey];
-        }
-        const storedValue = localStorage.getItem(this.settingKey);
-        return storedValue === null ? this.defaultValue : storedValue === "true";
+        return this.settingKey in Settings
+            ? Settings[this.settingKey]
+            : localStorage.getItem(this.settingKey) === "true" || this.defaultValue;
     }
 }
 
@@ -151,90 +126,57 @@ class PickSetting {
         this.options = options;
         this.defaultValue = defaultValue;
         this.onChange = onChange;
-
-        // Initialize the pick setting
         this.init();
     }
 
     init() {
-        // Get or create the container
         const container = document.getElementById(this.containerId);
-        if (!container) {
-            console.error(`Container with ID '${this.containerId}' not found.`);
-            return;
-        }
+        if (!container) return console.error(`Container with ID '${this.containerId}' not found.`);
 
-        // Create the setting row
-        const settingRow = document.createElement("div");
-        settingRow.className = "setting-row";
+        const currentValue = this.getSettingValue();
+        const currentOption = this.options.find(o => o.value === currentValue) || this.options[0];
 
-        const currentSettingValue = this.getSettingValue();
-        let option = this.options.find(option => option.value === currentSettingValue);
-        if (!option) {
-            console.error(`Option with value '${currentSettingValue}' not found.`);
-            option = this.options[0];
-        }
-        // Create the label
-        const labelEl = document.createElement("label");
-        labelEl.className = "setting-label";
-        labelEl.textContent = `${this.label}: ${option.label}`;
-        labelEl.setAttribute("for", `pick-${this.settingKey}`); // Associate label with select
+        const labelEl = createElement("label", {
+            className: "setting-label",
+            for: `pick-${this.settingKey}`
+        }, [`${this.label}: ${currentOption.label}`]);
 
-        // Create the <select> element
-        const selectEl = document.createElement("select");
-        selectEl.className = "pick-select";
-        selectEl.id = `pick-${this.settingKey}`;
+        const selectEl = createElement("select", {
+            className: "pick-select",
+            id: `pick-${this.settingKey}`
+        }, this.options.map(o =>
+            createElement("option", {
+                value: o.value,
+                selected: o.value === currentValue
+            }, [o.label])
+        ));
 
-        // Populate the options
-        this.options.forEach(option => {
-            const optionEl = document.createElement("option");
-            optionEl.value = option.value;
-            optionEl.textContent = option.label;
-            if (currentSettingValue === option.value) {
-                optionEl.selected = true;
-            }
-            selectEl.appendChild(optionEl);
-        });
-
-        // Append the label and select to the setting row
-        settingRow.appendChild(labelEl);
-        settingRow.appendChild(selectEl);
+        const settingRow = createElement("div", { className: "setting-row" }, [labelEl, selectEl]);
         container.appendChild(settingRow);
 
-        //this.saveSetting(selectEl.value);
         settingRow.addEventListener("click", () => {
-            // open up selectEl
             selectEl.focus();
             selectEl.click();
-        })
+        });
 
-        // Listen for changes
         selectEl.addEventListener("change", () => {
+            const selectedOption = this.options.find(o => o.value === selectEl.value);
+            labelEl.textContent = `${this.label}: ${selectedOption.label}`;
             this.saveSetting(selectEl.value);
-            if (this.onChange) {
-                // find option with value selectEl.value
-                const option = this.options.find(option => option.value === selectEl.value);
-                labelEl.textContent = `${this.label}: ${option.label}`;
-
-                this.onChange(selectEl.value);
-            }
+            this.onChange?.(selectEl.value);
         });
     }
 
-    // Save the selected value to localStorage
     saveSetting(value) {
         localStorage.setItem(this.settingKey, value);
         Settings[this.settingKey] = value;
         saveHistoryAndBookmarks();
     }
 
-    // Get the selected value from localStorage
     getSettingValue() {
-        if (this.settingKey in Settings) {
-            return Settings[this.settingKey];
-        }
-        const storedValue = localStorage.getItem(this.settingKey);
-        return storedValue === null ? this.defaultValue : storedValue;
+        return this.settingKey in Settings
+            ? Settings[this.settingKey]
+            : localStorage.getItem(this.settingKey) || this.defaultValue;
     }
 }
 
@@ -247,73 +189,52 @@ class SliderSetting {
         this.max = max;
         this.defaultValue = defaultValue;
         this.onChange = onChange;
-
-        // Initialize the slider setting
         this.init();
     }
 
     init() {
-        // Get or create the container
         const container = document.getElementById(this.containerId);
-        if (!container) {
-            console.error(`Container with ID '${this.containerId}' not found.`);
-            return;
-        }
+        if (!container) return console.error(`Container with ID '${this.containerId}' not found.`);
 
-        // Create the setting row
-        const settingRow = document.createElement("div");
-        settingRow.className = "setting-row";
+        const currentValue = this.getSettingValue();
 
-        // Create the label
-        const labelEl = document.createElement("label");
-        labelEl.className = "setting-label";
-        labelEl.textContent = `${this.label}: ${this.getSettingValue()}`;
-        labelEl.setAttribute("for", `slider-${this.settingKey}`); // Associate label with input
+        const labelEl = createElement("label", {
+            className: "setting-label",
+            for: `slider-${this.settingKey}`,
+            style: this.label === "Font Size" ? `font-size: ${currentValue}px;` : ""
+        }, [`${this.label}: ${currentValue}`]);
 
-        // Create the slider
-        const slider = document.createElement("input");
-        slider.type = "range";
-        slider.className = "slider-input";
-        slider.id = `slider-${this.settingKey}`;
-        slider.min = this.min;
-        slider.max = this.max;
-        slider.value = this.getSettingValue();
+        const slider = createElement("input", {
+            type: "range",
+            className: "slider-input",
+            id: `slider-${this.settingKey}`,
+            min: this.min,
+            max: this.max,
+            value: currentValue
+        });
 
-        // Append the label and slider to the setting row
-        settingRow.appendChild(labelEl);
-        settingRow.appendChild(slider);
+        const settingRow = createElement("div", { className: "setting-row" }, [labelEl, slider]);
         container.appendChild(settingRow);
 
-        //this.saveSetting(slider.value);
-        // Listen for changes
         slider.addEventListener("input", () => {
             labelEl.textContent = `${this.label}: ${slider.value}`;
+            if (this.label === "Font Size") labelEl.style.fontSize = `${slider.value}px`;
             this.saveSetting(slider.value);
-            if (this.onChange) {
-                if (this.label == "Font Size") {
-                    labelEl.style.fontSize = `${slider.value}px`;
-                }
-                this.onChange(slider.value);
-            }
+            this.onChange?.(slider.value);
         });
     }
 
-    // Save the slider value to localStorage
     saveSetting(value) {
         localStorage.setItem(this.settingKey, value);
         Settings[this.settingKey] = value;
         saveHistoryAndBookmarks();
     }
 
-    // Get the slider value from localStorage
     getSettingValue() {
-        if (this.settingKey in Settings) {
-            return Settings[this.settingKey];
-        }
-        const storedValue = localStorage.getItem(this.settingKey);
-        return storedValue === null ? this.defaultValue : storedValue;
+        return this.settingKey in Settings
+            ? Settings[this.settingKey]
+            : localStorage.getItem(this.settingKey) || this.defaultValue;
     }
-
 }
 
 class ColorPickerSetting {
@@ -323,50 +244,43 @@ class ColorPickerSetting {
         this.settingKey = settingKey;
         this.defaultValue = defaultValue;
         this.onChange = onChange;
-
-        // Initialize the color picker setting
         this.init();
     }
 
     init() {
-        // Get or create the container
         const container = document.getElementById(this.containerId);
         if (!container) {
             console.error(`Container with ID '${this.containerId}' not found.`);
             return;
         }
 
-        // Create the setting row
-        const settingRow = document.createElement("div");
-        settingRow.className = "setting-row";
+        const colorPickerContainer = createElement("div", {
+            className: "color-picker-container",
+            value: this.getSettingValue()
+        });
 
-        // Create the label
-        const labelEl = document.createElement("label");
-        labelEl.className = "setting-label";
-        labelEl.textContent = this.label;
-        labelEl.setAttribute("for", `color-picker-${this.settingKey}`); // Associate label with input
+        const labelEl = createElement("label", {
+            className: "setting-label",
+            textContent: this.label,
+            htmlFor: `color-picker-${this.settingKey}`
+        });
 
-        // Create the color input element
-        const colorInput = document.createElement("input");
-        colorInput.type = "button";
-        colorInput.className = "color-picker-input";
-        colorInput.id = `color-picker-${this.settingKey}`;
-        colorInput.value = this.getSettingValue();
-        colorInput.style.backgroundColor = colorInput.value;
+        const colorInput = createElement("input", {
+            type: "button",
+            className: "color-picker-input",
+            id: `color-picker-${this.settingKey}`,
+            value: this.getSettingValue()
+        });
+        colorInput.style.backgroundColor = this.getSettingValue();
 
-        // Append the label and input to the setting row
-        //color-picker-container
-        const colorPickerContainer = document.createElement("div");
-        colorPickerContainer.className = "color-picker-container";
-        colorPickerContainer.value = colorInput.value;
-        settingRow.appendChild(colorPickerContainer);
-        settingRow.appendChild(labelEl);
-        settingRow.appendChild(colorInput);
+        const settingRow = createElement("div", { className: "setting-row" }, [
+            colorPickerContainer,
+            labelEl,
+            colorInput
+        ]);
+
         container.appendChild(settingRow);
 
-        //this.saveSetting(colorInput.value);
-
-        // Listen for changes
         colorInput.addEventListener("click", () => {
             const colorPicker = new ColorPicker(colorPickerContainer);
             colorPicker.onColorSelect = (color) => {
@@ -374,175 +288,120 @@ class ColorPickerSetting {
                 colorInput.style.backgroundColor = color;
                 colorPickerContainer.value = color;
                 this.saveSetting(color);
-                if (this.onChange) {
-                    this.onChange(color);
-                }
+                this.onChange?.(color);
             };
             this.saveSetting(colorInput.value);
-            if (this.onChange) {
-                this.onChange(colorInput.value);
-            }
+            this.onChange?.(colorInput.value);
         });
     }
 
-    // Save the color value to localStorage
     saveSetting(value) {
         localStorage.setItem(this.settingKey, value);
         Settings[this.settingKey] = value;
         saveHistoryAndBookmarks();
     }
 
-    // Get the color value from localStorage
     getSettingValue() {
-        if (this.settingKey in Settings) {
-            return Settings[this.settingKey];
-        }
-        const storedValue = localStorage.getItem(this.settingKey);
-        return storedValue === null ? this.defaultValue : storedValue;
+        return Settings[this.settingKey] || localStorage.getItem(this.settingKey) || this.defaultValue;
     }
 }
 
 class BackButton {
     constructor({ containerId, label, onClick }) {
-        this.containerId = containerId;
-        this.label = label;
-        this.onClick = onClick;
-
-        // Initialize the back button
-        this.init();
+        this.init(containerId, label, onClick);
     }
 
-    init() {
-        // Get or create the container
-        const container = document.getElementById(this.containerId);
-        if (!container) {
-            console.error(`Container with ID '${this.containerId}' not found.`);
-            return;
-        }
-        // Create the setting row
-        const settingRow = document.createElement("div");
-        settingRow.className = "setting-row";
-        // Create the back button
-        const backButton = document.createElement("div");
-        backButton.className = "setting-label";
-        backButton.textContent = this.label;
+    init(containerId, label, onClick) {
+        const container = document.getElementById(containerId);
+        if (!container) return console.error(`Container with ID '${containerId}' not found.`);
 
-        settingRow.appendChild(backButton)
-
-        // Append the back button to the container
-        container.appendChild(settingRow);
-
-        // Listen for clicks
-        backButton.addEventListener("click", () => {
-            if (this.onClick) {
-                this.onClick();
-            }
+        const backButton = createElement("div", {
+            className: "setting-label",
+            textContent: label,
+            onclick: onClick
         });
+
+        container.appendChild(createElement("div", { className: "setting-row" }, [backButton]));
     }
 }
 
-
 class SettingsSubmenu {
     constructor({ containerId, label, settingKey, options = {} }) {
-        this.containerId = containerId;
-        this.label = label;
-        this.options = options; // the submenu 
-        this.settingKey = settingKey;
-
-        // Initialize the submenu setting
-        this.init();
+        this.init(containerId, label, settingKey, options);
     }
 
-    init() {
-        // Get or create the container
-        const container = document.getElementById(this.containerId);
-        if (!container) {
-            console.error(`Container with ID '${this.containerId}' not found.`);
-            return;
-        }
+    init(containerId, label, settingKey, options) {
+        const container = document.getElementById(containerId);
+        if (!container) return console.error(`Container with ID '${containerId}' not found.`);
 
-        // Create the setting row
-        const settingRow = document.createElement("div");
-        settingRow.className = "setting-row";
-
-        // Create the label
-        const labelEl = document.createElement("label");
-        labelEl.className = "setting-label";
-        labelEl.textContent = this.label;
-        labelEl.setAttribute("for", `submenu-${this.settingKey}`); // Associate label with select
-        settingRow.appendChild(labelEl);
-        container.appendChild(settingRow);
-
-        labelEl.addEventListener("click", () => {
-            new BackButton({
-                containerId: "submenu",
-                label: "Back",
-                onClick: () => {
-                    SubmenuWindow.style.display = "none";
-                    SubmenuWindow.innerHTML = "";
-                }
-            });
-            for (let setting in this.options) {
-                let settingObj = this.options[setting];
-                new settingObj.type({
-                    containerId: "submenu",
-                    label: settingObj.label,
-                    options: settingObj.options,
-                    settingKey: setting,
-                    defaultValue: settingObj.defaultValue,
-                    onChange: settingObj.onChange,
-                    min: settingObj.min,
-                    max: settingObj.max,
-                    step: settingObj.step
-                });
-            }
-            SubmenuWindow.style.display = "block";
+        const labelEl = createElement("label", {
+            className: "setting-label",
+            textContent: label,
+            for: `submenu-${settingKey}`,
+            onclick: () => this.openSubmenu(options)
         });
+
+        container.appendChild(createElement("div", { className: "setting-row" }, [labelEl]));
+    }
+
+    openSubmenu(options) {
+        new BackButton({
+            containerId: "submenu",
+            label: "Back",
+            onClick: () => {
+                SubmenuWindow.style.display = "none";
+                SubmenuWindow.innerHTML = "";
+            }
+        });
+
+        Object.entries(options).forEach(([setting, settingObj]) => {
+            Settings[setting] ??= settingObj.defaultValue;
+            Object.assign(settingObj, {
+                containerId: "submenu",
+                settingKey: setting
+            });
+
+            new settingObj.type({ ...settingObj });
+        });
+
+        SubmenuWindow.style.display = "block";
     }
 }
 
 class ColorPicker {
     constructor(containerElement) {
-        // Create palettes and preview elements dynamically
         this.container = containerElement;
         this.container.className = "color-picker-container";
         this.container.style.display = 'flex';
-        //onColorSelect
+
         this.onColorSelect = (color) => {
             console.log(`Color selected: ${color}`);
         };
 
         this.palettes = {
-            hue: this.createElement('div', 'hue-palette'),
-            saturation: this.createElement('div', 'saturation-palette'),
-            lightness: this.createElement('div', 'lightness-palette'),
+            hue: this.createElement('div', { id: 'hue-palette' }),
+            saturation: this.createElement('div', { id: 'saturation-palette' }),
+            lightness: this.createElement('div', { id: 'lightness-palette' }),
         };
-        this.colorPreview = this.createElement('div', 'color-preview');
-        this.colorPreview.className = "color-preview";
 
-        this.colorCode = this.createElement('div', 'color-code');
-        this.colorCode.className = "color-code";
+        this.colorPreview = this.createElement('div', { id: 'color-preview', className: 'color-preview' });
+        this.colorCode = this.createElement('div', { id: 'color-code', className: 'color-code' });
 
-        // Style color preview
         this.colorPreview.addEventListener('click', () => {
             const color = `hsl(${this.selectedHue.toFixed(1)}, ${this.selectedSaturation}%, ${this.selectedLightness}%)`;
             this.colorPreview.style.backgroundColor = color;
             this.colorCode.textContent = color;
             this.onColorSelect(color);
             this.destroy();
-        })
+        });
 
-
-        // Parse initial HSL values from container's value
         const initialColor = this.parseHSL(this.container.value || 'hsl(0, 100%, 50%)');
         this.selectedHue = initialColor.hue;
         this.selectedSaturation = initialColor.saturation;
         this.selectedLightness = initialColor.lightness;
 
-        // Factor for hue distribution
         this.factor = (3 - Math.sqrt(5)) * 180;
 
-        // Initialize palettes and preview
         this.update();
     }
 
@@ -559,28 +418,31 @@ class ColorPicker {
         };
     }
 
-    createElement(tag, id) {
-        const element = document.createElement(tag);
-        element.id = id;
+    createElement(type, attributes = {}, children = []) {
+        const element = Object.assign(document.createElement(type), attributes);
+        children.forEach(child => element.appendChild(
+            typeof child === "string" ? document.createTextNode(child) : child
+        ));
         this.container.appendChild(element);
         return element;
     }
 
     createPalette(palette, values, type) {
-        palette.innerHTML = ''; // Clear existing colors
+        palette.innerHTML = '';
         palette.className = 'color-palette';
 
         values.forEach(value => {
-            const colorBox = document.createElement('div');
-            const color = type === 'hue'
+            const colorBox = this.createElement('div', {
+                className: 'color-box'
+            });
+
+            colorBox.style.backgroundColor = type === 'hue'
                 ? `hsl(${(value * this.factor) % 360}, ${this.selectedSaturation}%, ${this.selectedLightness}%)`
                 : type === 'saturation'
                     ? `hsl(${this.selectedHue}, ${value}%, ${this.selectedLightness}%)`
                     : `hsl(${this.selectedHue}, ${this.selectedSaturation}%, ${value}%)`;
-
-            colorBox.style.backgroundColor = color;
-            colorBox.classList.add('color-box');
             colorBox.dataset.value = type === 'hue' ? (value * this.factor) % 360 : value;
+
 
             colorBox.addEventListener('click', () => {
                 if (type === 'hue') this.selectedHue = parseFloat(colorBox.dataset.value);
@@ -588,8 +450,6 @@ class ColorPicker {
                 if (type === 'lightness') this.selectedLightness = parseFloat(colorBox.dataset.value);
 
                 this.update();
-
-                // Update container value
                 this.container.value = `hsl(${this.selectedHue.toFixed(1)}, ${this.selectedSaturation}%, ${this.selectedLightness}%)`;
             });
 
@@ -615,10 +475,11 @@ class ColorPicker {
     }
 
     destroy() {
-        this.container.innerHTML = ''; // Clear the container
+        this.container.innerHTML = '';
         this.container.style.display = 'none';
     }
 }
+
 
 let defaultSettings = {
     "colors": {
@@ -748,7 +609,7 @@ let defaultSettings = {
             if (!value) {
                 TopicDescriptionList = null;
             } else {
-                loadTopicDescriptionList();
+                loadJSON(TopicDescriptionList, "./index_files/Description.json");
             }
         }
     },

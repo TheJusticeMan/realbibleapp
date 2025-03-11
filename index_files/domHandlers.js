@@ -21,6 +21,7 @@ function setupEventListeners() {
     addclickhandler('bookmarksBtn', loadBookmarksScreen);
     addclickhandler('addVerseBtn', loadVerseSelectionScreen);
     addclickhandler('SettingsBtn', loadSettings);
+    document.getElementById("SaveToTag").addEventListener('change', saveListToTag);
     // Screen 2
     addclickhandler('backButton1', handleBackButton);
     addclickhandler('Lookup', loadBooks);
@@ -33,6 +34,7 @@ function setupEventListeners() {
         div.textContent = `Line ${i}`;
         fullscreenDiv.appendChild(div);
     }
+    addclickhandler("LoadAllRelaventVerses",OpenAllReleventVerses);
     // Screen 3
     addclickhandler('backButton2', loadVerseListScreen);
     // Screen 4
@@ -43,13 +45,14 @@ function setupEventListeners() {
     addclickhandler('backButton3', handleBackButton);
     // Screen 6
     addclickhandler('backButton4', handleBackButton);
+    addclickhandler('OpenAllBookmarks', openAllBookmarks)
     document.getElementById('tagFilter').addEventListener('change', function () {
         loadBookmarks(this.value);
     });
     addclickhandler('backButton5', handleBackButton);
     // Screen 7
     addclickhandler('closeMenu', handleBackButton);
-    addclickhandler('ShareButton', () => { navigateToScreen(10) });
+    addclickhandler('ShareButton', setUpShareScreen);
     addclickhandler('SyncButton', () => navigateToScreen(11));
     addclickhandler('backButton6', () => { navigateToScreen(9) });
     addclickhandler('ShareLink1', shareLink);
@@ -187,23 +190,25 @@ class SwipeHandler {
 
                 // Allow reflow before applying transition back to original position
                 requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        this.element.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-in";
-                        this.element.style.transform = "translateX(0)";
-                        this.element.style.opacity = "1";
-                    });
+                    this.element.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-in";
+                    this.resetPosition();
                 });
             } else {
                 // Normal behavior
-                this.element.style.transform = "translateX(0)";
-                this.element.style.opacity = "1";
                 this.element.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-in";
+                this.resetPosition();
             }
         }, 300);
     }
 
     resetPosition() {
         this.element.style.transform = "translateX(0)";
+        this.element.style.opacity = "1";
+        setTimeout(() => {
+            this.element.style.transition = "";
+            this.element.style.transform = "";
+            this.element.style.opacity = "";
+        }, 300);
     }
 
     destroy() {
@@ -276,16 +281,17 @@ class ScrollPastBoundsHandler {
     }
 
     handleTouchStart(event) {
-        if (event.touches.length > 1) return;
+        if (event.touches.length > 1) return this.resetValues();
 
         this.startY = event.touches[0].pageY;
+        this.currentY = this.startY;
         const { scrollTop, offsetHeight, scrollHeight } = this.element;
         this.isAtTop = scrollTop <= 0;
         this.isAtBottom = scrollTop + offsetHeight >= scrollHeight - this.buffer;
     }
 
     handleTouchMove(event) {
-        if (event.touches.length > 1) return;
+        if (event.touches.length > 1) return this.resetValues();
 
         const { scrollTop, offsetHeight, scrollHeight } = this.element;
         if (!this.isAtTop && !this.isAtBottom && (scrollTop <= 0 || scrollTop + offsetHeight >= scrollHeight - this.buffer)) {
@@ -317,9 +323,15 @@ class ScrollPastBoundsHandler {
                 this._onScrollPastBottom();
                 this.animateSwipe("up");
             }
-            this.isAtTop = false;
-            this.isAtBottom = false;
+            this.resetValues();
         }
+    }
+
+    resetValues() {
+        this.startY = 0;
+        this.currentY = 0;
+        this.isAtTop = false;
+        this.isAtBottom = false;
     }
 
     animateSwipe(direction) {
@@ -488,4 +500,34 @@ class ZoomHandler {
     }
 }
 
+class CustomPrompt {
+    constructor() {
+        this.container = document.getElementById('custom-prompt-container');
+        this.messageElement = document.getElementById('custom-prompt-message');
+        this.inputElement = document.getElementById('custom-prompt-input');
+        this.okButton = document.getElementById('custom-prompt-ok');
+        this.cancelButton = document.getElementById('custom-prompt-cancel');
 
+        this.okButton.onclick = () => this.close(this.inputElement.value.trim() || null);
+        this.cancelButton.onclick = () => this.close(null);
+        this.inputElement.onkeydown = (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                this.close(this.inputElement.value.trim() || null);
+            }
+        };
+    }
+
+    show(message, callback) {
+        this.callback = callback;
+        this.messageElement.textContent = message;
+        this.inputElement.value = '';
+        this.container.style.display = 'flex';
+        this.inputElement.focus();
+    }
+
+    close(value) {
+        this.container.style.display = 'none';
+        if (this.callback) this.callback(value);
+    }
+}

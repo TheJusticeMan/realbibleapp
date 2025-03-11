@@ -187,16 +187,7 @@ function exportHistoryAsStrings() {
  */
 function importHistoryFromStrings(stringArray) {
     return stringArray.map(str => {
-        const parts = str.split(":");
-        if (parts.length !== 4) {
-            console.warn("Skipping invalid history string:", str);
-            return null;
-        }
-        return new BibleRef(
-            parts[0],
-            parts[1],
-            parts[2],
-            new Date(Number(parts[3]))
-        );
+        const [book, chap, verse, color] = str.split(":");
+        return new BibleRef(book, chap, verse, new Date(Number(color)));
     }).filter(item => item !== null);
 }

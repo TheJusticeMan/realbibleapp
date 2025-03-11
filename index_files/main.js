@@ -1,16 +1,17 @@
 const BibleSearch = {};
-let Biblewordcounts = {};
+const Biblewordcounts = {};
 const Biblewordcount = 793853;
-let BibleCrossReferences = {};
-let TopicDescriptionList = null;
-let Bible = null;
+const TopicDescriptionList = {};
+const Bible = {};
+const BibleCrossReferences = {};
+let VERSION = null;
 let notes = [];
 let Settings = {
     "initialized": false,
     "fontSize": "16",
     "debug": false,
     "reset": false,
-    "invert-inputs": true,
+    "invert-inputs": false,
     "Foreground": "hsl(0,100%,100%)",
     "Background": "hsl(0,100%,0%)",
     "Accent1": "hsl(275,100%,50%)",
@@ -57,23 +58,55 @@ function handleDebugMode() {
 }
 
 //lazy load files
-async function lazyload() {
-    await loadBibleCrossReferences();
-    const topicData = await loadTopicsText();
-    await loadBibleCount();
-    loadtopics(topicData);
-    if (Settings.includeAI)
-        await loadTopicDescriptionList();
+function lazyload() {
+    loadJSON(BibleCrossReferences, "./index_files/cross_references.json")
+        .then(() => {
+            Object.entries(BibleCrossReferences).map(([bookKey, chapters]) =>
+                BibleCrossReferences[bookKey] = chapters?.map((chapter) =>
+                    chapter?.map((verse) =>
+                        verse?.map(([bookIndex, chap, verseNum, votes]) => {
+                            const bookName = booksOfTheBible[bookIndex];
+                            return new BibleRef(bookName, chap, verseNum - 1, votes);
+                        })
+                    )
+                )
+            );
+        })
+        .catch((error) => {
+            console.error("Error loading BibleCrossReferences:", error);
+        });
+
+    loadJSON(Biblewordcounts, "./index_files/BibleCount.json").then(() => { });
+
+    if (Settings.includeAI) {
+        loadJSON(TopicDescriptionList, "./index_files/Description.json").then(() => { });
+    }
+
+    fetchText("./index_files/topic-scores.txt").then(loadtopics);
+}
+
+function nonlazyload() {
+    loadJSON(BibleCrossReferences, "./index_files/BibleCRef.json")
+        .then(() => loadJSON(Biblewordcounts, "./index_files/BibleCount.json"))
+        .then(() => {
+            if (Settings.includeAI) {
+                return loadJSON(TopicDescriptionList, "./index_files/Description.json");
+            }
+        })
+        .then(() => fetchText("./index_files/topic-scores.txt"))
+        .then(loadtopics);
 }
 
 
 async function initializeApp() {
     try {
         loadServiceworker();
-        await loadBible();
+
+        await loadJSON(Bible, "./index_files/Bible.json");
         loadHistoryAndBookmarks();
         if (Settings.debug) {
-            await lazyload();
+            await nonlazyload();
+            goToBibleReference(1);
         } else {
             lazyload();
         }
@@ -82,18 +115,18 @@ async function initializeApp() {
             Settings.initialized = true;
             const bibleRef1 = new BibleRef("GENESIS", 1, 0, 0);
             const bibleRef2 = new BibleRef("MATTHEW", 1, 0, 0);
-            tagManager.addTag(bibleRef1, "Creation");
-            tagManager.addTag(bibleRef2, "Salvation");
+            bookmarkStore.addTag(bibleRef1, "Creation");
+            bookmarkStore.addTag(bibleRef2, "Salvation");
         }
         handleDebugMode();
 
         if (Settings.debug) {
             //testHistory();
-            //testtagManager();
+            //testbookmarkStore();
             //testNotes();
             console.log("Settings:", Settings);
             console.log("History:", History);
-            console.log("Bookmarks:", tagManager.deserialize);
+            console.log("Bookmarks:", bookmarkStore.deserialize);
             console.log("Notes:", notes);
             console.log("VersesOpen:", VersesOpen);
             console.log("Bible:", Bible);
@@ -121,7 +154,7 @@ function preloadVerses() {
         VersesOpen.push(new BibleRef("JOHN", 3, 15, 1));
         VersesOpen.push(new BibleRef("GENESIS", 1, 0, 0));
     } else {
-        VersesOpen = VersesOpen.map(ref => new BibleRef(ref.Book, ref.Chap, ref.Verse, ref.color));
+        VersesOpen = VersesOpen.map(({ Book, Chap, Verse, color }) => new BibleRef(Book, Chap, Verse, color));
     }
     loadVerseListScreen();
 }
@@ -152,13 +185,13 @@ function testHistory() {
     }
 }
 
-function testtagManager() {
-    tagManager.tags = {};
+function testbookmarkStore() {
+    bookmarkStore.tags = {};
     for (let i = 0; i < 10; i++) {
-        tagManager.addTag(goToBibleReference(Math.random()), "Creation");
-        tagManager.addTag(goToBibleReference(Math.random()), "Salvation");
-        tagManager.addTag(goToBibleReference(Math.random()), "Jesus");
-        tagManager.addTag(goToBibleReference(Math.random()), "Christ");
+        bookmarkStore.addTag(goToBibleReference(Math.random()), "Creation");
+        bookmarkStore.addTag(goToBibleReference(Math.random()), "Salvation");
+        bookmarkStore.addTag(goToBibleReference(Math.random()), "Jesus");
+        bookmarkStore.addTag(goToBibleReference(Math.random()), "Christ");
     }
 }
 

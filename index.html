@@ -45,11 +45,11 @@
     <meta name="twitter:image" content="https://thejusticeman.github.io/realbibleapp/OpenBible.svg">
 
     <!-- Link to manifest -->
-    <link rel="manifest" href="/realbibleapp/manifest.json">
+    <link rel="manifest" href="./manifest.json">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/realbibleapp/OpenBible.svg">
-    <link rel="apple-touch-icon" href="/realbibleapp/icon-192.png">
+    <link rel="icon" type="image/svg+xml" href="./OpenBible.svg">
+    <link rel="apple-touch-icon" href="./icon-192.png">
 
     <!-- External CSS -->
     <link
@@ -96,6 +96,14 @@
 
         updateLoadingText();
     </script>
+    <div id="custom-prompt-container" class="custom-prompt-overlay">
+        <div class="custom-prompt">
+            <p id="custom-prompt-message"></p>
+            <input type="text" id="custom-prompt-input">
+            <button id="custom-prompt-ok" class="OKAY">OK</button>
+            <button id="custom-prompt-cancel">Cancel</button>
+        </div>
+    </div>
     <div id="container" class="container">
         <div id="screen1" class="screen">
             <div class="common-header">
@@ -103,12 +111,16 @@
                 <button id="historyBtn">History</button>
                 <button id="bookmarksBtn">Bookmarks</button>
             </div>
+            <select id="SaveToTag" class="tag-filter">
+                <option value="Cancel__pg">Save list to bookmark</option>
+                <option value="New__pg">New tag</option>
+            </select>
             <div id="OPverseList" class="verse-list main-content">
                 <!-- Verse snippets will be dynamically injected here -->
             </div>
             <div class="common-footer">
-                <span id="addVerseBtn" class="floating-btn">+</span>
-                <span id="SettingsBtn" class="floating-btnLFT">#</span>
+                <button id="addVerseBtn" class="floating-btn">+</button>
+                <button id="SettingsBtn" class="floating-btnLFT">#</button>
             </div>
         </div>
         <div id="screen2" class="screen">
@@ -124,6 +136,9 @@
             <div id="booksList" class="dynamic-list main-content"></div>
             <div id="chapterList" class="dynamic-list main-content"></div>
             <div id="verseList" class="dynamic-list main-content"></div>
+            <div class="common-footer">
+                <button id="LoadAllRelaventVerses" class="floating-btn">*</button>
+            </div>
         </div>
         <div id="screen3" class="screen">
             <div id="ReadingHeader" class="common-header">
@@ -134,13 +149,15 @@
                 <!-- Bible chapter text will be dynamically loaded here -->
             </div>
             <div class="common-footer">
-                <span id="addVerseBtn2" class="floating-btn">+</span>
+                <button id="addVerseBtn2" class="floating-btn">+</button>
             </div>
         </div>
         <div id="screen4" class="screen">
             <div class="common-header">
-                <input type="text" id="searchInput" placeholder="Search verses..." aria-label="Search verses">
-                <button id="clearSearchButton" class="icon-button">Back</button>
+                <div class="input-container">
+                    <input type="text" id="searchInput" placeholder="Search verses..." aria-label="Search verses">
+                    <button id="clearSearchButton" class="icon-button">Back</button>
+                </div>
             </div>
             <div id="searchResults" class="search-results main-content">
                 <!-- Search results will be dynamically loaded here -->
@@ -174,14 +191,14 @@
                     <!-- Dynamically populated with available tags -->
                 </select>
             </div>
-            <div class="bible-graphic main-content">
-                <!-- Miniaturized Bible graphic with interactive markers -->
-            </div>
             <div id="bookmarksList" class="bookmarks-list main-content">
                 <!-- Bookmarked verses will be dynamically loaded here -->
             </div>
             <div class="empty-state main-content" style="display:none;">
                 <p>Bookmark your favorite verses to keep them close!</p>
+            </div>
+            <div class="common-footer">
+                <button id="OpenAllBookmarks" class="floating-btn">*</button>
             </div>
         </div>
         <div id="screen7" class="screen">
@@ -224,6 +241,7 @@
                 <button id="backButton6" class="back-button">back</button>
                 <h1>Real Bible App</h1>
             </div>
+            <p id="Version_Number"></p>
 
             <p id="ShareLink1" class="ShareLink" onclick="shareLink()">https://thejusticeman.github.io/realbibleapp/</p>
 
@@ -237,11 +255,7 @@
             <button id="ImportData" class="back-button">Paste User Data</button>
             <button id="downloadData" class="back-button">Download User Data</button>
             <button id="uploadData" class="back-button">Upload User Data</button>
-            
         </div>
-
-        <!-- Load external JavaScript -->
-
     </div>
 </body>
 

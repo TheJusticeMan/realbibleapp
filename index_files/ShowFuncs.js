@@ -1,5 +1,4 @@
 let VersesOpen = [];
-//let VersesInview = [];
 
 class BibleRef {
 	constructor(Book, Chap, Verse, color = 0) {
@@ -56,27 +55,18 @@ class BibleRef {
 	}
 
 	createElement(tag = "div", className = "", contextMenuHandler = null, clickHandler = null, content = "", onSwipeLeft = null, onSwipeRight = null) {
-		const element = document.createElement(tag);
-		element.className = className;
-		Object.assign(element.dataset, { Book: this.Book, Chap: this.Chap, Verse: this.Verse });
+		const element = Object.assign(document.createElement(tag), {
+			oncontextmenu: contextMenuHandler,
+			onclick: clickHandler,
+			className: className
+		});
+		Object.assign(element.dataset, this);
+		if (typeof content === "string") content = [Object.assign(document.createElement("span"), { innerHTML: content })];
 
-		if (contextMenuHandler) element.oncontextmenu = contextMenuHandler;
-		if (clickHandler) element.onclick = clickHandler;
-
-		if (Array.isArray(content)) {
-			content.forEach(child => child instanceof Node ? element.appendChild(child) : console.error("Invalid content:", child));
-		} else if (typeof content === "string") {
-			element.innerHTML = content;
-		} else {
-			console.error("Invalid content type:", content);
-		}
+		content.forEach(child => child instanceof Node ? element.appendChild(child) : console.error("Invalid content:", child));
 
 		if (onSwipeLeft || onSwipeRight) {
-			const swipeHandler = new SwipeHandler(element);
-			swipeHandler.onSwipeLeft = onSwipeLeft;
-			swipeHandler.onSwipeRight = onSwipeRight;
-
-			//Object.assign(new SwipeHandler(element), { onSwipeLeft, onSwipeRight });
+			Object.assign(new SwipeHandler(element), { onSwipeLeft, onSwipeRight });
 		}
 
 		return element;
@@ -87,6 +77,11 @@ class BibleRef {
 	}
 
 	get HistoryElement() {
+		const content = [
+			this.createSpan("VerseNum", this.refText),
+			this.createSpan("italic", this.italicsFormatted),
+			this.createSpan("last-seen", this.DateString)
+		]
 		return this.createElement("span", "SearchResult", BibleRef.showVerseMenu, BibleRef.goToVerse,
 			`<span class="VerseNum">${this.refText}</span>
 			${this.italicsFormatted}
@@ -104,10 +99,14 @@ class BibleRef {
 	}
 
 	get VerseElement() {
-		const BookMarktag = tagManager.isBookmarked(this) ? ' BookmarkNumber' : '';
+		const BookMarktag = bookmarkStore.isBookmarked(this) ? ' BookmarkNumber' : '';
 		const NoteTag = notes.some(verse => this.isEqual(verse.BibleVerse)) ? ' NoteNumber' : '';
-		return this.createElement("p", "Contents", BibleRef.showVerseMenu, BibleRef.selectverse,
-			`<span class="VerseNum${BookMarktag}${NoteTag}">${this.Verse + 1}</span> ${this.italicsFormatted}`);
+		const content = [
+			this.createSpan(`VerseNum${BookMarktag}${NoteTag}`, `${this.Verse + 1}`),
+			this.createSpan("VerseText", this.italicsFormatted)
+		];
+		return this.createElement("p", "Contents", BibleRef.showVerseMenu, BibleRef.selectverse, content);
+		//`<span class="VerseNum${BookMarktag}${NoteTag}">${this.Verse + 1}</span> ${this.italicsFormatted}`);
 	}
 
 	get SearchElement() {
@@ -116,18 +115,12 @@ class BibleRef {
 	}
 
 	get CrossRefElement() {
-		return this.createElement(
-			"span",
-			"SearchResult",
-			BibleRef.showVerseMenu,
-			BibleRef.goToVerse,
-			`<span class="VerseNum">${this.refText}</span>
-				${this.italicsFormatted}
-				<span class="last-seen">
-					${Math.floor(this.color)} 
-					${(this.color % 1) !== 0 ? "v=" + ((1 / (1 - (this.color % 1))).toFixed()) : ""}
-				</span>`
-		);
+		const content = [
+			this.createSpan("VerseNum", this.refText),
+			this.createSpan("VerseText", this.italicsFormatted),
+			this.createSpan("last-seen", `${Math.floor(this.color)} ${this.color % 1 !== 0 ? "v=" + (1 / (1 - (this.color % 1))).toFixed() : ""}`)
+		];
+		return this.createElement("span", "SearchResult", BibleRef.showVerseMenu, BibleRef.goToVerse, content);
 	}
 
 	get BookNameElement() {
@@ -174,39 +167,27 @@ class BibleRef {
 	}
 
 	static handleSwipeLeft(event) {
-		let element = event.currentTarget;
+		const element = event.currentTarget;
+		const ref = BibleRef.getRefFromHTML(element);
 		console.log('Swiped left on', element.textContent);
-		let ref = BibleRef.getRefFromHTML(event.currentTarget);
-		VersesInview = VersesInview.filter(openRef => !openRef.isEqual(ref));
-		VersesInview.push(ref);
+		VerseGroup = VerseGroup.filter(openRef => !openRef.isEqual(ref));
+		VerseGroup.push(ref);
 		element.classList.add("selectedmark");
-		element.onclick = BibleRef.loadVersesInview;
+		element.onclick = BibleRef.loadVerseGroup;
 	}
 
 	static handleSwipeRight(event) {
-		console.log('Swiped right on', event.currentTarget.textContent);
-		let element = event.currentTarget;
-		let verseToRemove = BibleRef.getRefFromHTML(element);
+		const element = event.currentTarget;
+		const verseToRemove = BibleRef.getRefFromHTML(element);
+		console.log('Swiped right on', element.textContent);
 
-		// Check if there are multiple verses in view
-		if (VersesInview.length > 0) {
-			if (element.classList.contains("selectedmark")) {
-				// Take out all the VersesOpen[] that are in VersesInview[] using VersesOpen[].isEqual(VersesInview[])
-				VersesOpen = VersesOpen.filter(verse =>
-					!VersesInview.some(viewVerse => viewVerse.isEqual(verse))
-				);
-			} else {
-				VersesOpen = VersesInview;
-			}
-		} else {
-			// Remove the specific verse from VersesOpen if there's only one verse in view
-			VersesOpen = VersesOpen.filter(verse =>
-				!verse.isEqual(verseToRemove)
-			);
-		}
+		VersesOpen = VerseGroup.length > 0
+			? element.classList.contains("selectedmark")
+				? VersesOpen.filter(verse => !VerseGroup.some(viewVerse => viewVerse.isEqual(verse)))
+				: [...VerseGroup]
+			: VersesOpen.filter(verse => !verse.isEqual(verseToRemove));
 
-		// Reload the verse list screen to reflect changes
-		loadVerseListScreen();
+		refreshListScreen();
 	}
 
 	get VerseContent() {
@@ -247,8 +228,7 @@ class BibleRef {
 
 	static copy(event) {
 		const CElement = event.currentTarget;
-		const ref = BibleRef.getRefFromHTML(CElement);
-		const verseText = ref.singleVerseMarkdown;
+		const verseText = BibleRef.getRefFromHTML(CElement).singleVerseMarkdown;
 
 		if (navigator.share) {
 			// If sharing is supported, open the share dialog
@@ -260,11 +240,6 @@ class BibleRef {
 			// Fallback: Copy to clipboard
 			navigator.clipboard.writeText(verseText).then(() => {
 				CElement.classList.add("copymark");
-
-				// Disable text selection
-				if (window.getSelection) {
-					window.getSelection().removeAllRanges();
-				}
 
 				event.returnValue = false;
 
@@ -280,44 +255,45 @@ class BibleRef {
 		const ref = BibleRef.getRefFromHTML(event.currentTarget);
 		NewHistory(ref);
 
-		// Remove existing reference if it exists and find the lowest available color
-		const previousLength = VersesOpen.length;
+		// Remove existing reference and assign the lowest available color
 		VersesOpen = VersesOpen.filter(openRef => !openRef.isEqual(ref));
-
-		//if (previousLength == VersesOpen.length) {
-		let takenColors = VersesOpen.map(openRef => openRef.color);
-		let freecolor = 0;
-		while (takenColors.includes(freecolor)) {
-			freecolor++;
-		}
-		ref.color = freecolor;
-		//}
+		ref.color = BibleRef.getFreeColor(VersesOpen);
 
 		VersesOpen.push(ref);
-
 		BibleRef.goToRef(ref);
-		VersesInview = false;
+
+		VerseGroup = false;
+	}
+
+	static getFreeColor(VerseArray) {
+		const takenColors = new Set(VerseArray.map(({ color }) => color));
+
+		let freecolor = 0;
+		while (takenColors.has(freecolor)) freecolor++;
+
+		return freecolor;
 	}
 
 	static goLeft() {
-		if (VersesInview) {
-			VersesInview[VersesInviewIndex].Verse = BibleRef.getVerseScroll();
-			VersesInviewIndex = Math.min(VersesInviewIndex + 1, VersesInview.length - 1);
-			BibleRef.loadVersesInview();
+		if (VerseGroup) {
+			VerseGroup[VerseGroupIndex].Verse = BibleRef.getVerseScroll();
+			VerseGroupIndex = Math.min(VerseGroupIndex + 1, VerseGroup.length - 1);
+			BibleRef.loadVerseGroup();
 		}
 	}
 
 	static goRight() {
-		if (VersesInview) {
-			VersesInview[VersesInviewIndex].Verse = BibleRef.getVerseScroll();
-			VersesInviewIndex = Math.max(VersesInviewIndex - 1, 0);
-			BibleRef.loadVersesInview();
+		if (VerseGroup) {
+			VerseGroup[VerseGroupIndex].Verse = BibleRef.getVerseScroll();
+			VerseGroupIndex = Math.max(VerseGroupIndex - 1, 0);
+			BibleRef.loadVerseGroup();
 		}
 	}
 
 	static getVerseScroll() {
-		const container = document.getElementById('container');
-		const scrollPosition = container.scrollTop + document.getElementById('ReadingHeader').scrollHeight;
+		const scrollPosition =
+			document.getElementById('container').scrollTop +
+			document.getElementById('ReadingHeader').scrollHeight;
 		return Number([...document.querySelectorAll('.Contents')]
 			.find(verseEl => verseEl.offsetTop >= scrollPosition)?.dataset.Verse);
 	}
@@ -325,94 +301,75 @@ class BibleRef {
 	static scrollToVerse(Verse) {
 		const verses = document.querySelectorAll('.Contents');
 		const scrollToOffset = verses[Verse].offsetTop;
-		document.querySelectorAll('.Contents').forEach(el => el.classList.remove("selectedmark"));
+		document.querySelector('.Contents.selectedmark')?.classList.remove("selectedmark");
 		verses[Verse].classList.add("selectedmark");
 		document.getElementById('container').scrollTo(0, scrollToOffset - document.getElementById("ReadingHeader").scrollHeight);
 	}
 
-	static loadVersesInview() {
-		const currentVerse = VersesInview[VersesInviewIndex];
-		const { Book, Chap } = currentVerse;
+	static loadVerseGroup() {
+		viewingVerse = VerseGroup[VerseGroupIndex];
+		const { Book, Chap } = viewingVerse;
 		const readingHeader = document.getElementById("ReadingHeader");
 
-		if (!topswipehandler) {
-			topswipehandler = new SwipeHandler(readingHeader);
-		}
+		topswipehandler ||= new SwipeHandler(readingHeader);
 		topswipehandler.cycleSwipe = true;
 		topswipehandler.onSwipeLeft = BibleRef.goLeft;
 		topswipehandler.onSwipeRight = BibleRef.goRight;
 
-		const bookTitle = `${VersesInviewIndex > 0 ? "<  " : ""}${Book} ${Chap}${VersesInviewIndex < VersesInview.length - 1 ? "  >" : ""}`;
-		currentverseviewing = currentVerse;
-		loadDetailedVerseReadingScreen(currentVerse, bookTitle);
+		const bookTitle = `${VerseGroupIndex > 0 ? "<  " : ""}${Book} ${Chap}${VerseGroupIndex < VerseGroup.length - 1 ? "  >" : ""}`;
+		loadDetailedVerseReadingScreen(viewingVerse, bookTitle);
 	}
 
-	static ShowPreviousChapter(event) {
-		let ref = currentverseviewing;
-		// Get the current index of the book
-		const currentIndex = booksOfTheBible.indexOf(ref.Book);
+	static ShowPreviousChapter() {
+		const currentIndex = booksOfTheBible.indexOf(viewingVerse.Book);
 
-		if (ref.Chap > 1) {
-			// Move to the previous chapter in the same book
-			ref.Chap--;
+		if (viewingVerse.Chap > 1) {
+			viewingVerse.Chap--; // Move to the previous chapter in the same book
 		} else {
-			if (currentIndex > 0) {
-				// Move to the last chapter of the previous book
-				ref.Book = booksOfTheBible[currentIndex - 1];
-			} else {
-				// Wrap around to the last book
-				ref.Book = booksOfTheBible[booksOfTheBible.length - 1];
-			}
-			ref.Chap = Bible[ref.Book].length - 1; // Set to the last chapter
+			// Move to the last chapter of the previous book or wrap around to the last book
+			viewingVerse.Book = booksOfTheBible[currentIndex > 0 ? currentIndex - 1 : booksOfTheBible.length - 1];
+			viewingVerse.Chap = Bible[viewingVerse.Book].length; // Last chapter of new book
 		}
-		ref.Verse = Bible[ref.Book][ref.Chap].length - 1; // Reset verse to the beginning
-		currentverseviewing = ref;
-		loadDetailedVerseReadingScreen(ref);
+
+		viewingVerse.Verse = Bible[viewingVerse.Book][viewingVerse.Chap].length - 1; // Last verse of new chapter
+
+		loadDetailedVerseReadingScreen(viewingVerse);
 	}
 
-	static ShowNextChapter(event) {
-		let ref = currentverseviewing;
-		// Get the current index of the book
-		const currentIndex = booksOfTheBible.indexOf(ref.Book);
+	static ShowNextChapter() {
+		const currentIndex = booksOfTheBible.indexOf(viewingVerse.Book);
 
-		if (ref.Chap < (Bible[ref.Book].length - 1)) {
-			// Move to the next chapter in the same book
-			ref.Chap++;
+		if (viewingVerse.Chap < Bible[viewingVerse.Book].length) {
+			viewingVerse.Chap++; // Move to the next chapter in the same book
 		} else {
-			if (currentIndex < (booksOfTheBible.length - 1)) {
-				// Move to the first chapter of the next book
-				ref.Book = booksOfTheBible[currentIndex + 1];
-			} else {
-				// Wrap around to the first book
-				ref.Book = booksOfTheBible[0];
-			}
-			ref.Chap = 1; // Start from the first chapter
+			// Move to the first chapter of the next book or wrap around to the first book
+			viewingVerse.Book = booksOfTheBible[currentIndex < booksOfTheBible.length - 1 ? currentIndex + 1 : 0];
+			viewingVerse.Chap = 1; // Start at the first chapter
 		}
-		ref.Verse = 0; // Reset verse to the beginning
-		currentverseviewing = ref;
-		loadDetailedVerseReadingScreen(ref);
+
+		viewingVerse.Verse = 0; // Reset verse to the beginning
+
+		loadDetailedVerseReadingScreen(viewingVerse);
 	}
 
 	static selectverse(event) {
-		const c = BibleRef.getRefFromHTML(event.currentTarget);
-		document.querySelectorAll('.Contents').forEach(el => el.classList.remove("selectedmark"));
+		const selectedRef = BibleRef.getRefFromHTML(event.currentTarget);
+
+		document.querySelector('.Contents.selectedmark')?.classList.remove("selectedmark");
 		event.currentTarget.classList.add("selectedmark");
-		currentverseviewing.Book = c.Book;
-		currentverseviewing.Chap = c.Chap;
-		currentverseviewing.Verse = c.Verse;
-		currentverseviewing.color = c.color;
+
+		Object.assign(viewingVerse, selectedRef);
 	}
 
-
 	static goToRef(ref) {
-		currentverseviewing = ref;
+		viewingVerse = ref;
 		UpdateHistoryTime(ref);
 		loadDetailedVerseReadingScreen(ref);
 	}
 
 	static getRefFromHTML(element) {
-		const { Book, Chap, Verse } = element.dataset;
-		return new BibleRef(Book, Chap, Verse);
+		const { Book, Chap, Verse, color } = element.dataset;
+		return new BibleRef(Book, Chap, Verse, color);
 	}
 }
 

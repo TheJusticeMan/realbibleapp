@@ -38,7 +38,7 @@ function saveHistoryAndBookmarksToAndroid() {
     try {
         const userData = {
             history: History,
-            bookmarks: tagManager.serialize(),
+            bookmarks: bookmarkStore.serialize(),
             notes: notes,
             Settings: Settings
         };
@@ -56,7 +56,7 @@ function loadHistoryAndBookmarks() {
         if (data) {
             const userData = JSON.parse(data);
             if( userData.history) History = userData.history;
-            if( userData.bookmarks) tagManager.deserialize(userData.bookmarks);
+            if( userData.bookmarks) bookmarkStore.deserialize(userData.bookmarks);
             if( userData.notes) notes = userData.notes;
             if( userData.Settings) Settings = userData.Settings;
             console.log('User Data loaded successfully.');

@@ -1,10 +1,11 @@
 // Helper functions for fetching resources
-async function fetchJSON(url) {
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Network response was not ok for ${url}`);
+async function loadJSON(target, url) {
+    try {
+        Object.assign(target, await (await fetch(url)).json());
+        console.log(`${url} loaded`);
+    } catch (error) {
+        console.error(`Failed to load ${url}:`, error);
     }
-    return response.json();
 }
 
 async function fetchText(url) {
@@ -15,24 +16,6 @@ async function fetchText(url) {
     return response.text();
 }
 
-// Simplified loading functions
-async function loadBibleCrossReferences() {
-    try {
-        BibleCrossReferences = await fetchJSON('./index_files/BibleCRef.json');
-        console.log('BibleCrossReferences loaded');
-    } catch (error) {
-        console.error('Failed to load BibleCRef.json:', error);
-    }
-}
-
-async function loadTopicDescriptionList() {
-    try {
-        TopicDescriptionList = await fetchJSON('./index_files/Description.json');
-        console.log('TopicDescriptionList loaded');
-    } catch (error) {
-        console.error('Failed to load Description.json:', error);
-    }
-}
 
 async function loadTopicsText() {
     try {
@@ -45,37 +28,18 @@ async function loadTopicsText() {
     }
 }
 
-async function loadBibleCount() {
-    try {
-        Biblewordcounts = await fetchJSON('./index_files/BibleCount.json');
-        console.log('BibleCount loaded');
-    } catch (error) {
-        console.error('Failed to load BibleCount.json:', error);
-    }
-}
-
-async function loadBible() {
-    try {
-        Bible = await fetchJSON('./index_files/Bible.json');
-        console.log('Bible loaded');
-        // Use the bible data as needed
-    } catch (error) {
-        console.error('Failed to load Bible.json:', error);
-    }
-}
-
 // Simplified localStorage functions
 function getUserData() {
     return {
         history: exportHistoryAsStrings(),
-        bookmarks: tagManager.serialize(),
+        bookmarks: bookmarkStore.serialize(),
         notes: notes.map(note => note.toObject()),
         Settings: Settings,
         VersesOpen: VersesOpen
     };
 }
 
-function saveHistoryAndBookmarksToLocalStorage() {
+function saveHistoryAndBookmarks() {
     try {
         const userData = getUserData();
         localStorage.setItem('userData', JSON.stringify(userData));
@@ -118,24 +82,12 @@ function downloadHistoryAndBookmarks() {
 }
 
 function processUserData(userData) {
-    if (userData.history) {
-        // Check if the history data is in string format.
-        const isStringHistory = typeof userData.history[0] === 'string';
-        const importedHistory = isStringHistory
-            ? importHistoryFromStrings(userData.history)
-            : userData.history.map(item =>
-                new BibleRef(item.Book, item.Chap, item.Verse, item.lastSeen ? new Date(item.lastSeen) : undefined)
-            );
-
-        // Either replace or merge the imported history.
-        History.push(...importedHistory);
-    }
-    if (userData.bookmarks) tagManager.deserialize(userData.bookmarks);
+    if (userData.history) History.push(...importHistoryFromStrings(userData.history));
+    if (userData.bookmarks) bookmarkStore.deserialize(userData.bookmarks);
     if (userData.notes) notes.push(...userData.notes.map(note => BibleNote.fromObject(note)));
     if (userData.Settings) Settings = mergeSettings(Settings, userData.Settings);
     if (userData.VersesOpen)
-        VersesOpen = userData.VersesOpen.map(item => new BibleRef(item.Book, item.Chap, item.Verse, item.color));
-
+        VersesOpen = userData.VersesOpen.map(({ Book, Chap, Verse, color }) => new BibleRef(Book, Chap, Verse, color));
 }
 
 function loadHistoryAndBookmarks() {
@@ -190,41 +142,15 @@ function uploadHistoryAndBookmarks() {
     input.click();
 }
 
-
-// alias the save function
-const saveHistoryAndBookmarks = saveHistoryAndBookmarksToLocalStorage;
-
 function loadServiceworker() {
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("./service-worker.js").then(registration => {
             console.log("Service Worker registered with scope:", registration.scope);
 
-            // Listen for updates to the Service Worker
-            registration.onupdatefound = () => {
-                const installingWorker = registration.installing;
-                installingWorker.onstatechange = () => {
-                    if (installingWorker.state === "installed") {
-                        if (navigator.serviceWorker.controller) {
-                            // Notify the user about the update
-                            console.log("New content is available; please refresh.");
-                            // Optionally, add logic to show a UI prompt for refreshing
-                        } else {
-                            console.log("Content is cached for offline use.");
-                        }
-                    }
-                };
-            };
-
-            // Set debug mode based on localStorage
-            const debugMode = localStorage.getItem("debug") === "true";
-
-            // Send the debug flag to the Service Worker
-            if (registration.active) {
-                registration.active.postMessage({
-                    type: "SET_DEBUG_MODE",
-                    debug: debugMode
-                });
-            }
+            fetch('version')
+                .then(response => response.text())
+                .then(version => VERSION = version)
+                .catch(error => console.error('Error fetching version:', error));
         }).catch(error => {
             console.error("Service Worker registration failed:", error);
         });
