@@ -45,9 +45,9 @@ class BibleRef {
 		}
 
 		const maxVerses = Bible[this.Book][this.Chap]?.length || 1;
-		if (this.Verse < 0 || this.Verse >= maxVerses) {
-			console.warn(`Invalid verse "${this.Verse + 1}" in "${this.Book} ${this.Chap}". Defaulting to verse 1.`);
-			this.Verse = 0;
+		if (this.Verse < 1 || this.Verse >= maxVerses) {
+			console.warn(`Invalid verse "${this.Verse}" in "${this.Book} ${this.Chap}". Defaulting to verse 1.`);
+			this.Verse = 1;
 			isValid = false;
 		}
 
@@ -94,7 +94,7 @@ class BibleRef {
 
 	get ChapterElement() {
 		const chapterElement = this.createElement("div", "chapterElement");
-		Bible[this.Book][this.Chap].forEach((_, i) => chapterElement.appendChild(new BibleRef(this.Book, this.Chap, i).VerseElement));
+		Bible[this.Book][this.Chap].slice(1).forEach((_, i) => chapterElement.appendChild(new BibleRef(this.Book, this.Chap, i + 1).VerseElement));
 		return chapterElement;
 	}
 
@@ -102,7 +102,7 @@ class BibleRef {
 		const BookMarktag = bookmarkStore.isBookmarked(this) ? ' BookmarkNumber' : '';
 		const NoteTag = notes.some(verse => this.isEqual(verse.BibleVerse)) ? ' NoteNumber' : '';
 		const content = [
-			this.createSpan(`VerseNum${BookMarktag}${NoteTag}`, `${this.Verse + 1}`),
+			this.createSpan(`VerseNum${BookMarktag}${NoteTag}`, `${this.Verse}`),
 			this.createSpan("VerseText", this.italicsFormatted)
 		];
 		return this.createElement("p", "Contents", BibleRef.showVerseMenu, BibleRef.selectverse, content);
@@ -132,7 +132,7 @@ class BibleRef {
 	}
 
 	get VerseNumberElement() {
-		return this.createElement("span", "verse-nav-button", BibleRef.showVerseMenu, BibleRef.goToVerse, `${this.Verse + 1}`);
+		return this.createElement("span", "verse-nav-button", BibleRef.showVerseMenu, BibleRef.goToVerse, `${this.Verse}`);
 	}
 
 	get RefElement() {
@@ -153,7 +153,7 @@ class BibleRef {
 	}
 
 	get refText() {
-		return `${this.Book} ${this.Chap}:${this.Verse + 1}`;
+		return `${this.Book} ${this.Chap}:${this.Verse}`;
 	}
 
 	get SwipeLink() {
@@ -195,12 +195,9 @@ class BibleRef {
 	}
 
 	get italicsFormatted() {
-		if (!this.SearchQ) return this.VerseContent
-			.replace(/\[([^\]]+)\]/g, "<em>$1</em>")
-			.replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>");
-
 		return this.VerseContent
-			.replace(this.SearchQ, match => `<span class=resultmark>${match}</span>`)
+			.replace(/#/g, "¶")
+			.replace(this.SearchQ || /(?!)/, match => `<span class=resultmark>${match}</span>`)
 			.replace(/\[([^\]]+)\]/g, "<em>$1</em>")
 			.replace(/LORD/g, "<strong class=LORDCAPS>Lord</strong>");
 	}
@@ -295,14 +292,14 @@ class BibleRef {
 			document.getElementById('container').scrollTop +
 			document.getElementById('ReadingHeader').scrollHeight;
 		return Number([...document.querySelectorAll('.Contents')]
-			.find(verseEl => verseEl.offsetTop >= scrollPosition)?.dataset.Verse);
+			.find(verseEl => verseEl.offsetTop >= scrollPosition)?.dataset.Verse) - 1;
 	}
 
 	static scrollToVerse(Verse) {
 		const verses = document.querySelectorAll('.Contents');
-		const scrollToOffset = verses[Verse].offsetTop;
+		const scrollToOffset = verses[Verse - 1].offsetTop;
 		document.querySelector('.Contents.selectedmark')?.classList.remove("selectedmark");
-		verses[Verse].classList.add("selectedmark");
+		verses[Verse - 1].classList.add("selectedmark");
 		document.getElementById('container').scrollTo(0, scrollToOffset - document.getElementById("ReadingHeader").scrollHeight);
 	}
 
@@ -347,7 +344,7 @@ class BibleRef {
 			viewingVerse.Chap = 1; // Start at the first chapter
 		}
 
-		viewingVerse.Verse = 0; // Reset verse to the beginning
+		viewingVerse.Verse = 1; // Reset verse to the beginning
 
 		loadDetailedVerseReadingScreen(viewingVerse);
 	}
@@ -412,7 +409,7 @@ class BibleRange {
 		const chapter = parseInt(startParts[1] || 1, 10);
 		const verse = parseInt(startParts[2] || 1, 10);
 
-		const startRef = new BibleRef(book, chapter, verse - 1);
+		const startRef = new BibleRef(book, chapter, verse);
 		let endRef = startRef; // Default end to start
 
 		// If end parts are provided, adjust the specificity.
@@ -427,7 +424,7 @@ class BibleRange {
 			const endChapter = parseInt(endPartsRaw[1] || 1, 10);
 			const endVerse = parseInt(endPartsRaw[2] || 1, 10);
 
-			endRef = new BibleRef(endBook, endChapter, endVerse - 1);
+			endRef = new BibleRef(endBook, endChapter, endVerse);
 		}
 
 		return new BibleRange(startRef, endRef);
@@ -483,7 +480,7 @@ class BibleRange {
 			for (let j = startChap; j <= endChap; j++) {
 				const chapter = Bible[book][j];
 				// For the starting chapter of the starting book, start at the given verse; otherwise start at verse 0.
-				const startVerse = (i === startBookIndex && j === start.Chap) ? start.Verse : 0;
+				const startVerse = (i === startBookIndex && j === start.Chap) ? start.Verse : 1;
 				// For the ending chapter of the ending book, end at the given verse; otherwise go to the last verse.
 				const endVerse = (i === endBookIndex && j === end.Chap) ? end.Verse : chapter.length - 1;
 
@@ -546,7 +543,7 @@ class BibleRange {
 		// Parse chapter and verse, using defaults if needed.
 		const chapter = parseInt(startParts[1] || 1, 10);
 		const verse = parseInt(startParts[2] || 1, 10);
-		const startRef = new BibleRef(startBook, chapter, verse - 1);
+		const startRef = new BibleRef(startBook, chapter, verse);
 		let endRef = startRef; // Default end reference is the start
 
 		// Process the end part of the range if it exists.
@@ -569,7 +566,7 @@ class BibleRange {
 
 			const endChapter = parseInt(endParts[1] || 1, 10);
 			const endVerse = parseInt(endParts[2] || 1, 10);
-			endRef = new BibleRef(endBook, endChapter, endVerse - 1);
+			endRef = new BibleRef(endBook, endChapter, endVerse);
 		}
 
 		return new BibleRange(startRef, endRef);
@@ -609,3 +606,4 @@ class BibleNote {
 		};
 	}
 }
+

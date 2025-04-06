@@ -7,7 +7,7 @@ class BibleSearchClass {
     constructor(searchFor, searchType, regExpOn = false, useWholeWords = false, tags = "g") {
         this.MAX_RESULTS = 20; // Define the maximum number of results
         this.results = [];
-        this.LastS=new BibleRef("GENESIS",1,0);
+        this.LastS=new BibleRef("GENESIS",1,1);
         this.status = 0; // 0: nothing, 1: data collected, 2: set up, 3: searched, 4: shown
 
         // Initialize search parameters
@@ -57,7 +57,7 @@ class BibleSearchClass {
                         return this.results;
                     }
                 }
-                this.LastS.Verse = 0;
+                this.LastS.Verse = 1;
             }
             this.LastS.Chap = 1;
         }
@@ -66,7 +66,7 @@ class BibleSearchClass {
 
     reset() {
         this.results = [];
-        this.LastS = new BibleRef("GENESIS", 1, 0);
+        this.LastS = new BibleRef("GENESIS", 1, 1);
         this.status = 0;
     }
 

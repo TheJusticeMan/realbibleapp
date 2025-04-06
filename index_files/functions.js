@@ -187,7 +187,7 @@ function GetRelevantVerses() {
 
     [...(VersesOpen
         .flatMap(({ Book, Chap, Verse }) =>
-            BibleCrossReferences[Book]?.[Chap]?.[Verse + 1]
+            BibleCrossReferences[Book]?.[Chap]?.[Verse]
         )
         // Merge duplicate verses by summing their color weight
         .reduce((acc, verse) => {
@@ -222,7 +222,7 @@ function OpenAllReleventVerses() {
 
     [...(VersesOpen
         .flatMap(({ Book, Chap, Verse }) =>
-            BibleCrossReferences[Book]?.[Chap]?.[Verse + 1]
+            BibleCrossReferences[Book]?.[Chap]?.[Verse]
         )
         // Merge duplicate verses by summing their color weight
         .reduce((acc, verse) => {
@@ -247,7 +247,7 @@ function OpenAllReleventVerses() {
             if (!VersesOpen.some(openVerse => openVerse.isEqual(ref)))
                 VersesOpen2.push(ref);
         });
-    const VOPlength=VersesOpen.length;
+    const VOPlength = VersesOpen.length;
     VersesOpen2.reverse().forEach(({ Book, Chap, Verse }, i) => VersesOpen.push(new BibleRef(Book, Chap, Verse, i + VOPlength)))
     loadVerseListScreen();
 }
@@ -282,7 +282,7 @@ function loadBooks() {
     sections.forEach(([name, start, end]) => {
         booksList.appendChild(createSectionHeader(name));
         for (let i = start; i < end; i++) {
-            booksList.appendChild(new BibleRef(booksOfTheBible[i], 1, 0).BookNameElement);
+            booksList.appendChild(new BibleRef(booksOfTheBible[i], 1, 1).BookNameElement);
         }
     });
 
@@ -296,7 +296,7 @@ function loadChapters(event) {
     VerseSelectScreenHeader.innerText = "Select Chapter";
 
     Bible[Book].slice(1).forEach((_, index) => {
-        chapterList.appendChild(new BibleRef(Book, index + 1, 0).ChapterNumberElement);
+        chapterList.appendChild(new BibleRef(Book, index + 1, 1).ChapterNumberElement);
     });
 
     toggleDisplay(["chapterList"], ["Lookup", "booksList", "verseList"]);
@@ -308,7 +308,7 @@ function loadVerses(event) {
     verseList.innerHTML = '';
     VerseSelectScreenHeader.innerText = "Select Verse";
 
-    Bible[Book][Chap].forEach((_, index) => {
+    Bible[Book][Chap].slice(1).forEach((_, index) => {
         verseList.appendChild(new BibleRef(Book, Chap, index).VerseNumberElement);
     });
 
@@ -325,7 +325,7 @@ function goToBibleReference(distanceThrough) {
         for (let i = 0; i < chapters.length - 1; i++) {
             if (targetWord >= chapters[i] && targetWord < chapters[i + 1]) {
                 const versePosition = Math.floor(((targetWord - chapters[i]) / (chapters[i + 1] - chapters[i])) * Bible[book][i + 1].length);
-                return new BibleRef(book, i + 1, versePosition);
+                return new BibleRef(book, i + 1, Math.max(versePosition, 1));
             }
         }
     }
@@ -510,14 +510,14 @@ function showTopics(query2, resultsContainer, clearSearchButton, searchInput) {
                     if (endVerse) {
                         // Create a BibleRange if an end verse is provided
                         const range = new BibleRange(
-                            new BibleRef(book.trim().toUpperCase(), parseInt(chapter, 10), parseInt(verse, 10) - 1),
-                            new BibleRef(book.trim().toUpperCase(), parseInt(chapter, 10), parseInt(endVerse, 10) - 1)
+                            new BibleRef(book.trim().toUpperCase(), parseInt(chapter, 10), parseInt(verse, 10)),
+                            new BibleRef(book.trim().toUpperCase(), parseInt(chapter, 10), parseInt(endVerse, 10))
                         );
                         // Use the range's SearchElement (or RefElement if you add one) to generate clickable HTML
                         return range.RefElement.outerHTML;
                     } else {
                         // Otherwise, create a single BibleRef element as before
-                        const verseElement = new BibleRef(book.trim().toUpperCase(), parseInt(chapter, 10), parseInt(verse, 10) - 1);
+                        const verseElement = new BibleRef(book.trim().toUpperCase(), parseInt(chapter, 10), parseInt(verse, 10));
                         return verseElement.RefElement.outerHTML;
                     }
                 }
@@ -582,7 +582,7 @@ function preprocessBible() {
         for (let C = 1; C < chapters.length; C++) {
             BibleSearch[book][C] = [];
             const verses = chapters[C];
-            for (let V = 0; V < verses.length; V++) {
+            for (let V = 1; V < verses.length; V++) {
                 BibleSearch[book][C][V] = verses[V].toLowerCase().replace(/[] .,:;[]]+/g, " ");
             }
         }

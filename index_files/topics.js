@@ -4,7 +4,6 @@ let listOfAllTopicslowercase=[];// in lowercase
 let topicsLoaded = false;
 
 function loadtopics(data) {
-    //const data = (await loadTopicsText()).trim();
     const lines = data.split('\n');
 
     lines.slice(1).forEach(line => {

@@ -66,7 +66,7 @@ function lazyload() {
                     chapter?.map((verse) =>
                         verse?.map(([bookIndex, chap, verseNum, votes]) => {
                             const bookName = booksOfTheBible[bookIndex];
-                            return new BibleRef(bookName, chap, verseNum - 1, votes);
+                            return new BibleRef(bookName, chap, verseNum, votes);
                         })
                     )
                 )
@@ -102,7 +102,7 @@ async function initializeApp() {
     try {
         loadServiceworker();
 
-        await loadJSON(Bible, "./index_files/Bible.json");
+        await loadJSON(Bible, "./index_files/Bibles/KJV.json");
         loadHistoryAndBookmarks();
         if (Settings.debug) {
             await nonlazyload();
@@ -113,8 +113,8 @@ async function initializeApp() {
 
         if (!Settings.initialized) {
             Settings.initialized = true;
-            const bibleRef1 = new BibleRef("GENESIS", 1, 0, 0);
-            const bibleRef2 = new BibleRef("MATTHEW", 1, 0, 0);
+            const bibleRef1 = new BibleRef("GENESIS", 1, 1, 0);
+            const bibleRef2 = new BibleRef("MATTHEW", 1, 1, 0);
             bookmarkStore.addTag(bibleRef1, "Creation");
             bookmarkStore.addTag(bibleRef2, "Salvation");
         }
@@ -147,12 +147,12 @@ async function initializeApp() {
 
 function preloadVerses() {
     if (VersesOpen.length == 0) {
-        VersesOpen.push(new BibleRef("ROMANS", 8, 27, 5));
-        VersesOpen.push(new BibleRef("PHILIPPIANS", 4, 12, 4));
-        VersesOpen.push(new BibleRef("1 CORINTHIANS", 13, 3, 3));
-        VersesOpen.push(new BibleRef("PSALMS", 23, 1, 2));
-        VersesOpen.push(new BibleRef("JOHN", 3, 15, 1));
-        VersesOpen.push(new BibleRef("GENESIS", 1, 0, 0));
+        VersesOpen.push(new BibleRef("ROMANS", 8, 28, 5));
+        VersesOpen.push(new BibleRef("PHILIPPIANS", 4, 13, 4));
+        VersesOpen.push(new BibleRef("1 CORINTHIANS", 13, 4, 3));
+        VersesOpen.push(new BibleRef("PSALMS", 23, 2, 2));
+        VersesOpen.push(new BibleRef("JOHN", 3, 16, 1));
+        VersesOpen.push(new BibleRef("GENESIS", 1, 1, 0));
     } else {
         VersesOpen = VersesOpen.map(({ Book, Chap, Verse, color }) => new BibleRef(Book, Chap, Verse, color));
     }

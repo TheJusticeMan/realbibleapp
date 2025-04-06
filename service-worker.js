@@ -1,11 +1,11 @@
-const VERSION = "4.01.10";
+const VERSION = "4.01.11";
 const CACHE_NAME = `bible-app-cache-V${VERSION}`;
 const ASSETS = [
     "./index.html",
     "./manifest.json",
     "./index_files/BibleCount.json",
     "./index_files/cross_references.json",
-    "./index_files/Bible.json",
+    "./index_files/Bibles/KJV.json",
     "./index_files/fromthepages_64x64.jpg",
     "./OpenBible.svg",
     "./icon-192.png",
@@ -38,7 +38,7 @@ self.addEventListener("install", event => {
     self.skipWaiting(); // Immediately activate the new service worker
 });
 
-const skipCache=false;
+const skipCache=true;
 
 // Fetch event: Serve cached content when offline or force bypass cache
 self.addEventListener("fetch", event => {

@@ -16,18 +16,6 @@ async function fetchText(url) {
     return response.text();
 }
 
-
-async function loadTopicsText() {
-    try {
-        const text = await fetchText('./index_files/topic-scores.txt');
-        console.log('BibleTopics loaded');
-        return text;
-    } catch (error) {
-        console.error('Failed to load topic-scores.txt:', error);
-        return null;
-    }
-}
-
 // Simplified localStorage functions
 function getUserData() {
     return {
